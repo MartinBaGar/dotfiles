@@ -17,7 +17,7 @@ return {
 		local capabilities = require('blink.cmp').get_lsp_capabilities()
 		local mason_lspconfig = require("mason-lspconfig")
 		mason_lspconfig.setup({
-			ensure_installed = { "pyright", "lua_ls", "yamlls", "ltex" },
+			ensure_installed = { "lua_ls", "ltex" },
 		})
 
 		-- Existing LSP configurations
