@@ -30,15 +30,13 @@ vim.keymap.set('n', '<leader>lx', function()
 	end
 end, { desc = "Toggle ltex language server" })
 
-vim.keymap.set('n', '<leader>ln', vim.diagnostic.goto_next, { noremap = true, silent = true })
-vim.keymap.set('n', '<leader>lp', vim.diagnostic.goto_prev, { noremap = true, silent = true })
-
 vim.keymap.set('n', 'zn', ']s', { noremap = true, silent = true })
 vim.keymap.set('n', 'zp', '[s', { noremap = true, silent = true })
 
-vim.o.conceallevel = 2
+-- vim.o.conceallevel = 2
 vim.opt.shiftwidth = 4
 vim.opt.clipboard = "unnamedplus"
+vim.opt.number = true
 
 -- vim.keymap.set("n", "<space><space>x", "<cmd>source %<CR>")
 -- vim.keymap.set("n", "<space>x", ":.lua<CR>")
@@ -67,3 +65,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 		vim.highlight.on_yank()
 	end,
 })
+
+-- Diagnostics
+vim.keymap.set('n', 'dn', vim.diagnostic.goto_next)
+vim.keymap.set('n', '<leader>vrn', vim.lsp.buf.rename)
+vim.keymap.set('n', 'dp', vim.diagnostic.goto_prev)
+vim.keymap.set('n', 'dp', vim.diagnostic.goto_prev)

@@ -54,7 +54,13 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- Setup lazy.nvim
 require("lazy").setup({
 	spec = {
-		{ "folke/tokyonight.nvim",  config = function() vim.cmd.colorscheme "tokyonight" end },
+		{
+			"folke/tokyonight.nvim",
+			-- "rebelot/kanagawa.nvim",
+			config = function()
+				vim.cmd.colorscheme "tokyonight"
+			end
+		},
 		{ import = "config.plugins" },
 	},
 	change_detection = {
