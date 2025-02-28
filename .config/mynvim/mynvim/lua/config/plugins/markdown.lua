@@ -1,5 +1,5 @@
 return {
-	{ 'jbyuki/nabla.nvim' },
+	-- { 'jbyuki/nabla.nvim' },
 	{
 		'MeanderingProgrammer/render-markdown.nvim',
 		dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
@@ -261,11 +261,11 @@ return {
 					},
 					filetype = {},
 				},
-				on = {
-					attach = function()
-						require('nabla').enable_virt({ autogen = true })
-					end,
-				},
+				-- on = {
+				-- 	attach = function()
+				-- 		require('nabla').enable_virt({ autogen = true })
+				-- 	end,
+				-- },
 				custom_handlers = {},
 			})
 		end

@@ -7,6 +7,15 @@ return
 	opts = {
 		bigfile = { enabled = true },
 		dashboard = { enabled = true },
+		image = {
+			enabled = true,
+			doc = {
+				max_width = 100, -- maximum width in columns
+				max_height = 30, -- maximum height in lines
+				inline = true,
+				-- float = false,
+			}
+		},
 		indent = { enabled = false },
 		input = { enabled = true },
 		notifier = {
@@ -21,7 +30,17 @@ return
 		styles = {
 			notification = {
 				-- wo = { wrap = true } -- Wrap notifications
-			}
+			},
+			snacks_image = {
+				-- Your custom style overrides
+				relative = "editor", -- Position relative to the editor instead of cursor
+				border = "none", -- Change border style
+				row = 5,         -- Position 5 rows from the top
+				col = 10,        -- Position 10 columns from the left
+				backdrop = true, -- Add a backdrop
+				zindex = 50,     -- Control layering order
+				focusable = true,
+			},
 		}
 	},
 	keys = {
@@ -32,22 +51,22 @@ return
 		{ "<leader>n",  function() Snacks.notifier.show_history() end, desc = "Notification History" },
 		{ "<leader>bd", function() Snacks.bufdelete() end,             desc = "Delete Buffer" },
 		{ "<leader>cR", function() Snacks.rename.rename_file() end,    desc = "Rename File" },
-		{ "<leader>gB", function() Snacks.gitbrowse() end,             desc = "Git Browse",                  mode = { "n", "v" } },
-		{ "<leader>gb", function() Snacks.git.blame_line() end,        desc = "Git Blame Line" },
-		{ "<leader>gf", function() Snacks.lazygit.log_file() end,      desc = "Lazygit Current File History" },
-		{ "<leader>gg", function() Snacks.lazygit() end,               desc = "Lazygit" }, {
-		"<leader>gl",
-		function()
-			Snacks
-					.lazygit.log()
-		end,
-		desc = "Lazygit Log (cwd)"
-	},
-		{ "<leader>un", function() Snacks.notifier.hide() end,           desc = "Dismiss All Notifications" },
-		{ "<c-/>",      function() Snacks.terminal() end,                desc = "Toggle Terminal" },
-		{ "<c-_>",      function() Snacks.terminal() end,                desc = "which_key_ignore" },
-		{ "]]",         function() Snacks.words.jump(vim.v.count1) end,  desc = "Next Reference",           mode = { "n", "t" } },
-		{ "[[",         function() Snacks.words.jump(-vim.v.count1) end, desc = "Prev Reference",           mode = { "n", "t" } },
+		-- { "<leader>gB", function() Snacks.gitbrowse() end,             desc = "Git Browse",                  mode = { "n", "v" } },
+		-- { "<leader>gb", function() Snacks.git.blame_line() end,        desc = "Git Blame Line" },
+		-- { "<leader>gf", function() Snacks.lazygit.log_file() end,      desc = "Lazygit Current File History" },
+		-- { "<leader>gg", function() Snacks.lazygit() end,               desc = "Lazygit" }, {
+		-- "<leader>gl",
+		-- function()
+		-- 	Snacks
+		-- 			.lazygit.log()
+		-- end,
+		-- desc = "Lazygit Log (cwd)"
+		-- },
+		-- { "<leader>un", function() Snacks.notifier.hide() end,           desc = "Dismiss All Notifications" },
+		{ "<c-/>",      function() Snacks.terminal() end,              desc = "Toggle Terminal" },
+		{ "<c-_>",      function() Snacks.terminal() end,              desc = "which_key_ignore" },
+		-- { "]]",         function() Snacks.words.jump(vim.v.count1) end,  desc = "Next Reference",           mode = { "n", "t" } },
+		-- { "[[",         function() Snacks.words.jump(-vim.v.count1) end, desc = "Prev Reference",           mode = { "n", "t" } },
 		{
 			"<leader>N",
 			desc = "Neovim News",

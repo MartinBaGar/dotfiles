@@ -25,6 +25,7 @@ return {
 		require("lspconfig").lua_ls.setup({ capabilities = capabilities })
 		require("lspconfig").texlab.setup({ capabilities = capabilities })
 		require("lspconfig").yamlls.setup({ capabilities = capabilities })
+		-- require("lspconfig").markdownlint.setup({ capabilities = capabilities })
 		require("lspconfig").ltex.setup({
 			autostart = false,
 			settings = {

@@ -23,8 +23,8 @@ return {
 			python = { "isort", "black" },
 			-- latex = { "latexindent" },
 			yaml = { "yamlls" },
-			javascript = { "prettierd", "prettier", stop_after_first = true },
-			markdown = { "prettierd", "prettier" },
+			-- javascript = { "prettierd", "prettier", stop_after_first = true },
+			-- markdown = { "prettier" },
 		},
 		-- Set default options
 		default_format_opts = {

@@ -1,7 +1,8 @@
 require("config.lazy")
 
+vim.wo.spell = false
 -- Spell configuration
-vim.opt.spelllang = ""
+vim.opt.spelllang = "fr"
 
 vim.keymap.set('n', '<leader>lf', function()
 	vim.bo.spelllang = "fr"
@@ -68,9 +69,10 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 
 -- Diagnostics
 vim.keymap.set('n', 'dn', vim.diagnostic.goto_next)
+vim.keymap.set('n', 'dp', vim.diagnostic.goto_prev)
+vim.keymap.set("n", "dq", vim.diagnostic.setloclist)
 vim.keymap.set('n', '<leader>vrn', vim.lsp.buf.rename)
-vim.keymap.set('n', 'dp', vim.diagnostic.goto_prev)
-vim.keymap.set('n', 'dp', vim.diagnostic.goto_prev)
+vim.keymap.set('n', 'da', vim.lsp.buf.code_action)
 
 -- General Leader Key Setup
 vim.g.mapleader = " " -- Set leader key to space

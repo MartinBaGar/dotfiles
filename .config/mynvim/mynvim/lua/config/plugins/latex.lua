@@ -12,6 +12,7 @@ return {
 			vim.g.vimtex_imaps_enabled = 0
 			vim.g.vimtex_complete_enabled = 0
 			vim.g.vimtex_syntax_enabled = 0
+			vim.g.vimtex_format_enabled = 1
 		end
 	},
 }

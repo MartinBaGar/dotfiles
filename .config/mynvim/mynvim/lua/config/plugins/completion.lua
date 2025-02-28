@@ -26,27 +26,15 @@ return {
 				providers = {
 					snippets = {
 						name = 'snippets',
-						-- score_offset = function(ft)
-						-- 	return ft == 'markdown' and 10 or ft == 'tex' and 50
-						-- end,
 					},
 					buffer = {
 						name = 'buffer',
-						-- score_offset = function(ft)
-						-- 	return ft == 'markdown' and 30 or ft == 'tex' and 40
-						-- end,
 					},
 					lsp = {
 						name = 'lsp',
-						-- score_offset = function(ft)
-						-- 	return ft == 'markdown' and 0 or ft == 'tex' and 30
-						-- end,
 					},
 					path = {
 						name = 'path',
-						-- score_offset = function(ft)
-						-- 	return ft == 'python' and 10 or ft == 'markdown' and 50 or ft == 'tex' and 100
-						-- end,
 					},
 					obsidian = {
 						name = "obsidian",
@@ -63,9 +51,6 @@ return {
 					spell = {
 						name = "spell",
 						module = "blink.compat.source",
-						-- score_offset = function(ft)
-						-- 	return ft == 'markdown' and 30 or ft == 'tex' and 40
-						-- end,
 					},
 					calc = {
 						name = "calc",
@@ -74,9 +59,10 @@ return {
 					digraphs = {
 						name = 'digraphs',
 						module = 'blink.compat.source',
-						-- score_offset = -3,
 						opts = {
 							cache_digraphs_on_start = true,
+							max_item_count = 20,
+							trigger_characters = { '*', '.', '@', '+' },
 						},
 					},
 				},

@@ -1,7 +1,9 @@
 return {
 	{
 		'stevearc/oil.nvim',
-		opts = {},
+		opts = {
+			extra_scp_args = { "-o", "PreferredAuthentications=password", "-o", "GSSAPIAuthentication=no" },
+		},
 		dependencies = { { "echasnovski/mini.icons", opts = {} } },
 		config = function()
 			require("oil").setup()
@@ -9,4 +11,3 @@ return {
 		end,
 	},
 }
-
