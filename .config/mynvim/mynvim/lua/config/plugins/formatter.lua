@@ -24,7 +24,7 @@ return {
 			-- latex = { "latexindent" },
 			yaml = { "yamlls" },
 			-- javascript = { "prettierd", "prettier", stop_after_first = true },
-			-- markdown = { "prettier" },
+			markdown = { "markdownlint" },
 		},
 		-- Set default options
 		default_format_opts = {
@@ -37,12 +37,11 @@ return {
 			shfmt = {
 				prepend_args = { "-i", "2" },
 			},
-			prettierd = {
-				prepend_args = { "--print-width", "100" },
-			},
-			prettier = {
-				prepend_args = { "--print-width", "100" },
-			},
+			markdownlint = {
+				prepend_args = {
+					"--config", vim.fn.expand("~/.markdownlint.json")
+				}
+			}
 		},
 	},
 	init = function()
