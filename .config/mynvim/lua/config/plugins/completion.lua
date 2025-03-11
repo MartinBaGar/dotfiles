@@ -4,48 +4,43 @@ return {
 		dependencies = {
 			'L3MON4D3/LuaSnip',
 			version = 'v2.*',
-			{ "saghen/blink.compat", opts = {}, version = "*" },
+			{
+				'saghen/blink.compat',
+				version = '*',
+				lazy = true,
+				opts = {},
+			},
 			{ "f3fora/cmp-spell" },
+			{ "hrsh7th/cmp-calc" },
+			{ 'dmitmel/cmp-digraphs' },
 		},
 		version = '*',
 		opts = {
 			snippets = { preset = 'luasnip' },
-			keymap = { preset = 'default' },
+			keymap = {
+				preset = 'default',
+				['<A-1>'] = { function(cmp) cmp.accept({ index = 1 }) end },
+				['<A-2>'] = { function(cmp) cmp.accept({ index = 2 }) end },
+				['<A-3>'] = { function(cmp) cmp.accept({ index = 3 }) end },
+				['<A-4>'] = { function(cmp) cmp.accept({ index = 4 }) end },
+				['<A-5>'] = { function(cmp) cmp.accept({ index = 5 }) end },
+				['<A-6>'] = { function(cmp) cmp.accept({ index = 6 }) end },
+				['<A-7>'] = { function(cmp) cmp.accept({ index = 7 }) end },
+				['<A-8>'] = { function(cmp) cmp.accept({ index = 8 }) end },
+				['<A-9>'] = { function(cmp) cmp.accept({ index = 9 }) end },
+				['<A-0>'] = { function(cmp) cmp.accept({ index = 10 }) end },
+			},
 			appearance = {
 				use_nvim_cmp_as_default = false,
 				nerd_font_variant = 'mono'
 			},
 			sources = {
-				default = { 'lsp', 'path', 'snippets', 'buffer' },
+				default = { 'lsp', 'path', 'snippets', 'buffer', 'calc' },
 				per_filetype = {
-					markdown = { 'lsp', 'path', 'snippets', 'buffer', 'obsidian', 'obsidian_new', 'obsidian_tags', 'spell' },
+					markdown = { 'lsp', 'path', 'snippets', 'buffer', 'obsidian', 'obsidian_new', 'obsidian_tags', 'spell', 'calc', 'omni' },
 					tex = { 'lsp', 'path', 'snippets', 'buffer', 'spell' }
 				},
 				providers = {
-					snippets = {
-						name = 'snippets',
-						score_offset = function(ft)
-							return ft == 'markdown' and 10 or ft == 'tex' and 50
-						end,
-					},
-					buffer = {
-						name = 'buffer',
-						score_offset = function(ft)
-							return ft == 'markdown' and 30 or ft == 'tex' and 40
-						end,
-					},
-					lsp = {
-						name = 'lsp',
-						score_offset = function(ft)
-							return ft == 'markdown' and 0 or ft == 'tex' and 30
-						end,
-					},
-					path = {
-						name = 'path',
-						score_offset = function(ft)
-							return ft == 'markdown' and 50 or ft == 'tex' and 10
-						end,
-					},
 					obsidian = {
 						name = "obsidian",
 						module = "blink.compat.source",
@@ -61,28 +56,30 @@ return {
 					spell = {
 						name = "spell",
 						module = "blink.compat.source",
-						score_offset = function(ft)
-							return ft == 'markdown' and 30 or ft == 'tex' and 40
-						end,
+					},
+					calc = {
+						name = "calc",
+						module = "blink.compat.source",
 					},
 				},
 			},
 			completion = {
 				menu = {
-					auto_show = true,
 					draw = {
-						treesitter = { 'lsp' },
-						columns = {
-							{ "label",     "label_description", gap = 1 },
-							{ "kind_icon", "kind" },
-						},
+						columns = { { 'item_idx' }, { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
+						components = {
+							item_idx = {
+								text = function(ctx) return ctx.idx == 10 and '0' or ctx.idx >= 10 and ' ' or tostring(ctx.idx) end,
+								highlight = 'BlinkCmpItemIdx' -- optional, only if you want to change its color
+							}
+						}
 					}
 				},
 				documentation = {
-					auto_show = true,
+					auto_show = false,
 				},
-				ghost_text = { enabled = true }
-			}
+				ghost_text = { enabled = false }
+			},
 		},
 		opts_extend = { "sources.default" }
 	},

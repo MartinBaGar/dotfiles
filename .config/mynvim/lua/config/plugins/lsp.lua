@@ -21,10 +21,11 @@ return {
 		})
 
 		-- Existing LSP configurations
-		require("lspconfig").pyright.setup({ capabilities = capabilities })
+		require("lspconfig").pylsp.setup({ capabilities = capabilities })
 		require("lspconfig").lua_ls.setup({ capabilities = capabilities })
-		require("lspconfig").texlab.setup({ capabilities = capabilities })
+		-- require("lspconfig").texlab.setup({ capabilities = capabilities })
 		require("lspconfig").yamlls.setup({ capabilities = capabilities })
+		require("lspconfig").marksman.setup({ capabilities = capabilities })
 		require("lspconfig").ltex.setup({
 			autostart = false,
 			settings = {

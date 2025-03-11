@@ -41,6 +41,7 @@ vim.opt.cursorline = true
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+vim.keymap.set('n', '<C-c>', '<cmd>nohlsearch<CR>', { silent = true })
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -54,18 +55,10 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- Setup lazy.nvim
 require("lazy").setup({
 	spec = {
-		{
-			"folke/tokyonight.nvim",
-			-- "rebelot/kanagawa.nvim",
-			config = function()
-				vim.cmd.colorscheme "tokyonight"
-			end
-		},
 		{ import = "config.plugins" },
 	},
 	change_detection = {
-		-- automatically check for config file changes and reload the ui
 		enabled = false,
-		notify = false, -- get a notification when changes are found
+		notify = false,
 	},
 })
