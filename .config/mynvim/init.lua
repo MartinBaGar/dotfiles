@@ -1,25 +1,28 @@
+-- Load Lazy configuration
 require("config.lazy")
 
-vim.wo.spell = false
 -- Spell configuration
+vim.wo.spell = false
 vim.opt.spelllang = "fr"
 
+-- Keymaps for switching spell language
 vim.keymap.set('n', '<leader>lf', function()
 	vim.bo.spelllang = "fr"
-end, { desc = "Set language to French" })
+end, { desc = "Set spell language to French" })
 
 vim.keymap.set('n', '<leader>le', function()
 	vim.bo.spelllang = "en"
-end, { desc = "Set language to English" })
+end, { desc = "Set spell language to English" })
 
 vim.keymap.set('n', '<leader>lb', function()
 	vim.bo.spelllang = "fr,en"
-end, { desc = "Set language to French and English" })
+end, { desc = "Set spell language to French and English" })
 
 vim.keymap.set('n', '<leader>ll', function()
 	vim.wo.spell = not vim.wo.spell
-end, { desc = "Activate spell in the current buffer" })
+end, { desc = "Toggle spell checking in the current buffer" })
 
+-- Toggle ltex language server
 vim.keymap.set('n', '<leader>lx', function()
 	local clients = vim.lsp.get_clients({ name = 'ltex' })
 	if #clients > 0 then
@@ -31,34 +34,32 @@ vim.keymap.set('n', '<leader>lx', function()
 	end
 end, { desc = "Toggle ltex language server" })
 
-vim.keymap.set('n', 'zn', ']s', { noremap = true, silent = true })
-vim.keymap.set('n', 'zp', '[s', { noremap = true, silent = true })
+-- Navigation for spelling suggestions
+vim.keymap.set('n', 'zn', ']s', { noremap = true, silent = true, desc = "Next spelling suggestion" })
+vim.keymap.set('n', 'zp', '[s', { noremap = true, silent = true, desc = "Previous spelling suggestion" })
 
--- vim.o.conceallevel = 2
+-- General Neovim settings
 vim.opt.shiftwidth = 4
 vim.opt.clipboard = "unnamedplus"
 vim.opt.number = true
 
--- vim.keymap.set("n", "<space><space>x", "<cmd>source %<CR>")
--- vim.keymap.set("n", "<space>x", ":.lua<CR>")
--- vim.keymap.set("v", "<space>x", ":lua<CR>")
-
 -- Exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
--- Displays which-key popup sooner
+-- Set timeout length for which-key popup
 vim.opt.timeoutlen = 300
 
-vim.keymap.set('n', 'grn', vim.lsp.buf.rename)
-vim.keymap.set('n', 'gra', vim.lsp.buf.code_action)
-vim.keymap.set('n', 'grr', vim.lsp.buf.references)
+-- LSP keymaps
+vim.keymap.set('n', 'grn', vim.lsp.buf.rename, { desc = "Rename symbol" })
+vim.keymap.set('n', 'gra', vim.lsp.buf.code_action, { desc = "Code actions" })
+vim.keymap.set('n', 'grr', vim.lsp.buf.references, { desc = "Find references" })
 
-vim.keymap.set('i', '<C-h>', '<C-w>', { noremap = true })
-vim.keymap.set('i', '<C-s>', '<BS>', { noremap = true })
--- vim.keymap.set('i', '<C-W>l', '<Esc>dwi')
--- vim.keymap.set('i', '<C-W>j', '<Esc>Jdwi')
-vim.keymap.set('i', '<C-L>', '<Esc>wdwi', { noremap = true })
+-- Insert mode keybindings
+vim.keymap.set('i', '<C-h>', '<C-w>', { noremap = true, desc = "Delete previous word" })
+vim.keymap.set('i', '<C-s>', '<BS>', { noremap = true, desc = "Delete previous character" })
+vim.keymap.set('i', '<C-L>', '<Esc>wdwi', { noremap = true, desc = "Delete word and re-enter insert mode" })
 
+-- Highlight on yank
 vim.api.nvim_create_autocmd('TextYankPost', {
 	desc = 'Highlight when yanking (copying) text',
 	group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
@@ -67,48 +68,40 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 	end,
 })
 
--- Diagnostics
-vim.keymap.set('n', 'dn', vim.diagnostic.goto_next)
-vim.keymap.set('n', 'dp', vim.diagnostic.goto_prev)
-vim.keymap.set("n", "dq", vim.diagnostic.setloclist)
-vim.keymap.set('n', '<leader>vrn', vim.lsp.buf.rename)
-vim.keymap.set('n', 'da', vim.lsp.buf.code_action)
+-- Diagnostics navigation
+vim.keymap.set('n', 'dn', vim.diagnostic.goto_next, { desc = "Go to next diagnostic" })
+vim.keymap.set('n', 'dp', vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic" })
+vim.keymap.set('n', 'dq', vim.diagnostic.setloclist, { desc = "Open diagnostics list" })
+vim.keymap.set('n', '<leader>vrn', vim.lsp.buf.rename, { desc = "Rename symbol (LSP)" })
+vim.keymap.set('n', 'da', vim.lsp.buf.code_action, { desc = "Perform code action" })
 
--- General Leader Key Setup
-vim.g.mapleader = " " -- Set leader key to space
+-- Set leader keys
+vim.g.mapleader = " " -- Space as leader key
 vim.g.maplocalleader = " "
 
--- Keybindings for Obsidian commands
-local map = vim.api.nvim_set_keymap
-local opts = { noremap = true, silent = true }
-
--- Obsidian Commands
-map("n", "<leader>oo", ":ObsidianOpen ", opts)                  -- Open with a query
-map("n", "<leader>on", ":ObsidianNew<CR>", opts)                -- Create a new note
-map("n", "<leader>onq", ":ObsidianNew ", opts)                  -- Create a new note with title
-map("n", "<leader>oq", ":ObsidianQuickSwitch<CR>", opts)        -- Quick switch
-map("n", "<leader>ol", ":ObsidianFollowLink<CR>", opts)         -- Follow link
-map("n", "<leader>olv", ":ObsidianFollowLink vsplit<CR>", opts) -- Follow link in vertical split
-map("n", "<leader>olh", ":ObsidianFollowLink hsplit<CR>", opts) -- Follow link in horizontal split
-map("n", "<leader>ob", ":ObsidianBacklinks<CR>", opts)          -- Backlinks
-map("n", "<leader>ot", ":ObsidianTags ", opts)                  -- Search by tags
-map("n", "<leader>otd", ":ObsidianToday<CR>", opts)             -- Open today's daily note
-map("n", "<leader>oty", ":ObsidianToday -1<CR>", opts)          -- Yesterday's note
-map("n", "<leader>ott", ":ObsidianTomorrow<CR>", opts)          -- Tomorrow's note
-map("n", "<leader>od", ":ObsidianDailies<CR>", opts)            -- List dailies
-map("n", "<leader>os", ":ObsidianSearch<CR>", opts)             -- Search notes
-map("v", "<leader>ok", ":ObsidianLink<CR>", opts)               -- Link selected text
-map("v", "<leader>okq", ":ObsidianLink ", opts)                 -- Link with a query
-map("v", "<leader>okn", ":ObsidianLinkNew<CR>", opts)           -- Create a new note and link
-map("n", "<leader>oknq", ":ObsidianLinkNew ", opts)             -- Create a new note with title
-map("n", "<leader>ox", ":ObsidianLinks<CR>", opts)              -- Collect links in the current buffer
-map("v", "<leader>oe", ":ObsidianExtractNote<CR>", opts)        -- Extract selection into a new note
-map("v", "<leader>oeq", ":ObsidianExtractNote ", opts)          -- Extract selection with title
-map("n", "<leader>ow", ":ObsidianWorkspace<CR>", opts)          -- Switch workspace
-map("n", "<leader>oi", ":ObsidianPasteImg<CR>", opts)           -- Paste image from clipboard
-map("n", "<leader>or", ":ObsidianRename<CR>", opts)             -- Rename current note
-map("n", "<leader>ord", ":ObsidianRename --dry-run<CR>", opts)  -- Dry run rename
-map("n", "<leader>oc", ":ObsidianToggleCheckbox<CR>", opts)     -- Toggle checkbox
-map("n", "<leader>otc", ":ObsidianTOC<CR>", opts)               -- Table of contents
-map("n", "<leader>otn", ":ObsidianNewFromTemplate<CR>", opts)   -- New note from template
-map("n", "<leader>otnq", ":ObsidianNewFromTemplate ", opts)     -- New note from template with title
+-- Obsidian keymaps
+vim.keymap.set("n", "<leader>oo", ":ObsidianOpen ", { desc = "Open with a query" })
+vim.keymap.set("n", "<leader>on", ":ObsidianNew<CR>", { desc = "Create a new note" })
+vim.keymap.set("n", "<leader>oq", ":ObsidianQuickSwitch<CR>", { desc = "Quick switch" })
+vim.keymap.set("n", "<leader>ol", ":ObsidianFollowLink<CR>", { desc = "Follow link" })
+vim.keymap.set("n", "<leader>olv", ":ObsidianFollowLink vsplit<CR>", { desc = "Follow link in vertical split" })
+vim.keymap.set("n", "<leader>olh", ":ObsidianFollowLink hsplit<CR>", { desc = "Follow link in horizontal split" })
+vim.keymap.set("n", "<leader>ob", ":ObsidianBacklinks<CR>", { desc = "View backlinks" })
+vim.keymap.set("n", "<leader>ot", ":ObsidianTags ", { desc = "Search by tags" })
+vim.keymap.set("n", "<leader>odd", ":ObsidianToday<CR>", { desc = "Open today's daily note" })
+vim.keymap.set("n", "<leader>ody", ":ObsidianToday -1<CR>", { desc = "Open yesterday's note" })
+vim.keymap.set("n", "<leader>odt", ":ObsidianTomorrow<CR>", { desc = "Open tomorrow's note" })
+vim.keymap.set("n", "<leader>od", ":ObsidianDailies<CR>", { desc = "List daily notes" })
+vim.keymap.set("n", "<leader>os", ":ObsidianSearch<CR>", { desc = "Search notes" })
+vim.keymap.set("v", "<leader>ok", ":ObsidianLink<CR>", { desc = "Link selected text" })
+vim.keymap.set("v", "<leader>okq", ":ObsidianLink ", { desc = "Link with a query" })
+vim.keymap.set("v", "<leader>okn", ":ObsidianLinkNew<CR>", { desc = "Create and link a new note" })
+vim.keymap.set("n", "<leader>oknq", ":ObsidianLinkNew ", { desc = "Create a new note with title" })
+vim.keymap.set("n", "<leader>ox", ":ObsidianLinks<CR>", { desc = "Collect links in the current buffer" })
+vim.keymap.set("v", "<leader>oe", ":ObsidianExtractNote<CR>", { desc = "Extract selection into a new note" })
+vim.keymap.set("v", "<leader>oeq", ":ObsidianExtractNote ", { desc = "Extract selection with title" })
+vim.keymap.set("n", "<leader>ow", ":ObsidianWorkspace<CR>", { desc = "Switch workspace" })
+vim.keymap.set("n", "<leader>oi", ":ObsidianPasteImg<CR>", { desc = "Paste image from clipboard" })
+vim.keymap.set("n", "<leader>or", ":ObsidianRename<CR>", { desc = "Rename current note" })
+vim.keymap.set("n", "<leader>oc", ":ObsidianToggleCheckbox<CR>", { desc = "Toggle checkbox" })
+vim.keymap.set("n", "<leader>otc", ":ObsidianTOC<CR>", { desc = "Generate table of contents" })

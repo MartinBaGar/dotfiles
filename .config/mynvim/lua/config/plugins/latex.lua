@@ -8,11 +8,11 @@ return {
 			-- VimTeX configuration goes here, e.g.
 			vim.g.vimtex_view_method = "zathura"
 			vim.g.vimtex_imaps_enabled = 0
-			vim.g.vimtex_indent_enabled = 0
-			vim.g.vimtex_imaps_enabled = 0
 			vim.g.vimtex_complete_enabled = 0
 			vim.g.vimtex_syntax_enabled = 0
-			vim.g.vimtex_format_enabled = 1
+			vim.g.vimtex_format_enabled = 0
+			vim.g.vimtex_indent_enabled = 0
+			vim.g.vimtex_compiler_latexmk_engines = { _ = '-xelatex' }
 		end
 	},
 }

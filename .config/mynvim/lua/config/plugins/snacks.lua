@@ -1,20 +1,25 @@
 return
 {
 	"folke/snacks.nvim",
+	enabled = true,
 	priority = 1000,
 	lazy = false,
 	---@type snacks.Config
 	opts = {
 		bigfile = { enabled = true },
 		dashboard = { enabled = true },
+		-- image = {
+		-- 	enabled = true,
+		-- 	doc = {
+		-- 		max_width = 100, -- maximum width in columns
+		-- 		max_height = 30, -- maximum height in lines
+		-- 		inline = true,
+		-- 		-- float = false,
+		-- 	}
+		-- },
 		image = {
 			enabled = true,
-			doc = {
-				max_width = 100, -- maximum width in columns
-				max_height = 30, -- maximum height in lines
-				inline = true,
-				-- float = false,
-			}
+			doc = { enabled = true, inline = true, float = true },
 		},
 		indent = { enabled = false },
 		input = { enabled = true },
@@ -31,16 +36,16 @@ return
 			notification = {
 				-- wo = { wrap = true } -- Wrap notifications
 			},
-			snacks_image = {
-				-- Your custom style overrides
-				relative = "editor", -- Position relative to the editor instead of cursor
-				border = "none", -- Change border style
-				row = 5,         -- Position 5 rows from the top
-				col = 10,        -- Position 10 columns from the left
-				backdrop = true, -- Add a backdrop
-				zindex = 50,     -- Control layering order
-				focusable = true,
-			},
+			-- snacks_image = {
+			-- 	-- Your custom style overrides
+			-- 	relative = "editor", -- Position relative to the editor instead of cursor
+			-- 	border = "none", -- Change border style
+			-- 	row = 5,         -- Position 5 rows from the top
+			-- 	col = 10,        -- Position 10 columns from the left
+			-- 	backdrop = true, -- Add a backdrop
+			-- 	zindex = 50,     -- Control layering order
+			-- 	focusable = true,
+			-- },
 		}
 	},
 	keys = {

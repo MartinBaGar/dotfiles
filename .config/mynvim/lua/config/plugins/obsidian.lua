@@ -18,14 +18,14 @@ return {
 	},
 	opts = {
 		workspaces = {
-			-- {
-			-- 	name = "personal",
-			-- 	path = "~/docs",
-			-- },
 			{
-				name = "work",
-				path = "~/Documents/vaults/labo/",
+				name = "personal",
+				path = "~/docs",
 			},
+			-- {
+			-- 	name = "work",
+			-- 	path = "~/Documents/vaults/labo/",
+			-- },
 			{
 				name = "no-vault",
 				path = function()

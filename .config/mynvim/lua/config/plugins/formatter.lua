@@ -1,5 +1,6 @@
 return {
 	"stevearc/conform.nvim",
+	enabled = true,
 	event = { "BufWritePre" },
 	cmd = { "ConformInfo" },
 	keys = {
@@ -21,6 +22,7 @@ return {
 			python = { "isort", "black" },
 			yaml = { "yamlls" },
 			markdown = { "markdownlint" },
+			tex = { "latexindent" },
 		},
 		-- Set default options
 		default_format_opts = {
@@ -35,7 +37,7 @@ return {
 			},
 			markdownlint = {
 				prepend_args = {
-					"--config", vim.fn.expand("~/.markdownlint.json")
+					-- "--config", vim.fn.expand("~/.markdownlint.json")
 				}
 			}
 		},
