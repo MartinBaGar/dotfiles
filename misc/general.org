@@ -1,7 +1,25 @@
 #+title: General information
 
+For now, this document gathers :
+
+- [[Org mode resources][Resources]] I use to learn about the *Org mode*
+- [[Emacs resources][Resources]] I use to learn about *Emacs* in general
+- Some [[Emacs tips][tips]] I gather here and there.
+
+* Org mode resources
+  
+[[https://orgmode.org/worg/org-tutorials/org4beginners.html][Official tutorial]]
+
+* Emacs resources
+
 [[https://orgmode.org/manual/In_002dbuffer-Settings.html][These are information about buffer settings]]
+
+* Emacs tips
 
 To add a source code block
 
 =C-c C-, s=
+
+To edit a link
+
+=C-c C-l=
