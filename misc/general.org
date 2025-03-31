@@ -1,1 +1,1 @@
-../docs/Org/general.org
+/home/mabagar/docs/Org/general.org
