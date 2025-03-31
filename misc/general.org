@@ -1,1 +1,7 @@
-/home/mabagar/docs/Org/general.org
+#+title: General information
+
+[[https://orgmode.org/manual/In_002dbuffer-Settings.html][These are information about buffer settings]]
+
+To add a source code block
+
+=C-c C- s=
