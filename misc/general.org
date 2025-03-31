@@ -4,4 +4,4 @@
 
 To add a source code block
 
-=C-c C- s=
+=C-c C-, s=
