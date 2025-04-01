@@ -1,11 +1,10 @@
 #+TITLE: Doom Emacs Configuration
-#+PROPERTY: header-args :tangle config.el
+#+PROPERTY: header-args:emacs-lisp :tangle config.el
 
 * General Settings
 These are some basic settings. I am learning EMACS.
 
 * Keybindings
-
 *** Basic
 #+begin_src emacs-lisp
 ;; credentials
@@ -21,25 +20,20 @@ These are some basic settings. I am learning EMACS.
 
 ;; remap <localleader> from SPC m to SPC l
 ;; (setq doom-localleader-key "SPC l"
-;;       doom-localleader-alt-key "M-SPC l")
+;;      doom-localleader-alt-key "M-SPC l")
 #+end_src
 
-** Visual Enhancements
+* Visual Enhancements
 *** Theme & Fonts
 #+begin_src emacs-lisp
 (setq doom-theme 'doom-gruvbox)
-
-(setq doom-font (font-spec :family "FiraCode Nerd Font Mono" :size 12)
-      doom-serif-font (font-spec :family "FiraCode Nerd Font" :size 12)
-      doom-variable-pitch-font (font-spec :family "FiraCode Nerd Font Propo" :size 20)
-      doom-emoji-font (font-spec :family "FiraCode Nerd Font Mono" :size 12)
-      doom-symbol-font (font-spec :family "FiraCode Nerd Font" :size 12))
+(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 20))
+#+end_src
 
 *** Lines
 Enable relative line numbers and make their slant normal (not italic).
 #+begin_src emacs-lisp
 (setq display-line-numbers-type 'relative) ;; TODO change to 'visual in org-mode
-
 (add-hook! display-line-numbers-mode
   (custom-set-faces!
     '(line-number :slant normal)
@@ -58,15 +52,15 @@ Display a fill indicator at 80 characters in =prog-mode=.
 #+end_src
 
 Smooth scrolling.
-# Run ~(package-vc-install '(ultra-scroll :vc-backend Git :url  "https://github.com/jdtsmith/ultra-scroll"))~ in =*scratch*= buffer.
-# #+begin_src emacs-lisp
-# (use-package! ultra-scroll
-#   :init
-#   (setq scroll-conservatively 101 ; important!
-#         scroll-margin 0)
-#   :config
-#   (ultra-scroll-mode 1))
-# #+end_src
+#+begin_src emacs-lisp
+;; Run (package-vc-install '(ultra-scroll :vc-backend Git :url "https://github.com/jdtsmith/ultra-scroll")) in scratch buffer.
+;; (use-package! ultra-scroll
+;;   :init
+;;   (setq scroll-conservatively 101 ; important!
+;;         scroll-margin 0)
+;;   :config
+;;   (ultra-scroll-mode 1))
+#+end_src
 
 *** Window
 Start emacs in a 100x40 window.
@@ -75,13 +69,36 @@ Start emacs in a 100x40 window.
 (add-to-list 'default-frame-alist '(height . 40))
 #+end_src
 
-*** Org functionalities
-
+*** TODO Org functionalities
 #+begin_src emacs-lisp
 (after! org
-(setq org-todo-keywords
-  '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE"))))
-(setq org-tag-alist '(("@work" . ?w) ("@home" . ?h) ("laptop" . ?l)))
+  (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE"))))
+(setq org-tag-alist '(("labo" . ?l) ("maison" . ?m) ("production" . ?p) ("analyse" . ?a) ("biblio" . ?b) ("divers" . ?d)))
 #+end_src
 
-** Some agenda corrections
+*** Spell checking with selection menu
+#+begin_src emacs-lisp
+;; Set default dictionary
+(setq ispell-dictionary "fr_FR")
+
+;; Create a function to select dictionary from a list
+(defun select-dictionary ()
+  "Select spelling dictionary."
+  (interactive)
+  (let* ((dicts '("en_US" "fr_FR"))
+         (selection (completing-read "Select dictionary: " dicts nil t)))
+    (ispell-change-dictionary selection)
+    (message "Dictionary switched to %s" selection)))
+
+;; Bind the selection function to a key
+(map! :leader
+      (:prefix ("t" . "toggle")
+       :desc "Select dictionary" "d" #'select-dictionary))
+#+end_src
+
+*** Image settings
+
+#+begin_src emacs-lisp
+(setq org-display-inline-images t)
+(setq org-display-remote-inline-images 'cache)
+#+end_src
