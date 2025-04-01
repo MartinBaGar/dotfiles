@@ -60,4 +60,4 @@
        :desc "Select dictionary" "d" #'select-dictionary))
 
 (setq org-display-inline-images t)
-(setq org-display-remote-inline-images 'cache)
+(setq org-display-remote-inline-images 'download)
