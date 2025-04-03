@@ -14,13 +14,13 @@
 ;;      doom-localleader-alt-key "M-SPC l")
 
 (setq doom-theme 'doom-gruvbox)
-(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 20))
+(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 18))
 
-(setq display-line-numbers-type 'relative) ;; TODO change to 'visual in org-mode
-(add-hook! display-line-numbers-mode
-  (custom-set-faces!
-    '(line-number :slant normal)
-    '(line-number-current-line :slant normal)))
+;; (setq display-line-numbers-type 'relative) ;; TODO change to 'visual in org-mode
+;; (add-hook! display-line-numbers-mode
+;;   (custom-set-faces!
+;;     '(line-number :slant normal)
+;;     '(line-number-current-line :slant normal)))
 
 (setq global-hl-line-modes nil)
 
@@ -39,8 +39,12 @@
 (add-to-list 'default-frame-alist '(height . 40))
 
 (after! org
-  (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE"))))
-(setq org-tag-alist '(("labo" . ?l) ("maison" . ?m) ("production" . ?p) ("analyse" . ?a) ("biblio" . ?b) ("divers" . ?d)))
+  (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
+  (setq org-tag-alist '(("labo" . ?l) ("maison" . ?m) ("production" . ?p) ("analyse" . ?a) ("biblio" . ?b) ("divers" . ?d)))
+  (setq org-display-remote-inline-images 'download)
+  (setq org-startup-with-inline-images t)
+  (setq org-image-align 'center)
+  (setq org-log-done t))
 
 ;; Set default dictionary
 (setq ispell-dictionary "fr_FR")
@@ -59,5 +63,48 @@
       (:prefix ("t" . "toggle")
        :desc "Select dictionary" "d" #'select-dictionary))
 
-(setq org-display-inline-images t)
-(setq org-display-remote-inline-images 'download)
+(define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
+
+(after! vterm
+  (set-popup-rule! "*doom:vterm-popup-vertical:*" :size 0.25 :vslot -4 :select t :quit nil :ttl 0 :side 'right))
+
+;; Create vertical toggle command
+(defun +vterm/toggle-vertical (arg)
+  "Toggles a terminal popup window at project root.
+
+If prefix ARG is non-nil, recreate vterm buffer in the current project's root.
+
+Returns the vterm buffer."
+  (interactive "P")
+  (+vterm--configure-project-root-and-display
+   arg
+   (lambda ()
+     (let ((buffer-name
+            (format "*doom:vterm-popup-vertical:%s*"
+                    (if (bound-and-true-p persp-mode)
+                        (safe-persp-name (get-current-persp))
+                      "main")))
+           confirm-kill-processes
+           current-prefix-arg)
+       (when arg
+         (let ((buffer (get-buffer buffer-name))
+               (window (get-buffer-window buffer-name)))
+           (when (buffer-live-p buffer)
+             (kill-buffer buffer))
+           (when (window-live-p window)
+             (delete-window window))))
+       (if-let* ((win (get-buffer-window buffer-name)))
+           (delete-window win)
+         (let ((buffer (or (cl-loop for buf in (doom-buffers-in-mode 'vterm-mode)
+                                    if (equal (buffer-local-value '+vterm--id buf)
+                                              buffer-name)
+                                    return buf)
+                           (get-buffer-create buffer-name))))
+           (with-current-buffer buffer
+             (setq-local +vterm--id buffer-name)
+             (unless (eq major-mode 'vterm-mode)
+               (vterm-mode)))
+           (pop-to-buffer buffer)))
+       (get-buffer buffer-name)))))
+
+(global-set-key (kbd "C-c v") #'+vterm/toggle-vertical)

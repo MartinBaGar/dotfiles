@@ -27,17 +27,17 @@ These are some basic settings. I am learning EMACS.
 *** Theme & Fonts
 #+begin_src emacs-lisp
 (setq doom-theme 'doom-gruvbox)
-(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 20))
+(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 18))
 #+end_src
 
 *** Lines
 Enable relative line numbers and make their slant normal (not italic).
 #+begin_src emacs-lisp
-(setq display-line-numbers-type 'relative) ;; TODO change to 'visual in org-mode
-(add-hook! display-line-numbers-mode
-  (custom-set-faces!
-    '(line-number :slant normal)
-    '(line-number-current-line :slant normal)))
+;; (setq display-line-numbers-type 'relative) ;; TODO change to 'visual in org-mode
+;; (add-hook! display-line-numbers-mode
+;;   (custom-set-faces!
+;;     '(line-number :slant normal)
+;;     '(line-number-current-line :slant normal)))
 #+end_src
 
 Disable highlighting of the current line.
@@ -72,8 +72,12 @@ Start emacs in a 100x40 window.
 *** TODO Org functionalities
 #+begin_src emacs-lisp
 (after! org
-  (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE"))))
-(setq org-tag-alist '(("labo" . ?l) ("maison" . ?m) ("production" . ?p) ("analyse" . ?a) ("biblio" . ?b) ("divers" . ?d)))
+  (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
+  (setq org-tag-alist '(("labo" . ?l) ("maison" . ?m) ("production" . ?p) ("analyse" . ?a) ("biblio" . ?b) ("divers" . ?d)))
+  (setq org-display-remote-inline-images 'download)
+  (setq org-startup-with-inline-images t)
+  (setq org-image-align 'center)
+  (setq org-log-done t))
 #+end_src
 
 *** Spell checking with selection menu
@@ -96,9 +100,56 @@ Start emacs in a 100x40 window.
        :desc "Select dictionary" "d" #'select-dictionary))
 #+end_src
 
-*** Image settings
+*** Custom keybindings
 
 #+begin_src emacs-lisp
-(setq org-display-inline-images t)
-(setq org-display-remote-inline-images 'download)
+(define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
+#+end_src
+
+*** Vterm
+
+#+begin_src emacs-lisp
+(after! vterm
+  (set-popup-rule! "*doom:vterm-popup-vertical:*" :size 0.25 :vslot -4 :select t :quit nil :ttl 0 :side 'right))
+
+;; Create vertical toggle command
+(defun +vterm/toggle-vertical (arg)
+  "Toggles a terminal popup window at project root.
+
+If prefix ARG is non-nil, recreate vterm buffer in the current project's root.
+
+Returns the vterm buffer."
+  (interactive "P")
+  (+vterm--configure-project-root-and-display
+   arg
+   (lambda ()
+     (let ((buffer-name
+            (format "*doom:vterm-popup-vertical:%s*"
+                    (if (bound-and-true-p persp-mode)
+                        (safe-persp-name (get-current-persp))
+                      "main")))
+           confirm-kill-processes
+           current-prefix-arg)
+       (when arg
+         (let ((buffer (get-buffer buffer-name))
+               (window (get-buffer-window buffer-name)))
+           (when (buffer-live-p buffer)
+             (kill-buffer buffer))
+           (when (window-live-p window)
+             (delete-window window))))
+       (if-let* ((win (get-buffer-window buffer-name)))
+           (delete-window win)
+         (let ((buffer (or (cl-loop for buf in (doom-buffers-in-mode 'vterm-mode)
+                                    if (equal (buffer-local-value '+vterm--id buf)
+                                              buffer-name)
+                                    return buf)
+                           (get-buffer-create buffer-name))))
+           (with-current-buffer buffer
+             (setq-local +vterm--id buffer-name)
+             (unless (eq major-mode 'vterm-mode)
+               (vterm-mode)))
+           (pop-to-buffer buffer)))
+       (get-buffer buffer-name)))))
+
+(global-set-key (kbd "C-c v") #'+vterm/toggle-vertical)
 #+end_src
