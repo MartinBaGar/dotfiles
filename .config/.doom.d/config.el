@@ -16,11 +16,8 @@
 (setq doom-theme 'doom-gruvbox)
 (setq doom-font (font-spec :family "FiraCode Nerd Font" :size 18))
 
+(setq global-display-line-numbers-mode nil)
 ;; (setq display-line-numbers-type 'relative) ;; TODO change to 'visual in org-mode
-;; (add-hook! display-line-numbers-mode
-;;   (custom-set-faces!
-;;     '(line-number :slant normal)
-;;     '(line-number-current-line :slant normal)))
 
 (setq global-hl-line-modes nil)
 
@@ -35,8 +32,7 @@
 ;;   :config
 ;;   (ultra-scroll-mode 1))
 
-(add-to-list 'default-frame-alist '(width . 100))
-(add-to-list 'default-frame-alist '(height . 40))
+(add-hook 'window-setup-hook #'toggle-frame-maximized)
 
 (after! org
   (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
@@ -47,7 +43,7 @@
   (setq org-log-done t))
 
 ;; Set default dictionary
-(setq ispell-dictionary "fr_FR")
+;; (setq ispell-dictionary "fr_FR")
 
 ;; Create a function to select dictionary from a list
 (defun select-dictionary ()
@@ -58,10 +54,14 @@
     (ispell-change-dictionary selection)
     (message "Dictionary switched to %s" selection)))
 
-;; Bind the selection function to a key
 (map! :leader
-      (:prefix ("t" . "toggle")
-       :desc "Select dictionary" "d" #'select-dictionary))
+      (:prefix-map ("t" . "toggle")
+       (:prefix-map ("s" . "spell")
+        :desc "French Dictionary" "f" (lambda () (interactive) (ispell-change-dictionary "fr_FR"))
+        :desc "English Dictionary" "e" (lambda () (interactive) (ispell-change-dictionary "en_US"))
+        :desc "Toggle spell check" "s" #'flyspell-mode
+        ;; :desc "Select dictionary" "d" #'select-dictionary
+        )))
 
 (define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
 
@@ -107,4 +107,8 @@ Returns the vterm buffer."
            (pop-to-buffer buffer)))
        (get-buffer buffer-name)))))
 
-(global-set-key (kbd "C-c v") #'+vterm/toggle-vertical)
+(map! :leader
+      (:prefix-map ("o" . "open")
+       (:prefix-map ("t" . "terminal")
+        :desc "Toggle vterm horizontally" "h" #'+vterm/toggle
+        :desc "Toggle vterm vertically" "v" #'+vterm/toggle-vertical)))
