@@ -5,6 +5,7 @@
 These are some basic settings. I am learning EMACS.
 
 * Keybindings
+
 *** Basic
 #+begin_src emacs-lisp
 ;; credentials
@@ -24,6 +25,7 @@ These are some basic settings. I am learning EMACS.
 #+end_src
 
 * Visual Enhancements
+
 *** Theme & Fonts
 #+begin_src emacs-lisp
 (setq doom-theme 'doom-gruvbox)
@@ -36,8 +38,6 @@ Enable relative line numbers and make their slant normal (not italic).
 (setq global-display-line-numbers-mode nil)
 ;; (setq display-line-numbers-type 'relative) ;; TODO change to 'visual in org-mode
 #+end_src
-
-#+RESULTS:
 
 Disable highlighting of the current line.
 #+begin_src emacs-lisp
@@ -76,14 +76,16 @@ Start emacs in a 100x40 window.
   (setq org-display-remote-inline-images 'download)
   (setq org-startup-with-inline-images t)
   (setq org-image-align 'center)
-  (setq org-log-done t))
+  (setq org-log-done t)
+  (use-package! org-pandoc-import)
+  )
 #+end_src
 
 *** Spell checking with selection menu
 
 #+begin_src emacs-lisp
 ;; Set default dictionary
-;; (setq ispell-dictionary "fr_FR")
+(setq ispell-dictionary "fr_FR")
 
 ;; Create a function to select dictionary from a list
 (defun select-dictionary ()
@@ -160,4 +162,28 @@ Returns the vterm buffer."
        (:prefix-map ("t" . "terminal")
         :desc "Toggle vterm horizontally" "h" #'+vterm/toggle
         :desc "Toggle vterm vertically" "v" #'+vterm/toggle-vertical)))
+#+end_src
+
+*** Latex 
+
+#+begin_src emacs-lisp
+(after! latex
+  (setq +latex-viewers '(pdf-tools))
+  (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
+  (setq TeX-view-program-list
+        '(("PDF Tools" TeX-pdf-tools-sync-view)))
+  (setq TeX-command-default "LaTeXMk")
+)
+(setq-hook! 'LaTeX-mode-hook +spellcheck-immediately nil)
+#+end_src
+
+***  Some functions
+
+#+begin_src emacs-lisp
+(defun markdown-convert-buffer-to-org ()
+"Convert the current buffer's content from markdown to orgmode format and save it with the current buffer's file name but with .org extension."
+(interactive)
+(shell-command-on-region (point-min) (point-max)
+                        (format "pandoc -f markdown -t org -o %s"
+                                (concat (file-name-sans-extension (buffer-file-name)) ".org"))))
 #+end_src

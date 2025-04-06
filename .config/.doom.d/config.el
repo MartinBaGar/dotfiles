@@ -40,10 +40,12 @@
   (setq org-display-remote-inline-images 'download)
   (setq org-startup-with-inline-images t)
   (setq org-image-align 'center)
-  (setq org-log-done t))
+  (setq org-log-done t)
+  (use-package! org-pandoc-import)
+  )
 
 ;; Set default dictionary
-;; (setq ispell-dictionary "fr_FR")
+(setq ispell-dictionary "fr_FR")
 
 ;; Create a function to select dictionary from a list
 (defun select-dictionary ()
@@ -112,3 +114,19 @@ Returns the vterm buffer."
        (:prefix-map ("t" . "terminal")
         :desc "Toggle vterm horizontally" "h" #'+vterm/toggle
         :desc "Toggle vterm vertically" "v" #'+vterm/toggle-vertical)))
+
+(after! latex
+  (setq +latex-viewers '(pdf-tools))
+  (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
+  (setq TeX-view-program-list
+        '(("PDF Tools" TeX-pdf-tools-sync-view)))
+  (setq TeX-command-default "LaTeXMk")
+)
+(setq-hook! 'LaTeX-mode-hook +spellcheck-immediately nil)
+
+(defun markdown-convert-buffer-to-org ()
+"Convert the current buffer's content from markdown to orgmode format and save it with the current buffer's file name but with .org extension."
+(interactive)
+(shell-command-on-region (point-min) (point-max)
+                        (format "pandoc -f markdown -t org -o %s"
+                                (concat (file-name-sans-extension (buffer-file-name)) ".org"))))
