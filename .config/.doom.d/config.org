@@ -244,3 +244,31 @@ Returns the vterm buffer."
         "s" #'save-window-layout
         "r" #'restore-window-layout))
 #+end_src
+
+*** Conversion markdown to org
+
+#+begin_src emacs-lisp
+(defun my/org-pandoc-import-multiple (files)
+  "Convert multiple FILES (Markdown) to Org using `org-pandoc-import-to-org`."
+  (interactive
+   (list (file-expand-wildcards (read-file-name "Glob pattern (e.g., *.md): " nil "*.md" t))))
+  (dolist (file files)
+    (message "Converting %s..." file)
+    (org-pandoc-import-to-org nil file)))
+
+(defun my/org-roam-convert-existing-notes ()
+  "Convert all .org files under `org-roam-directory` into Org-roam nodes."
+  (interactive)
+  (require 'org-id)
+  (dolist (file (directory-files-recursively org-roam-directory "\\.org$"))
+    (with-current-buffer (find-file-noselect file)
+      (goto-char (point-min))
+      ;; Add title if missing
+      (unless (re-search-forward "^#\\+title: " nil t)
+        (goto-char (point-min))
+        (insert (format "#+title: %s\n\n" (file-name-base file))))
+      ;; Add ID if missing
+      (org-id-get-create)
+      (save-buffer)
+      (kill-buffer))))
+#+end_src
