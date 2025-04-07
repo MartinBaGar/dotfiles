@@ -177,13 +177,70 @@ Returns the vterm buffer."
 (setq-hook! 'LaTeX-mode-hook +spellcheck-immediately nil)
 #+end_src
 
-***  Some functions
+***  Zoom
 
 #+begin_src emacs-lisp
-(defun markdown-convert-buffer-to-org ()
-"Convert the current buffer's content from markdown to orgmode format and save it with the current buffer's file name but with .org extension."
-(interactive)
-(shell-command-on-region (point-min) (point-max)
-                        (format "pandoc -f markdown -t org -o %s"
-                                (concat (file-name-sans-extension (buffer-file-name)) ".org"))))
+(defvar-local toggle-maximize--saved-config nil
+  "Holds the window configuration before maximizing.")
+
+(defun toggle-maximize-window ()
+  "Toggle maximization of the current window."
+  (interactive)
+  (if toggle-maximize--saved-config
+      (progn
+        (set-window-configuration toggle-maximize--saved-config)
+        (setq toggle-maximize--saved-config nil)
+        (message "Window layout restored"))
+    (setq toggle-maximize--saved-config (current-window-configuration))
+    (delete-other-windows)
+    (message "Window maximized")))
+
+(defun toggle-maximize--reset-on-change (&rest _)
+  "Reset toggle state if the window layout changes outside the toggle function."
+  (when toggle-maximize--saved-config
+    (setq toggle-maximize--saved-config nil)))
+
+(advice-add 'split-window :after #'toggle-maximize--reset-on-change)
+(advice-add 'delete-window :after #'toggle-maximize--reset-on-change)
+(advice-add 'other-window :after #'toggle-maximize--reset-on-change)
+
+(map! :leader
+        "z" #'toggle-maximize-window)
+#+end_src
+
+*** Layouts
+
+#+begin_src emacs-lisp
+(defvar window-layout-stack '()
+  "A stack of saved window configurations with user-defined names.")
+
+(defvar max-window-layouts 10
+  "The maximum number of window layouts to store in the stack.")
+
+(defun save-window-layout ()
+  "Save the current window configuration to the layout stack with a user-defined name."
+  (interactive)
+  (let ((name (read-string "Enter layout name: ")))  ; Prompt for a name
+    (if (>= (length window-layout-stack) max-window-layouts)
+        (setq window-layout-stack (butlast window-layout-stack 1)))  ; Remove oldest if over limit
+    (push (cons name (current-window-configuration)) window-layout-stack)
+    (message "Window layout saved: %s" name)))
+
+(defun restore-window-layout ()
+  "Choose and restore a saved window configuration from the stack."
+  (interactive)
+  (if window-layout-stack
+      (let* ((choices (mapcar #'car window-layout-stack))
+             (selected (completing-read "Restore layout: " choices nil t)))
+        (when selected
+          (let ((config (cdr (assoc selected window-layout-stack))))
+            (when config
+              (set-window-configuration config)
+              (message "Restored layout: %s" selected)))))
+    (message "No saved layouts.")))
+
+(map! :leader
+      (:prefix-map ("l" . "layout")
+        "s" #'save-window-layout
+        "r" #'restore-window-layout))
 #+end_src
