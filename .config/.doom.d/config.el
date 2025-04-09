@@ -14,7 +14,18 @@
 ;;      doom-localleader-alt-key "M-SPC l")
 
 (setq doom-theme 'doom-gruvbox)
-(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 18))
+(setq doom-font (font-spec
+                 :family "DejaVu Sans Mono"
+                 :size 18))
+
+(custom-set-faces
+ '(bold ((t (:weight extra-bold :height 1.0))))
+ '(italic ((t (:slant italic :weight normal :height 1.0)))))
+
+;; (custom-set-faces!
+;;   '(org-block :background "#232335")
+;;   '(org-block-begin-line :background "#1c1c25" :foreground "#5B6268")
+;;   '(org-block-end-line :background "#1c1c25" :foreground "#5B6268"))
 
 (setq global-display-line-numbers-mode nil)
 ;; (setq display-line-numbers-type 'relative) ;; TODO change to 'visual in org-mode
@@ -35,8 +46,11 @@
 (add-hook 'window-setup-hook #'toggle-frame-maximized)
 
 (after! org
+  ;; Org config
   (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
-  (setq org-tag-alist '(("labo" . ?l) ("maison" . ?m) ("production" . ?p) ("analyse" . ?a) ("biblio" . ?b) ("divers" . ?d)))
+  (setq org-tag-alist
+        '(("labo" . ?l) ("maison" . ?m) ("production" . ?p)
+          ("analyse" . ?a) ("biblio" . ?b) ("divers" . ?d)))
   (setq org-display-remote-inline-images 'download)
   (setq org-startup-with-inline-images t)
   (setq org-image-align 'center)
@@ -44,7 +58,15 @@
   (setq-default org-display-custom-times t)
   (setq org-time-stamp-formats '("<%Y-%m-%d %a %H:%M>" . "<%Y-%m-%d %a %H:%M>"))
   (use-package! org-pandoc-import)
-  )
+  (add-hook! 'org-mode-hook #'org-modern-mode)
+  (add-hook! 'org-mode-hook #'+org-pretty-mode)
+  ;; Folding persistence via savefold.el
+  (setq org-startup-folded 'showeverything) ; default fold behavior
+
+  (setq savefold-backends '(org))
+  (setq savefold-directory (locate-user-emacs-file "savefold"))
+  (savefold-mode 1)
+)
 
 ;; Set default dictionary
 (setq ispell-dictionary "fr_FR")
@@ -72,6 +94,11 @@
 (after! vterm
   (set-popup-rule! "*doom:vterm-popup-vertical:*" :size 0.25 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
   (setq vterm-shell "/usr/bin/zsh")
+
+  (define-key vterm-mode-map (kbd "M-h") 'windmove-left)
+  (define-key vterm-mode-map (kbd "M-j") 'windmove-down)
+  (define-key vterm-mode-map (kbd "M-k") 'windmove-up)
+  (define-key vterm-mode-map (kbd "M-l") 'windmove-right)
   )
 
 ;; Create vertical toggle command
@@ -118,6 +145,20 @@ Returns the vterm buffer."
        (:prefix-map ("t" . "terminal")
         :desc "Toggle vterm horizontally" "h" #'+vterm/toggle
         :desc "Toggle vterm vertically" "v" #'+vterm/toggle-vertical)))
+
+(defun vterm-dired-other-window ()
+  "Open dired in the current working directory of vterm in another window."
+  (interactive)
+  (when (derived-mode-p 'vterm-mode)
+    (let* ((proc (get-buffer-process (current-buffer)))
+           (pid (and proc (process-id proc)))
+           (cwd (and pid
+                     (file-symlink-p (format "/proc/%d/cwd" pid)))))
+      (dired-other-window (or cwd default-directory)))))
+
+(map! :leader
+      (:prefix-map ("d" . "dired")
+        :desc "Dired vterm-cwd in new win" "v" #'vterm-dired-other-window))
 
 (after! latex
   (setq +latex-viewers '(pdf-tools))

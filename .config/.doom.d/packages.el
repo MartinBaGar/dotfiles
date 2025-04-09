@@ -52,3 +52,8 @@
   :recipe (:host github
            :repo "tecosaur/org-pandoc-import"
            :files ("*.el" "filters" "preprocessors")))
+
+(package! org-modern)
+
+(package! savefold
+  :recipe (:host github :repo "jcfk/savefold.el"))
