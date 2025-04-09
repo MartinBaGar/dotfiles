@@ -2,7 +2,11 @@
 #+PROPERTY: header-args:emacs-lisp :tangle config.el
 
 * General Settings
-These are some basic settings. I am learning EMACS.
+
+** Completion
+
+#+begin_src emacs-lisp
+#+end_src
 
 * Keybindings
 
@@ -220,6 +224,18 @@ Returns the vterm buffer."
   (setq TeX-command-default "LaTeXMk")
 )
 (setq-hook! 'LaTeX-mode-hook +spellcheck-immediately nil)
+
+; use cdlatex completion instead of yasnippet
+(map! :map cdlatex-mode-map
+      :i "TAB" #'cdlatex-tab)
+
+(map! :after latex
+      :map cdlatex-mode-map
+      :localleader
+      :desc "Insert math symbol"
+      "i" #'cdlatex-math-symbol
+      :desc "Begin environment"
+      "e" #'cdlatex-environment)
 #+end_src
 
 *** Zoom

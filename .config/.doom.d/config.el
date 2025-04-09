@@ -1,3 +1,5 @@
+
+
 ;; credentials
 (setq user-full-name "Martin Bari Garnier"
       user-mail-address "martbari.g@gmail.com")
@@ -168,6 +170,18 @@ Returns the vterm buffer."
   (setq TeX-command-default "LaTeXMk")
 )
 (setq-hook! 'LaTeX-mode-hook +spellcheck-immediately nil)
+
+; use cdlatex completion instead of yasnippet
+(map! :map cdlatex-mode-map
+      :i "TAB" #'cdlatex-tab)
+
+(map! :after latex
+      :map cdlatex-mode-map
+      :localleader
+      :desc "Insert math symbol"
+      "i" #'cdlatex-math-symbol
+      :desc "Begin environment"
+      "e" #'cdlatex-environment)
 
 (defvar-local toggle-maximize--saved-config nil
   "Holds the window configuration before maximizing.")
