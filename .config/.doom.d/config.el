@@ -8,13 +8,6 @@
 (setq auto-save-default t
       make-backup-files t)
 
-;; kill emacs without confiming
-(setq confirm-kill-emacs nil)
-
-;; remap <localleader> from SPC m to SPC l
-;; (setq doom-localleader-key "SPC l"
-;;      doom-localleader-alt-key "M-SPC l")
-
 (setq doom-theme 'doom-gruvbox)
 (setq doom-font (font-spec
                  :family "DejaVu Sans Mono"
@@ -24,10 +17,28 @@
  '(bold ((t (:weight extra-bold :height 1.0))))
  '(italic ((t (:slant italic :weight normal :height 1.0)))))
 
-;; (custom-set-faces!
-;;   '(org-block :background "#232335")
-;;   '(org-block-begin-line :background "#1c1c25" :foreground "#5B6268")
-;;   '(org-block-end-line :background "#1c1c25" :foreground "#5B6268"))
+(defvar current-monitor-name nil)
+
+(defun my/check-monitor-change (&rest _)
+  "Check if monitor has changed and adjust font if needed."
+  (let* ((monitor-attrs (frame-monitor-attributes))
+         (monitor-name (cdr (assoc 'name monitor-attrs))))
+    (when (and monitor-name (not (string= monitor-name current-monitor-name)))
+      (let ((font-size (cond
+                       ((string= monitor-name "XWAYLAND0") 17)  ;; smaller font
+                       ((string= monitor-name "XWAYLAND1") 20)  ;; normal font
+                       (t 18))))  ;; fallback font size
+        (message "Monitor changed: %s → Font size: %.1f" monitor-name font-size)
+        (setq doom-font (font-spec :family "DejaVu Sans Mono" :size font-size))
+        (setq current-monitor-name monitor-name)
+        (doom/reload-font)))))
+
+;; Alternative approach: advise doom-modeline function
+(advice-add 'doom-modeline-window-size-change-function
+            :after #'my/check-monitor-change)
+
+;; Run once initially at startup
+(my/check-monitor-change)
 
 (setq global-display-line-numbers-mode nil)
 ;; (setq display-line-numbers-type 'relative) ;; TODO change to 'visual in org-mode

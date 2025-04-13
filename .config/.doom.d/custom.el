@@ -6,7 +6,8 @@
  ;; If there is more than one, they won't work right.
  '(ede-project-directories
    '("/data/bari-garnier/endoU" "/home/bari-garnier/Documents/papiers"))
- '(org-agenda-files '("/home/bari-garnier/org/todo.org")))
+ '(org-agenda-files '("/home/bari-garnier/org/todo.org"))
+ '(org-agenda-files '("/home/mabagar/org/todo.org")))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
