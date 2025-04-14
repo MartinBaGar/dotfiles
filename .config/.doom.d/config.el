@@ -1,5 +1,3 @@
-
-
 ;; credentials
 (setq user-full-name "Martin Bari Garnier"
       user-mail-address "martbari.g@gmail.com")
@@ -73,6 +71,7 @@
   (use-package! org-pandoc-import)
   (add-hook! 'org-mode-hook #'org-modern-mode)
   (add-hook! 'org-mode-hook #'+org-pretty-mode)
+
   ;; Folding persistence via savefold.el
   (setq org-startup-folded 'showeverything) ; default fold behavior
 

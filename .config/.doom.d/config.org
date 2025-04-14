@@ -5,9 +5,6 @@
 
 ** Completion
 
-#+begin_src emacs-lisp
-#+end_src
-
 * Keybindings
 
 *** Basic
@@ -115,6 +112,7 @@ Start emacs in a full window.
   (use-package! org-pandoc-import)
   (add-hook! 'org-mode-hook #'org-modern-mode)
   (add-hook! 'org-mode-hook #'+org-pretty-mode)
+
   ;; Folding persistence via savefold.el
   (setq org-startup-folded 'showeverything) ; default fold behavior
 
