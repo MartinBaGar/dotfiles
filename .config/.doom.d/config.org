@@ -381,3 +381,60 @@ Returns the vterm buffer."
       (:prefix-map ("l" . "layout")
         :desc "Toggle window split" "t" #'toggle-window-split))
 #+end_src
+
+***  LLM
+
+#+begin_src emacs-lisp
+(use-package! gptel
+  :config
+  ;; Use authinfo (nil falls back to auth-source)
+  ;; (setq! gptel-api-key nil)
+
+  ;; Register OpenAI backend
+  (gptel-make-openai "OpenAI"
+    :host "api.openai.com"
+    :endpoint "/v1/chat/completions"
+    :models '("gpt-4" "gpt-3.5-turbo")
+    :key #'gptel-api-key-from-auth-source)
+
+  ;; Register Mistral backend
+  (gptel-make-openai "Mistral"
+    :host "api.mistral.ai"
+    :endpoint "/v1/chat/completions"
+    :models '("mistral-small" "mistral-medium")
+    :key #'gptel-api-key-from-auth-source)
+
+  ;; Register DeepSeek backend
+  ;; (gptel-make-deepseek "DeepSeek"
+  ;;   :stream t
+  ;;   ;; :models '("deepseek-chat" "deepseek-coder" "deepseek-reasoner")
+  ;;   :key #'gptel-api-key-from-auth-source)
+  ;; Groq offers an OpenAI compatible API
+
+    (gptel-make-openai "Groq"               ;Any name you want
+    :host "api.groq.com"
+    :endpoint "/openai/v1/chat/completions"
+    :stream nil
+    :key #'gptel-api-key-from-auth-source
+    :models '(llama-3.1-70b-versatile
+                llama-3.1-8b-instant
+                llama3-70b-8192
+                llama3-8b-8192
+                mixtral-8x7b-32768
+                gemma-7b-it))
+
+   ;; OpenRouter offers an OpenAI compatible API
+  (gptel-make-openai "OpenRouter"               ;Any name you want
+  :host "openrouter.ai"
+  :endpoint "/api/v1/chat/completions"
+  :stream t
+  :key #'gptel-api-key-from-auth-source
+  :models '(deepseek/deepseek-r1:free
+            deepseek/deepseek-chat-v3-0324:free
+            google/gemini-2.5-pro-exp-03-25:free
+            google/gemma-3-27b-it:free))
+
+  ;; Default model + backend
+  (setq! gptel-backend (gptel-get-backend "Mistral"))
+  (setq! gptel-model 'mistral-medium))
+#+end_src

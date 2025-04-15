@@ -57,3 +57,5 @@
 
 (package! savefold
   :recipe (:host github :repo "jcfk/savefold.el"))
+
+(package! gptel :recipe (:nonrecursive t))
