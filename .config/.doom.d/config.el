@@ -1,3 +1,12 @@
+(setq text-mode-ispell-word-completion nil)
+
+;; Add cape-dict as first priority in text mode
+(after! cape
+  (setq cape-dict-file "/usr/share/dict/french"))
+  (add-hook! 'text-mode-hook
+    (defun +corfu-add-cape-dict-h ()
+      (add-hook 'completion-at-point-functions #'cape-dict -20 t)))
+
 ;; credentials
 (setq user-full-name "Martin Bari Garnier"
       user-mail-address "martbari.g@gmail.com")
@@ -49,8 +58,7 @@
 ;; Run (package-vc-install '(ultra-scroll :vc-backend Git :url "https://github.com/jdtsmith/ultra-scroll")) in scratch buffer.
 ;; (use-package! ultra-scroll
 ;;   :init
-;;   (setq scroll-conservatively 101 ; important!
-;;         scroll-margin 0)
+;;   (setq scroll-conservatively 101 ; important! ;;         scroll-margin 0)
 ;;   :config
 ;;   (ultra-scroll-mode 1))
 
@@ -79,26 +87,66 @@
   (setq savefold-directory (locate-user-emacs-file "savefold"))
   (savefold-mode 1)
 )
+(use-package! org-transclusion
+              :after org
+              :init
+              (map!
+               :map global-map "<f12>" #'org-transclusion-add
+               :leader
+               :prefix "n"
+               :desc "Org Transclusion Mode" "t" #'org-transclusion-mode))
+
+(defun my/org-copy-heading-link ()
+  "Copy file: link to current Org heading using heading name, not ID."
+  (interactive)
+  (let ((link (format "[[file:%s::*%s]]"
+                      (buffer-file-name)
+                      (org-get-heading t t t t))))
+    (kill-new link)
+    (message "Copied: %s" link)))
 
 ;; Set default dictionary
 (setq ispell-dictionary "fr_FR")
 
-;; Create a function to select dictionary from a list
+;; Define function to update cape-dict-file when dictionary changes
+(defun update-cape-dict-file (dict-name)
+  "Update cape-dict-file based on selected dictionary."
+  (setq-default cape-dict-file
+        (cond
+         ((string= dict-name "fr_FR") "/usr/share/dict/french")
+         ((string= dict-name "en_US") "/usr/share/dict/american-english")
+         (t "/usr/share/dict/american-english")))
+  (message "Cape dictionary set to %s" cape-dict-file))
+
+;; Modify your dictionary selection functions to also update cape-dict-file
 (defun select-dictionary ()
   "Select spelling dictionary."
   (interactive)
   (let* ((dicts '("en_US" "fr_FR"))
          (selection (completing-read "Select dictionary: " dicts nil t)))
     (ispell-change-dictionary selection)
+    (update-cape-dict-file selection)
     (message "Dictionary switched to %s" selection)))
 
+;; Advise ispell-change-dictionary to update cape-dict-file
+(advice-add 'ispell-change-dictionary :after
+            (lambda (dict)
+              (when (member dict '("fr_FR" "en_US"))
+                (update-cape-dict-file dict))))
+
+;; Your existing keybindings with modified functions
 (map! :leader
       (:prefix-map ("t" . "toggle")
        (:prefix-map ("s" . "spell")
-        :desc "French Dictionary" "f" (lambda () (interactive) (ispell-change-dictionary "fr_FR"))
-        :desc "English Dictionary" "e" (lambda () (interactive) (ispell-change-dictionary "en_US"))
+        :desc "French Dictionary" "f" (lambda ()
+                                        (interactive)
+                                        (ispell-change-dictionary "fr_FR")
+                                        (update-cape-dict-file "fr_FR"))
+        :desc "English Dictionary" "e" (lambda ()
+                                         (interactive)
+                                         (ispell-change-dictionary "en_US")
+                                         (update-cape-dict-file "en_US"))
         :desc "Toggle spell check" "s" #'flyspell-mode
-        ;; :desc "Select dictionary" "d" #'select-dictionary
         )))
 
 (define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)

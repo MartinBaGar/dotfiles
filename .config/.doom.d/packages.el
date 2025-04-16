@@ -59,3 +59,4 @@
   :recipe (:host github :repo "jcfk/savefold.el"))
 
 (package! gptel :recipe (:nonrecursive t))
+(package! org-transclusion)
