@@ -1,45 +1,11 @@
-;; Désactiver la complétion ispell qui peut interférer avec cape-dict
 (setq text-mode-ispell-word-completion nil)
 
-;; Configuration de Cape pour les dictionnaires
+;; Add cape-dict as first priority in text mode
 (after! cape
-  ;; Configurer le dictionnaire français
-  (setq cape-dict-file
-        (or (and (file-exists-p "/usr/share/dict/french")
-                 "/usr/share/dict/french")
-            (and (file-exists-p "/usr/share/dict/wfrench")
-                 "/usr/share/dict/wfrench")
-            "/usr/share/dict/american-english"))
-
-  ;; Ajouter cape-dict aux sources de complétion pour les modes texte et LaTeX
-  (add-hook! '(text-mode-hook LaTeX-mode-hook)
-    ;; Retirer ispell-completion-at-point s'il est présent
-    (remove-hook 'completion-at-point-functions #'ispell-completion-at-point 'local)
-    ;; Ajouter cape-dict en priorité
-    ;; (push #'cape-dict completion-at-point-functions)
-    ;; (push #'cape-dabbrev completion-at-point-functions))
-  ))
-
-;; Fonction pour basculer entre les dictionnaires français et anglais
-(defun toggle-completion-language ()
-  "Toggle between French and English completion."
-  (interactive)
-  (if (string-match-p "french" (or cape-dict-file ""))
-      (progn
-        (setq cape-dict-file "/usr/share/dict/american-english")
-        (message "Switched to English completion"))
-    (progn
-      (setq cape-dict-file
-            (or (and (file-exists-p "/usr/share/dict/french")
-                     "/usr/share/dict/french")
-                (and (file-exists-p "/usr/share/dict/wfrench")
-                     "/usr/share/dict/wfrench")))
-      (message "Switched to French completion"))))
-
-;; Lier à une touche
-;; (map! :leader
-;;       (:prefix-map ("t" . "toggle")
-;;        :desc "Toggle completion language" "l" #'toggle-completion-language))
+  (setq cape-dict-file "/usr/share/dict/french"))
+  (add-hook! 'text-mode-hook
+    (defun +corfu-add-cape-dict-h ()
+      (add-hook 'completion-at-point-functions #'cape-dict -20 t)))
 
 ;; credentials
 (setq user-full-name "Martin Bari Garnier"
