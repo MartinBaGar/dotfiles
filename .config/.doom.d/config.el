@@ -3,9 +3,18 @@
 ;; Add cape-dict as first priority in text mode
 (after! cape
   (setq cape-dict-file "/usr/share/dict/french"))
-  (add-hook! 'text-mode-hook
-    (defun +corfu-add-cape-dict-h ()
-      (add-hook 'completion-at-point-functions #'cape-dict -20 t)))
+
+(add-hook! 'text-mode-hook
+  (defun +corfu-add-cape-dict-h ()
+    (add-hook 'completion-at-point-functions #'cape-dict -20 t)))
+
+(add-hook! 'LaTeX-mode-hook
+  (defun +corfu-add-cape-tex-h ()
+    (add-hook 'completion-at-point-functions #'cape-tex -30 t)))
+;; (after! yasnippet
+;;   (add-hook! 'LaTeX-mode-hook
+;;     (defun +yas-latex-key-syntax-h ()
+;;       (setq-local yas-key-syntaxes '("w" "w_" "w_.()")))))
 
 ;; credentials
 (setq user-full-name "Martin Bari Garnier"
