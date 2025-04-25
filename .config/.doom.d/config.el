@@ -1,20 +1,73 @@
 (setq text-mode-ispell-word-completion nil)
 
-;; Add cape-dict as first priority in text mode
 (after! cape
   (setq cape-dict-file "/usr/share/dict/french"))
 
-(add-hook! 'text-mode-hook
-  (defun +corfu-add-cape-dict-h ()
-    (add-hook 'completion-at-point-functions #'cape-dict -20 t)))
+;; Org Mode: Enable cape-dict only outside src blocks
+(add-hook! 'org-mode-hook
+  (defun +corfu-cape-dict-maybe-org ()
+    (add-hook 'completion-at-point-functions
+              (lambda ()
+                (unless (org-in-src-block-p)
+                  (cape-dict)))
+              -20 t)))
+
+;; Markdown Mode: Enable cape-dict only outside code blocks
+(add-hook! 'markdown-mode-hook
+  (defun +corfu-cape-dict-maybe ()
+    (add-hook 'completion-at-point-functions
+              (lambda ()
+                (unless (markdown-code-block-at-point-p)
+                  (cape-dict)))
+              -20 t)))
 
 (add-hook! 'LaTeX-mode-hook
   (defun +corfu-add-cape-tex-h ()
     (add-hook 'completion-at-point-functions #'cape-tex -30 t)))
-;; (after! yasnippet
-;;   (add-hook! 'LaTeX-mode-hook
-;;     (defun +yas-latex-key-syntax-h ()
-;;       (setq-local yas-key-syntaxes '("w" "w_" "w_.()")))))
+
+;; Set default dictionary
+(setq ispell-dictionary "fr_FR")
+
+;; Define function to update cape-dict-file when dictionary changes
+(defun update-cape-dict-file (dict-name)
+  "Update cape-dict-file based on selected dictionary."
+  (setq-default cape-dict-file
+        (cond
+         ((string= dict-name "fr_FR") "/usr/share/dict/french")
+         ((string= dict-name "en_US") "/usr/share/dict/american-english")
+         (t "/usr/share/dict/american-english")))
+  (message "Cape dictionary set to %s" cape-dict-file))
+
+;; Modify your dictionary selection functions to also update cape-dict-file
+(defun select-dictionary ()
+  "Select spelling dictionary."
+  (interactive)
+  (let* ((dicts '("en_US" "fr_FR"))
+         (selection (completing-read "Select dictionary: " dicts nil t)))
+    (ispell-change-dictionary selection)
+    (update-cape-dict-file selection)
+    (message "Dictionary switched to %s" selection)))
+
+;; Advise ispell-change-dictionary to update cape-dict-file
+(advice-add 'ispell-change-dictionary :after
+            (lambda (dict)
+              (when (member dict '("fr_FR" "en_US"))
+                (update-cape-dict-file dict))))
+
+;; Your existing keybindings with modified functions
+(map! :leader
+      (:prefix-map ("t" . "toggle")
+       (:prefix-map ("s" . "spell")
+        :desc "French Dictionary" "f" (lambda ()
+                                        (interactive)
+                                        (ispell-change-dictionary "fr_FR")
+                                        (update-cape-dict-file "fr_FR"))
+        :desc "English Dictionary" "e" (lambda ()
+                                         (interactive)
+                                         (ispell-change-dictionary "en_US")
+                                         (update-cape-dict-file "en_US"))
+        :desc "Toggle spell check" "s" #'flyspell-mode
+        )))
 
 ;; credentials
 (setq user-full-name "Martin Bari Garnier"
@@ -113,50 +166,6 @@
                       (org-get-heading t t t t))))
     (kill-new link)
     (message "Copied: %s" link)))
-
-;; Set default dictionary
-(setq ispell-dictionary "fr_FR")
-
-;; Define function to update cape-dict-file when dictionary changes
-(defun update-cape-dict-file (dict-name)
-  "Update cape-dict-file based on selected dictionary."
-  (setq-default cape-dict-file
-        (cond
-         ((string= dict-name "fr_FR") "/usr/share/dict/french")
-         ((string= dict-name "en_US") "/usr/share/dict/american-english")
-         (t "/usr/share/dict/american-english")))
-  (message "Cape dictionary set to %s" cape-dict-file))
-
-;; Modify your dictionary selection functions to also update cape-dict-file
-(defun select-dictionary ()
-  "Select spelling dictionary."
-  (interactive)
-  (let* ((dicts '("en_US" "fr_FR"))
-         (selection (completing-read "Select dictionary: " dicts nil t)))
-    (ispell-change-dictionary selection)
-    (update-cape-dict-file selection)
-    (message "Dictionary switched to %s" selection)))
-
-;; Advise ispell-change-dictionary to update cape-dict-file
-(advice-add 'ispell-change-dictionary :after
-            (lambda (dict)
-              (when (member dict '("fr_FR" "en_US"))
-                (update-cape-dict-file dict))))
-
-;; Your existing keybindings with modified functions
-(map! :leader
-      (:prefix-map ("t" . "toggle")
-       (:prefix-map ("s" . "spell")
-        :desc "French Dictionary" "f" (lambda ()
-                                        (interactive)
-                                        (ispell-change-dictionary "fr_FR")
-                                        (update-cape-dict-file "fr_FR"))
-        :desc "English Dictionary" "e" (lambda ()
-                                         (interactive)
-                                         (ispell-change-dictionary "en_US")
-                                         (update-cape-dict-file "en_US"))
-        :desc "Toggle spell check" "s" #'flyspell-mode
-        )))
 
 (define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
 
