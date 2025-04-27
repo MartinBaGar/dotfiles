@@ -6,11 +6,21 @@
 ;; Org Mode: Enable cape-dict only outside src blocks
 (add-hook! 'org-mode-hook
   (defun +corfu-cape-dict-maybe-org ()
-    (add-hook 'completion-at-point-functions
-              (lambda ()
-                (unless (org-in-src-block-p)
-                  (cape-dict)))
-              -20 t)))
+    ;; Preserve existing completion-at-point-functions
+    (let ((cape-func (lambda ()
+                       (unless (org-in-src-block-p)
+                         (cape-dict)))))
+      ;; Add cape-dict preserving previous functions
+      (add-hook 'completion-at-point-functions cape-func 100 t))))
+
+;; Markdown Mode: Enable cape-dict only outside code blocks
+(add-hook! 'markdown-mode-hook
+  (defun +corfu-cape-dict-maybe ()
+    (let ((cape-func (lambda ()
+                       (unless (markdown-code-block-at-point-p)
+                         (cape-dict)))))
+      ;; Add cape-dict preserving previous functions
+      (add-hook 'completion-at-point-functions cape-func 100 t))))
 
 ;; Markdown Mode: Enable cape-dict only outside code blocks
 (add-hook! 'markdown-mode-hook
@@ -19,11 +29,25 @@
               (lambda ()
                 (unless (markdown-code-block-at-point-p)
                   (cape-dict)))
-              -20 t)))
+              100 t)))
 
 (add-hook! 'LaTeX-mode-hook
   (defun +corfu-add-cape-tex-h ()
-    (add-hook 'completion-at-point-functions #'cape-tex -30 t)))
+    ;; Preserve existing completion-at-point-functions
+    (let ((cape-dict-func (lambda ()
+                           (cape-dict)))
+          (cape-tex-func  (lambda ()
+                            (cape-tex))))
+      ;; Add cape-dict and cape-tex preserving previous functions
+      (add-hook 'completion-at-point-functions cape-dict-func 100 t)
+      (add-hook 'completion-at-point-functions cape-tex-func -30 t))))
+
+;; https://github.com/joaotavora/yasnippet/issues/998
+(defun my-yas-try-expanding-auto-snippets ()
+(when (and (boundp 'yas-minor-mode) yas-minor-mode)
+    (let ((yas-buffer-local-condition ''(require-snippet-condition . auto)))
+    (yas-expand))))
+(add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
 
 ;; Set default dictionary
 (setq ispell-dictionary "fr_FR")
@@ -244,20 +268,38 @@ Returns the vterm buffer."
   (setq TeX-view-program-list
         '(("PDF Tools" TeX-pdf-tools-sync-view)))
   ;; Correct way to set LaTeXmk as default in Doom Emacs
-  (setq-hook! LaTeX-mode TeX-command-default "LaTeXMK")
-)
+  (setq-hook! LaTeX-mode TeX-command-default "LaTeXMK"))
+
+(after! cdlatex
+  (setq cdlatex-math-modify-prefix ?²)
+  ;; First, remove the old keybinding
+  (define-key cdlatex-mode-map "'" nil)
+  ;; Then, bind the new one manually
+  (define-key cdlatex-mode-map (string cdlatex-math-modify-prefix) #'cdlatex-math-modify))
+
+;; (defun my/update-prefix-key (map old-key new-key command)
+;;   "In MAP, unbind OLD-KEY and bind NEW-KEY to COMMAND."
+;;   (when (boundp map)
+;;     (let ((map (symbol-value map)))
+;;       (when map
+;;         (define-key map (kbd old-key) nil)
+;;         (define-key map (kbd new-key) command)))))
+
+;; (after! cdlatex
+;;   (setq cdlatex-math-modify-prefix ?/)
+;;   (my/update-prefix-key 'cdlatex-mode-map "'" "/" #'cdlatex-math-modify))
 
 ; use cdlatex completion instead of yasnippet
-(map! :map cdlatex-mode-map
-      :i "TAB" #'cdlatex-tab)
+;; (map! :map cdlatex-mode-map
+;;       :i "TAB" #'cdlatex-tab)
 
-(map! :after latex
-      :map cdlatex-mode-map
-      :localleader
-      :desc "Insert math symbol"
-      "i" #'cdlatex-math-symbol
-      :desc "Begin environment"
-      "e" #'cdlatex-environment)
+;; (map! :after latex
+;;       :map cdlatex-mode-map
+;;       :localleader
+;;       :desc "Insert math symbol"
+;;       "i" #'cdlatex-math-symbol
+;;       :desc "Begin environment"
+;;       "e" #'cdlatex-environment)
 
 (defvar-local toggle-maximize--saved-config nil
   "Holds the window configuration before maximizing.")
@@ -426,3 +468,9 @@ Returns the vterm buffer."
   ;; Default model + backend
   (setq! gptel-backend (gptel-get-backend "Mistral"))
   (setq! gptel-model 'mistral-medium))
+
+(setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
+(setq! bibtex-completion-bibliography '("~/texmf/bibtex/bib/library.bib"))
+(setq! bibtex-completion-library-path '("/mnt/c/Users/martb/Documents/zotero-lib/"))
+(setq! citar-library-paths '("/mnt/c/Users/martb/Documents/zotero-lib/"))
+;; (setq! citar-file-parser-functions '("/mnt/c/Users/martb/Documents/zotero-lib/"))

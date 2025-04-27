@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: dialogue
+# uuid: dialogue
+# key: dialogue
+# --
+\begin{dialogue}
+${0:`%`}
+\end{dialogue}

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: dialogue item
+# uuid: dialogue item
+# key: ditem
+# condition: (equal (LaTeX-current-environment) "dialogue")
+# --
+\dialogueitem ${0:`%`}
