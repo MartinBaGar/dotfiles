@@ -434,13 +434,7 @@ Returns the vterm buffer."
     :models '("mistral-small" "mistral-medium")
     :key #'gptel-api-key-from-auth-source)
 
-  ;; Register DeepSeek backend
-  ;; (gptel-make-deepseek "DeepSeek"
-  ;;   :stream t
-  ;;   ;; :models '("deepseek-chat" "deepseek-coder" "deepseek-reasoner")
-  ;;   :key #'gptel-api-key-from-auth-source)
   ;; Groq offers an OpenAI compatible API
-
     (gptel-make-openai "Groq"               ;Any name you want
     :host "api.groq.com"
     :endpoint "/openai/v1/chat/completions"
@@ -467,6 +461,12 @@ Returns the vterm buffer."
   ;; Default model + backend
   (setq! gptel-backend (gptel-get-backend "Mistral"))
   (setq! gptel-model 'mistral-medium))
+
+(after! gptel
+  ;; Add a new directive called ‘my-prompt’
+  (setf (alist-get 'md-expert gptel-directives)
+        "Act as an expert in molecular dynamics simulations. You have deep knowledge of theory, workflows, force fields, and major software.
+Answer my questions with technical accuracy and clarity. Focus on concepts, practical advice, and common pitfalls. Keep explanations concise but complete."))
 
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
 (setq! bibtex-completion-bibliography '("~/texmf/bibtex/bib/library.bib"))
