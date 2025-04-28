@@ -154,8 +154,7 @@
   ;; Org config
   (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
   (setq org-tag-alist
-        '(("labo" . ?l) ("maison" . ?m) ("production" . ?p)
-          ("analyse" . ?a) ("biblio" . ?b) ("divers" . ?d)))
+        '(("baal" . ?b) ("adastra" . ?a)))
   (setq org-display-remote-inline-images 'download)
   (setq org-startup-with-inline-images t)
   (setq org-image-align 'center)
