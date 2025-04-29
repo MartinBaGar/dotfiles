@@ -212,6 +212,13 @@ Start emacs in a full window.
   (use-package! org-pandoc-import)
   (add-hook! 'org-mode-hook #'org-modern-mode)
   (add-hook! 'org-mode-hook #'+org-pretty-mode)
+  ;; Use a timer to ensure the file is fully loaded before previewing LaTeX
+  (add-hook! 'org-mode-hook
+    (run-with-timer 1 nil
+                  (lambda ()
+                    (when (and (buffer-live-p (current-buffer))
+                              (display-graphic-p))
+                      (org-latex-preview '(16))))))
 
   ;; Folding persistence via savefold.el
   (setq org-startup-folded 'showeverything) ; default fold behavior
