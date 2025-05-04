@@ -449,19 +449,32 @@ Returns the vterm buffer."
     (message "Converting %s..." file)
     (org-pandoc-import-to-org nil file)))
 
+(defun my/org-pandoc-import-md-recursive ()
+  "Convert all Markdown files in current directory and subdirectories to Org format."
+  (interactive)
+  (let ((files (directory-files-recursively default-directory "\\.md$")))
+    (dolist (file files)
+      (message "Converting %s..." file)
+      (org-pandoc-import-to-org nil file))))
+
 (defun my/org-roam-convert-existing-notes ()
   "Convert all .org files under `org-roam-directory` into Org-roam nodes."
   (interactive)
   (require 'org-id)
-  (dolist (file (directory-files-recursively org-roam-directory "\\.org$"))
+  ;; (dolist (file (directory-files-recursively org-roam-directory "\\.org$"))
+  (dolist (file (directory-files-recursively default-directory "\\.org$"))
     (with-current-buffer (find-file-noselect file)
       (goto-char (point-min))
       ;; Add title if missing
-      (unless (re-search-forward "^#\\+title: " nil t)
+      (unless (re-search-forward "^\:ID\:" nil t)
         (goto-char (point-min))
+        (org-id-get-create))
+      (goto-char (point-min))
+      (unless (re-search-forward "^#\\+title: " nil t)
+        (re-search-forward "^:PROPERTIES:\n\\(?:.*\n\\)*?:END:" nil t)
+        (forward-line 1)
         (insert (format "#+title: %s\n\n" (file-name-base file))))
       ;; Add ID if missing
-      (org-id-get-create)
       (save-buffer)
       (kill-buffer))))
 #+end_src
