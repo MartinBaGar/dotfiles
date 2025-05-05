@@ -493,3 +493,6 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
 (setq! bibtex-completion-library-path '("/mnt/c/Users/martb/Documents/zotero-lib/"))
 (setq! citar-library-paths '("/mnt/c/Users/martb/Documents/zotero-lib/"))
 ;; (setq! citar-file-parser-functions '("/mnt/c/Users/martb/Documents/zotero-lib/"))
+
+(setq-hook! 'python-mode-hook +format-with '(isort black))
+   ;; (setq-hook! 'python-mode-hook +format-with 'black)

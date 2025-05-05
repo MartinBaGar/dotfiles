@@ -579,3 +579,8 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
 (setq! citar-library-paths '("/mnt/c/Users/martb/Documents/zotero-lib/"))
 ;; (setq! citar-file-parser-functions '("/mnt/c/Users/martb/Documents/zotero-lib/"))
 #+end_src
+*** Python
+#+begin_src emacs-lisp
+(setq-hook! 'python-mode-hook +format-with '(isort black))
+   ;; (setq-hook! 'python-mode-hook +format-with 'black)
+#+end_src
