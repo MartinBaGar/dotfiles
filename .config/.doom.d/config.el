@@ -101,6 +101,8 @@
 (setq auto-save-default t
       make-backup-files t)
 
+(setq doom-modeline-project-name t)
+
 (setq doom-theme 'doom-gruvbox)
 (setq doom-font (font-spec
                  :family "DejaVu Sans Mono"
@@ -479,8 +481,8 @@ Returns the vterm buffer."
             google/gemma-3-27b-it:free))
 
   ;; Default model + backend
-  (setq! gptel-backend (gptel-get-backend "Mistral"))
-  (setq! gptel-model 'mistral-medium))
+  (setq! gptel-backend (gptel-get-backend "OpenRouter"))
+  (setq! gptel-model 'deepseek/deepseek-chat-v3-0324:free))
 
 (after! gptel
   ;; Add a new directive called ‘my-prompt’
@@ -496,3 +498,26 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
 
 (setq-hook! 'python-mode-hook +format-with '(isort black))
    ;; (setq-hook! 'python-mode-hook +format-with 'black)
+
+(map! :leader
+      (:prefix ("p" . "project.el") ; Use a different prefix like "P" instead of "p"
+       :desc "Find file in project"           "f" #'project-find-file
+       :desc "Find external file"             "F" #'project-or-external-find-file
+       :desc "Switch to project buffer"       "b" #'project-switch-to-buffer
+       :desc "Run shell in project"           "s" #'project-shell
+       :desc "Find directory in project"      "d" #'project-find-dir
+       :desc "Open project dired"             "D" #'project-dired
+       :desc "Open project vc-dir"            "v" #'project-vc-dir
+       :desc "Compile project"                "c" #'project-compile
+       :desc "Run eshell in project"          "e" #'project-eshell
+       :desc "Kill project buffers"           "k" #'project-kill-buffers
+       :desc "Switch project"                 "p" #'project-switch-project
+       :desc "Find regexp in project"         "g" #'project-find-regexp
+       :desc "Find external regexp"           "G" #'project-or-external-find-regexp
+       :desc "Replace regexp in project"      "r" #'project-query-replace-regexp
+       :desc "Run command in project"         "x" #'project-execute-extended-command
+       :desc "Run any project command"        "o" #'project-any-command
+       :desc "List project buffers"           "l" #'project-list-buffers
+       :desc "Save project buffers"           "S" #'project-save-some-buffers
+       :desc "Run shell command in project"   "!" #'project-shell-command
+       :desc "Async shell command in project" "&" #'project-async-shell-command))

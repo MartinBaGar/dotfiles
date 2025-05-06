@@ -60,3 +60,5 @@
 
 (package! gptel :recipe (:nonrecursive t))
 (package! org-transclusion)
+
+;; (package! projectile :disable t)
