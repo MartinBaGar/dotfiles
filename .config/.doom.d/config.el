@@ -174,6 +174,7 @@
                               (display-graphic-p))
                       (org-latex-preview '(16))))))
 
+  (setq org-attach-id-dir "img/")
   ;; Folding persistence via savefold.el
   (setq org-startup-folded 'showeverything) ; default fold behavior
 
@@ -198,6 +199,25 @@
                       (org-get-heading t t t t))))
     (kill-new link)
     (message "Copied: %s" link)))
+
+(after! org-download
+  ;; Disable org-download's default timestamp prefixing
+  ;; (setq org-download-timestamp "")
+
+  (defun my/org-download-clipboard-with-buffername-and-prompt ()
+    "Save clipboard image as <buffer-name>_<timestamp>_<name>.png"
+    (interactive)
+    (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
+           (name (read-string "Image name: "))
+           ;; (filename (format "%s_%s_%s.png" buffer-name-base name)))
+           (filename (format "%s_%s.png" buffer-name-base name)))
+      (org-download-clipboard filename)))
+
+  ;; Optional keybinding under SPC i p
+  (map! :leader
+        :prefix "i"
+        :desc "Paste clipboard image with buffername and custom name"
+        "p" #'my/org-download-clipboard-with-buffername-and-prompt))
 
 (define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
 
@@ -521,3 +541,16 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
        :desc "Save project buffers"           "S" #'project-save-some-buffers
        :desc "Run shell command in project"   "!" #'project-shell-command
        :desc "Async shell command in project" "&" #'project-async-shell-command))
+
+(defun my/vscode-open-path-at-point ()
+  "Open the file at point with VS Code."
+  (interactive)
+  (let ((path (thing-at-point 'filename t)))
+    (if (and path (file-exists-p path))
+        (start-process "vscode" nil "code" (expand-file-name path))
+      (message "No valid file path at point."))))
+
+(map! :leader
+      :prefix "o"
+      :desc "Open file at point in VS Code"
+      "v" #'my/vscode-open-path-at-point)
