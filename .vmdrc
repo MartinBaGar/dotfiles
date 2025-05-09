@@ -1,0 +1,32 @@
+menu main on ; menu main move 835 532
+
+# position the stage and axes
+axes location off
+stage location off
+
+# User's default values for newly loaded molecules/reps, etc
+mol default style {NewCartoon 0.300000 6.000000 4.100000 0}
+#mol default selection {name CA}
+#mol default material {Transparent}
+
+display reposition 1376 600
+display resize 1245 1376
+display nearclip set 0.01
+display projection   Orthographic
+display rendermode   GLSL
+display depthcue   off
+# color Display {Background} white
+color Display {Background} black
+
+# Add a shortcut to bring back all the windows on the front
+proc bring_windows {} {
+	menu main off ; menu main on
+	menu tkcon off ; menu tkcon on ; menu tkcon move 497 0
+}
+
+user add key Control-b bring_windows
+
+# Wrapper procedure to source toto.tcl and make its functions available
+source "/data/bari-garnier/scripts/vmd/custom_scripts.tcl"
+
+set env(TMPDIR) /tmp
