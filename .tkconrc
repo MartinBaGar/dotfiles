@@ -1,0 +1,14 @@
+######################################################
+## my tkcon resource file
+
+# use a fixed default font
+tkcon font Courier 12 bold; # valid everywhere
+# tkcon set ::tkcon::COLOR(bg) "#1E1E1E"
+# # Modify TkCon color scheme for better contrast
+# tkcon set ::tkcon::COLOR(prompt) "#32CD32" 
+# tkcon set ::tkcon::COLOR(stdin) "#00FF00"  
+# tkcon set ::tkcon::COLOR(stdout) "#00FF00" 
+# tkcon set ::tkcon::COLOR(stderr) "#FF4500" 
+# tkcon set ::tkcon::COLOR(blink) "#FF4500"  
+# tkcon set ::tkcon::COLOR(cursor) "#FF4500" 
+###################################################### 
