@@ -150,7 +150,7 @@
 ;;   :config
 ;;   (ultra-scroll-mode 1))
 
-(add-hook 'window-setup-hook #'toggle-frame-maximized)
+;; (add-hook 'window-setup-hook #'toggle-frame-maximized)
 
 (after! org
   ;; Org config
@@ -508,7 +508,9 @@ Returns the vterm buffer."
   ;; Add a new directive called ‘my-prompt’
   (setf (alist-get 'md-expert gptel-directives)
         "Act as an expert in molecular dynamics simulations. You have deep knowledge of theory, workflows, force fields, and major software.
-Answer my questions with technical accuracy and clarity. Focus on concepts, practical advice, and common pitfalls. Keep explanations concise but complete."))
+Answer my questions with technical accuracy and clarity. Focus on concepts, practical advice, and common pitfalls. Keep explanations concise but complete.")
+  (setf (alist-get 'LaTeX-assistant gptel-directives)
+        "Act as an expert in LaTeX document writing and formatting. You know best practices for structure, typography, equations, figures, tables, and citations. Be decisive about when to use built-in solutions vs. recommended packages, and suggest packages when appropriate. Answer clearly with clean LaTeX code. Keep responses concise, practical, and focused on document quality."))
 
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
 (setq! bibtex-completion-bibliography '("~/texmf/bibtex/bib/library.bib"))
