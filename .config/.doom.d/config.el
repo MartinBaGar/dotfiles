@@ -200,6 +200,13 @@
     (kill-new link)
     (message "Copied: %s" link)))
 
+(defun my/org-copy-link-at-point ()
+  "Copy the link at point"
+  (interactive)
+  (let ((link (replace-regexp-in-string "^[^:]+:" "" (org--link-at-point))))
+    (kill-new link)
+    (message "Copied: %s" link)))
+
 (after! org-download
   ;; Disable org-download's default timestamp prefixing
   ;; (setq org-download-timestamp "")
