@@ -49,6 +49,41 @@
     (yas-expand))))
 (add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
 
+;; 1. Enable yasnippet and load LaTeX snippets when editing Org
+(defun my-org-latex-yas ()
+  "Enable YASnippet and activate LaTeX snippets in Org mode."
+  (yas-minor-mode)
+  (yas-activate-extra-mode 'latex-mode))  ; load LaTeX snippets
+
+(add-hook 'org-mode-hook #'my-org-latex-yas)
+
+(setq org-image-max-width 500)
+
+;; ;; 2. Function to expand YAS only inside LaTeX fragments in Org
+;; (defun my/org-inline-latex-snippet-expand ()
+;;   "Expand LaTeX snippets when inside an Org inline LaTeX fragment."
+;;   (interactive)
+;;   (when (and (org-inside-LaTeX-fragment-p)
+;;              (bound-and-true-p yas-minor-mode))
+;;     (yas-expand)))
+
+;; ;; 3. Bind it to a key in Org mode (e.g., C-c y or TAB)
+;; (with-eval-after-load 'org
+;;   (define-key org-mode-map (kbd "C-c y") #'my/org-inline-latex-snippet-expand))
+
+;; ;; Optional: If you want TAB to auto-expand snippets inside inline LaTeX
+;; (defun my/org-tab-handler ()
+;;   "Custom TAB handler: expands YAS in LaTeX fragments or cycles otherwise."
+;;   (interactive)
+;;   (cond
+;;    ((and (org-inside-LaTeX-fragment-p)
+;;          (bound-and-true-p yas-minor-mode)
+;;          (yas-expand)))
+;;    (t (org-cycle))))  ; fallback behavior
+
+;; (with-eval-after-load 'org
+;;   (define-key org-mode-map (kbd "TAB") #'my/org-tab-handler))
+
 ;; Set default dictionary
 (setq ispell-dictionary "fr_FR")
 
@@ -159,6 +194,7 @@
         '(("baal" . ?b) ("adastra" . ?a)))
   (setq org-display-remote-inline-images 'download)
   (setq org-startup-with-inline-images t)
+  (setq org-download-timestamp "")
   (setq org-image-align 'center)
   (setq org-log-done t)
   (setq-default org-display-custom-times t)
@@ -174,7 +210,7 @@
                               (display-graphic-p))
                       (org-latex-preview '(16))))))
 
-  (setq org-attach-id-dir "img/")
+  ;; (setq org-attach-id-dir "img/")
   ;; Folding persistence via savefold.el
   (setq org-startup-folded 'showeverything) ; default fold behavior
 
@@ -207,24 +243,53 @@
     (kill-new link)
     (message "Copied: %s" link)))
 
-(after! org-download
-  ;; Disable org-download's default timestamp prefixing
-  ;; (setq org-download-timestamp "")
+;; (use-package! org-download
+;;   :after org
+;;   :defer nil
+;;   :config
+;;   ;; 1. Disable timestamp prefix
+;;   (setq org-download-timestamp ""))
 
-  (defun my/org-download-clipboard-with-buffername-and-prompt ()
-    "Save clipboard image as <buffer-name>_<timestamp>_<name>.png"
-    (interactive)
-    (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
-           (name (read-string "Image name: "))
-           ;; (filename (format "%s_%s_%s.png" buffer-name-base name)))
-           (filename (format "%s_%s.png" buffer-name-base name)))
-      (org-download-clipboard filename)))
+;;   ;; 2. Prevent ID creation with advice
+;;   (defadvice org-download-clipboard (around prevent-id-creation activate)
+;;     "Prevent org-id-get-create from being called during org-download-clipboard."
+;;     (let ((orig-fn (symbol-function 'org-id-get-create)))
+;;       (cl-letf (((symbol-function 'org-id-get-create) (lambda (&optional force) nil)))
+;;         ad-do-it)))
 
-  ;; Optional keybinding under SPC i p
-  (map! :leader
-        :prefix "i"
-        :desc "Paste clipboard image with buffername and custom name"
-        "p" #'my/org-download-clipboard-with-buffername-and-prompt))
+;;   ;; 3. Define your custom naming and saving function
+;;   (defun my/org-download-clipboard-with-custom-name ()
+;;     "Prompt for a custom image name and insert it using the current buffer base name."
+;;     (interactive)
+;;     (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
+;;            (name (read-string "Image name (without extension): "))
+;;            (filename (format "%s_%s.png" buffer-name-base name)))
+;;       (org-download-clipboard filename)))
+
+;;   ;; Optional keybinding under SPC m a p
+;;   (map! :leader
+;;       (:prefix-map ("m")
+;;        (:prefix-map ("a")
+;;         :desc "Paste clipboard image with custom name"
+;;         "p" #'my/org-download-clipboard-with-custom-name))))
+;; (defun my/org-download-clipboard-with-name ()
+;;   "Prompt for a filename and save the clipboard image with it."
+;;   (interactive)
+;;   (let* ((name (read-string "Image name (without extension): "))
+;;          (filename (concat name ".png")))
+;;     (org-download-clipboard filename))
+;;     (message filename "has been saved"))
+
+
+;; (defun my/org-download-clipboard-with-name ()
+;;   "Prompt for a filename and save the clipboard image as <buffername>_<name>.png."
+;;   (interactive)
+;;   (setq org-download-timestamp "")
+;;   (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
+;;          (name (read-string "Image name (without extension): "))
+;;          (filename (format "%s_%s.png" buffer-name-base name)))
+;;     (org-download-clipboard filename)
+;;     (message "Saved image as: %s" filename)))
 
 (define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
 
