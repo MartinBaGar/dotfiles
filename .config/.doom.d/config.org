@@ -236,18 +236,10 @@ Start emacs in a full window.
 
 #+begin_src emacs-lisp
 (after! org
-  ;; Org config
-  (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
-  (setq org-tag-alist
-        '(("baal" . ?b) ("adastra" . ?a)))
-  (setq org-display-remote-inline-images 'download)
+  ;; Display
+  ;; (setq org-display-remote-inline-images 'download)
   (setq org-startup-with-inline-images t)
-  (setq org-download-timestamp "")
   (setq org-image-align 'center)
-  (setq org-log-done t)
-  (setq-default org-display-custom-times t)
-  (setq org-time-stamp-formats '("<%Y-%m-%d %a %H:%M>" . "<%Y-%m-%d %a %H:%M>"))
-  (use-package! org-pandoc-import)
   (add-hook! 'org-mode-hook #'org-modern-mode)
   (add-hook! 'org-mode-hook #'+org-pretty-mode)
   ;; Use a timer to ensure the file is fully loaded before previewing LaTeX
@@ -257,14 +249,25 @@ Start emacs in a full window.
                     (when (and (buffer-live-p (current-buffer))
                               (display-graphic-p))
                       (org-latex-preview '(16))))))
+  ;; TODOs
+  (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
+  (setq org-tag-alist
+        '(("baal" . ?b) ("adastra" . ?a)))
+  (setq org-log-done t)
+  (setq-default org-display-custom-times t)
+  (setq org-time-stamp-formats '("<%Y-%m-%d %a %H:%M>" . "<%Y-%m-%d %a %H:%M>"))
+  (use-package! org-pandoc-import)
 
-  ;; (setq org-attach-id-dir "img/")
+
   ;; Folding persistence via savefold.el
   (setq org-startup-folded 'showeverything) ; default fold behavior
 
   (setq savefold-backends '(org))
   (setq savefold-directory (locate-user-emacs-file "savefold"))
   (savefold-mode 1)
+
+  ;; Attach
+  ;; (setq org-attach-id-dir "img/")
 )
 (use-package! org-transclusion
               :after org
@@ -291,53 +294,32 @@ Start emacs in a full window.
     (kill-new link)
     (message "Copied: %s" link)))
 
-;; (use-package! org-download
-;;   :after org
-;;   :defer nil
-;;   :config
-;;   ;; 1. Disable timestamp prefix
-;;   (setq org-download-timestamp ""))
+(use-package! org-download
+  :after org
+  :defer nil
+  :config
 
-;;   ;; 2. Prevent ID creation with advice
-;;   (defadvice org-download-clipboard (around prevent-id-creation activate)
-;;     "Prevent org-id-get-create from being called during org-download-clipboard."
-;;     (let ((orig-fn (symbol-function 'org-id-get-create)))
-;;       (cl-letf (((symbol-function 'org-id-get-create) (lambda (&optional force) nil)))
-;;         ad-do-it)))
+(setq org-download-screenshot-method "flameshot gui --raw > %s")
 
-;;   ;; 3. Define your custom naming and saving function
-;;   (defun my/org-download-clipboard-with-custom-name ()
-;;     "Prompt for a custom image name and insert it using the current buffer base name."
-;;     (interactive)
-;;     (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
-;;            (name (read-string "Image name (without extension): "))
-;;            (filename (format "%s_%s.png" buffer-name-base name)))
-;;       (org-download-clipboard filename)))
+(defun my/org-download-clipboard-with-name ()
+  "Prompt for a filename and save the clipboard image as <buffername>_<name>.png."
+  (interactive)
+  ;; (setq org-download-timestamp "")
+  (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
+         (name (read-string "Image name (without extension): "))
+         (filename (format "%s_%s.png" buffer-name-base name)))
+    (org-download-clipboard filename)
+    (message "Saved image as: %s" filename)))
 
-;;   ;; Optional keybinding under SPC m a p
-;;   (map! :leader
-;;       (:prefix-map ("m")
-;;        (:prefix-map ("a")
-;;         :desc "Paste clipboard image with custom name"
-;;         "p" #'my/org-download-clipboard-with-custom-name))))
-;; (defun my/org-download-clipboard-with-name ()
-;;   "Prompt for a filename and save the clipboard image with it."
-;;   (interactive)
-;;   (let* ((name (read-string "Image name (without extension): "))
-;;          (filename (concat name ".png")))
-;;     (org-download-clipboard filename))
-;;     (message filename "has been saved"))
-
-
-;; (defun my/org-download-clipboard-with-name ()
-;;   "Prompt for a filename and save the clipboard image as <buffername>_<name>.png."
-;;   (interactive)
-;;   (setq org-download-timestamp "")
-;;   (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
-;;          (name (read-string "Image name (without extension): "))
-;;          (filename (format "%s_%s.png" buffer-name-base name)))
-;;     (org-download-clipboard filename)
-;;     (message "Saved image as: %s" filename)))
+(defun my/org-download-screenshot ()
+  "Prompt for a filename and save the clipboard image as <buffername>_<name>.png."
+  (interactive)
+  ;; (setq org-download-timestamp "")
+  (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
+         (name (read-string "Image name (without extension): "))
+         (filename (format "%s_%s.png" buffer-name-base name)))
+    (org-download-screenshot filename)
+    (message "Saved image as: %s" filename))))
 #+end_src
 
 *** Editing
@@ -670,9 +652,10 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
 
 #+begin_src emacs-lisp
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
-(setq! bibtex-completion-bibliography '("~/texmf/bibtex/bib/library.bib"))
-(setq! bibtex-completion-library-path '("/mnt/c/Users/martb/Documents/zotero-lib/"))
-(setq! citar-library-paths '("/mnt/c/Users/martb/Documents/zotero-lib/"))
+(setq! bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))
+(setq citar-bibliography '("~/zotero-lib/referenciator.bib"))
+(setq! bibtex-completion-library-path '("~/zotero-lib/referenciator.bib"))
+(setq! citar-library-paths '("~/zotero-lib/"))
 ;; (setq! citar-file-parser-functions '("/mnt/c/Users/martb/Documents/zotero-lib/"))
 #+end_src
 *** Python
