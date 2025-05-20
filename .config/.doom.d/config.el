@@ -191,9 +191,10 @@
   ;; Display
   ;; (setq org-display-remote-inline-images 'download)
   (setq org-startup-with-inline-images t)
-  (setq org-image-align 'center)
+  (setq org-image-align 'left)
   (add-hook! 'org-mode-hook #'org-modern-mode)
   (add-hook! 'org-mode-hook #'+org-pretty-mode)
+
   ;; Use a timer to ensure the file is fully loaded before previewing LaTeX
   (add-hook! 'org-mode-hook
     (run-with-timer 1 nil
@@ -219,7 +220,8 @@
   (savefold-mode 1)
 
   ;; Attach
-  ;; (setq org-attach-id-dir "img/")
+  (setq org-attach-id-dir "~/org/.attach")
+  (require 'org-download)
 )
 (use-package! org-transclusion
               :after org
@@ -246,32 +248,62 @@
     (kill-new link)
     (message "Copied: %s" link)))
 
-(use-package! org-download
-  :after org
-  :defer nil
-  :config
+;; (use-package! org-download
+;;   :after org
+;;   :defer nil
+;;   :config
 
-(setq org-download-screenshot-method "flameshot gui --raw > %s")
+;; (setq org-download-screenshot-method "flameshot gui --raw > %s")
 
-(defun my/org-download-clipboard-with-name ()
-  "Prompt for a filename and save the clipboard image as <buffername>_<name>.png."
-  (interactive)
+;; (defun my/org-download-clipboard-with-name ()
+;;   "Prompt for a filename and save the clipboard image as <buffername>_<name>.png."
+;;   (interactive)
+;;   ;; (setq org-download-timestamp "")
+;;   (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
+;;          (name (read-string "Image name (without extension): "))
+;;          (filename (format "%s_%s.png" buffer-name-base name)))
+;;     (org-download-clipboard filename)
+;;     (message "Saved image as: %s" filename)))
+
+;; (defun my/org-download-screenshot ()
+;;   "Prompt for a filename and save the clipboard image as <buffername>_<name>.png."
+;;   (interactive)
+;;   ;; (setq org-download-timestamp "")
+;;   (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
+;;          (name (read-string "Image name (without extension): "))
+;;          (filename (format "%s_%s.png" buffer-name-base name)))
+;;     (org-download-screenshot filename)
+;;     (message "Saved image as: %s" filename))))
+(after! org-download
+  ;; Fix the underscore prefix issue
+  (setq org-download-timestamp "%Y%m%d-%H%M%S")
+  (setq org-download-screenshot-method "flameshot gui --raw > %s")
   ;; (setq org-download-timestamp "")
-  (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
-         (name (read-string "Image name (without extension): "))
-         (filename (format "%s_%s.png" buffer-name-base name)))
-    (org-download-clipboard filename)
-    (message "Saved image as: %s" filename)))
 
-(defun my/org-download-screenshot ()
-  "Prompt for a filename and save the clipboard image as <buffername>_<name>.png."
-  (interactive)
-  ;; (setq org-download-timestamp "")
-  (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
-         (name (read-string "Image name (without extension): "))
-         (filename (format "%s_%s.png" buffer-name-base name)))
-    (org-download-screenshot filename)
-    (message "Saved image as: %s" filename))))
+  ;; Add a custom function to prompt for a filename
+  (defun my/org-download-screenshot ()
+    "Take a screenshot and prompt for a custom filename."
+    (interactive)
+    (let* ((custom-name (read-string "Screenshot name: ")))
+      (setq org-download-screenshot-file
+            (concat (temporary-file-directory) "_" custom-name ".png"))
+      (org-download-screenshot)))
+
+  (defun my/org-download-clipboard ()
+    "Download image from clipboard and prompt for a custom filename."
+    (interactive)
+    (let* ((custom-name (read-string "Image name: "))
+           (temp-file (make-temp-file nil))
+           (custom-fname (concat temporary-file-directory custom-name ".png"))
+           (org-download-screenshot-file custom-fname)
+           )
+      ;; Temporarily use the custom name as timestamp
+      (setq org-download-timestamp "")
+      ;; Call clipboard function
+      (call-interactively 'org-download-clipboard)
+      ;; Restore original timestamp
+      (setq org-download-timestamp "%Y%m%d_%H%M%S")
+      )))
 
 (define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
 
