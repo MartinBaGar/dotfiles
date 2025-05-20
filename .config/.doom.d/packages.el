@@ -62,3 +62,4 @@
 (package! org-transclusion)
 
 ;; (package! projectile :disable t)
+(package! go-translate)

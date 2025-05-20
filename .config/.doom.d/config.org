@@ -735,3 +735,36 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
       :desc "Open file at point in VS Code"
       "v" #'my/vscode-open-path-at-point)
 #+end_src
+
+* Language
+** Translation
+#+begin_src emacs-lisp
+(setq gt-langs '(en fr))
+
+;; This configuration means:
+;; Initialize the default translator, let it translate between en and fr via Google Translate,
+;; and the result will be displayed in the Echo Area.
+;; for text selected, not pick, render with posframe
+;; for buffer Info, translate current paragraph, render with overlay
+;; for buffer readonly, translate all fresh word in buffer, render with overlay
+;; for Magit commit buffer, insert the translated result into current position
+;; for word, translate with google engine; for non-word, use deepl
+(setq gt-default-translator
+      (gt-translator
+       :taker   (list (gt-taker :pick nil :if 'selection)
+                      (gt-taker :text 'paragraph :if '(Info-mode help-mode))
+                      (gt-taker :text 'buffer :pick 'fresh-word :if 'read-only)
+                      (gt-taker :text 'word)
+                      )
+       :engines (list (gt-google-engine :if 'word)
+                      (gt-deepl-engine :if 'no-word :key "8e5f7835-fc8c-49fa-96e9-7d6e35455a2a:fx"))
+       :render  (list
+                      ;; (gt-posframe-pop-render :if 'selection)
+                      ;; (gt-overlay-render :if 'selection :type 'replace)
+                      (gt-render :if 'selection)
+                      ;; (gt-insert-render :if (lambda (translator) (member (buffer-name) '("COMMIT_EDITMSG"))))
+                      ;; (gt-alert-render)
+                      (gt-buffer-render)
+                      ))
+      )
+#+end_src
