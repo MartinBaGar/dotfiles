@@ -720,7 +720,9 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
        :desc "Run shell command in project"   "!" #'project-shell-command
        :desc "Async shell command in project" "&" #'project-async-shell-command))
 #+end_src
+
 ** Jupyter Notebooks
+
 #+begin_src emacs-lisp
 (defun my/vscode-open-path-at-point ()
   "Open the file at point with VS Code."
@@ -737,34 +739,29 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
 #+end_src
 
 * Language
+
 ** Translation
 #+begin_src emacs-lisp
-(setq gt-langs '(en fr))
+(use-package! go-translate
+  :init
+  :config
+    (setq gt-preset-translators
+        `((en-fr . ,(gt-translator
+                    :taker (gt-taker :langs '(en fr) :text 'word)
+                    :engines (list (gt-bing-engine :if 'no-word) (gt-google-engine :if 'word))
+                    ;; :engines (list (gt-bing-engine))
+                    :render (list (gt-insert-render :type 'replace :if 'no-word) (gt-buffer-render))))
+            (fr-en . ,(gt-translator
+                    :taker (gt-taker :langs '(fr en) :text 'word)
+                    :engines (list (gt-bing-engine :if 'no-word) (gt-google-engine :if 'word))
+                    ;; :engines (list (gt-bing-engine))
+                    :render (list (gt-insert-render :type 'replace :if 'no-word) (gt-buffer-render)))))))
 
-;; This configuration means:
-;; Initialize the default translator, let it translate between en and fr via Google Translate,
-;; and the result will be displayed in the Echo Area.
-;; for text selected, not pick, render with posframe
-;; for buffer Info, translate current paragraph, render with overlay
-;; for buffer readonly, translate all fresh word in buffer, render with overlay
-;; for Magit commit buffer, insert the translated result into current position
-;; for word, translate with google engine; for non-word, use deepl
-(setq gt-default-translator
-      (gt-translator
-       :taker   (list (gt-taker :pick nil :if 'selection)
-                      (gt-taker :text 'paragraph :if '(Info-mode help-mode))
-                      (gt-taker :text 'buffer :pick 'fresh-word :if 'read-only)
-                      (gt-taker :text 'word)
-                      )
-       :engines (list (gt-google-engine :if 'word)
-                      (gt-deepl-engine :if 'no-word :key "8e5f7835-fc8c-49fa-96e9-7d6e35455a2a:fx"))
-       :render  (list
-                      ;; (gt-posframe-pop-render :if 'selection)
-                      ;; (gt-overlay-render :if 'selection :type 'replace)
-                      (gt-render :if 'selection)
-                      ;; (gt-insert-render :if (lambda (translator) (member (buffer-name) '("COMMIT_EDITMSG"))))
-                      ;; (gt-alert-render)
-                      (gt-buffer-render)
-                      ))
-      )
+(map! :leader
+    (:prefix ("t t" . "translate")
+    :desc "Translate" "t" #'gt-do-translate
+    :desc "Switch translator" "s" #'gt-switch-translator))
+
+;; Ceci est un test
+;; This is a test
 #+end_src
