@@ -666,3 +666,6 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
 
 ;; Ceci est un test
 ;; This is a test
+
+(setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
+(require 'langtool)
