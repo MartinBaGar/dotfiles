@@ -772,3 +772,121 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
 (setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
 (require 'langtool)
 #+end_src
+
+* Default-Apps
+
+#+begin_src emacs-lisp
+(defun my/xdg-open-path-at-point ()
+  "Open the file at point with xdg-open."
+  (interactive)
+  (let ((path (thing-at-point 'filename t)))
+    (if (and path (file-exists-p path))
+        (start-process "open" nil "xdg-open" (expand-file-name path))
+      (message "No valid file path at point."))))
+
+(map! :leader
+      :prefix "o"
+      :desc "Open file at point with default app"
+      "x" #'my/xdg-open-path-at-point)
+
+;; (defun x11-yank-image-at-point-as-image ()
+;;   "Yank the image at point to the X11 clipboard as image/png."
+;;   (interactive)
+;;   (let ((image (get-text-property (point) 'display)))
+;;     (if (eq (car image) 'image)
+;;         (let ((data (plist-get (cdr image) ':data))
+;;               (file (plist-get (cdr image) ':file)))
+;;           (cond (data
+;;                  (with-temp-buffer
+;;                    (insert data)
+;;                    (call-shell-region
+;;                     (point-min) (point-max)
+;;                     "xclip -i -selection clipboard -t image/png")))
+;;                 (file
+;;                  (if (file-exists-p file)
+;;                      (start-process
+;;                       "xclip-proc" nil "xclip"
+;;                       "-i" "-selection" "clipboard" "-t" "image/png"
+;;                       "-quiet" (file-truename file))))
+;;                 (t
+;;                  (message "The image seems to be malformed."))))
+;;       (message "Point is not at an image."))))
+
+;; (defun org-attach-copy-image-to-clipboard ()
+;;   "Copy an image from the current entry's attachments to clipboard as image/png.
+;; Prompts for the image file if not on an image link."
+;;   (interactive)
+;;   (let* ((attach-dir (org-attach-dir))
+;;          (file (cond
+;;                 ((org-element-type-p (org-element-context) 'link)
+;;                  (org-element-property :path (org-element-context)))
+;;                 (t
+;;                  (completing-read "Select image: "
+;;                                   (org-attach-file-list attach-dir)
+;;                                   nil t))))
+;;          (full-path (expand-file-name file attach-dir)))
+
+;;     (unless attach-dir
+;;       (user-error "No attachment directory for current entry"))
+;;     (unless (file-exists-p full-path)
+;;       (user-error "File %s not found in attachment directory" file))
+
+;;     (if (and (executable-find "xclip")
+;;              (image-type-from-file-name full-path))
+;;         (progn
+;;           (start-process "xclip-proc" nil "xclip"
+;;                          "-i" "-selection" "clipboard" "-t" "image/png"
+;;                          "-quiet" (file-truename full-path))
+;;           (message "Image %s copied to clipboard as PNG" file))
+;;       (user-error "Either xclip is not available or not a recognized image file"))))
+
+(defun copy-image-to-x11-clipboard (&optional force-prompt)
+  "Copy an image to the X11 clipboard as image/png.
+If FORCE-PROMPT is non-nil or point is not on an image, prompt for a file in the current org entry's attachment directory."
+  (interactive "P")
+  (let ((image (get-text-property (point) 'display))
+        (xclip (executable-find "xclip")))
+
+    (unless xclip
+      (user-error "xclip is not available"))
+
+    (cond
+     ((and (not force-prompt) (eq (car image) 'image))
+      (let ((data (plist-get (cdr image) ':data))
+            (file (plist-get (cdr image) ':file)))
+        (cond
+         (data
+          (with-temp-buffer
+            (insert data)
+            (call-shell-region
+             (point-min) (point-max)
+             "xclip -i -selection clipboard -t image/png")))
+         ((and file (file-exists-p file))
+          (start-process "xclip-proc" nil "xclip"
+                         "-i" "-selection" "clipboard" "-t" "image/png"
+                         "-quiet" (file-truename file)))
+         (t
+          (message "The image seems to be malformed.")))))
+
+     (t
+      (let* ((attach-dir (org-attach-dir))
+             (file (cond
+                    ((org-element-type-p (org-element-context) 'link)
+                     (org-element-property :path (org-element-context)))
+                    (t
+                     (completing-read "Select image: "
+                                      (org-attach-file-list attach-dir)
+                                      nil t))))
+             (full-path (expand-file-name file attach-dir)))
+        (unless attach-dir
+          (user-error "No attachment directory for current entry"))
+        (unless (file-exists-p full-path)
+          (user-error "File %s not found in attachment directory" file))
+        (unless (image-type-from-file-name full-path)
+          (user-error "File %s is not a recognized image file" file))
+        (start-process "xclip-proc" nil "xclip"
+                       "-i" "-selection" "clipboard" "-t" "image/png"
+                       "-quiet" (file-truename full-path))
+        (message "Image %s copied to clipboard as PNG" file))))))
+
+#+end_src
