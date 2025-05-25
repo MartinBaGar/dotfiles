@@ -162,7 +162,9 @@ Add this line to your configuration file and restart Emacs for the changes to ta
 
 *** Theme & Fonts
 #+begin_src emacs-lisp
-(setq doom-theme 'doom-gruvbox)
+;; (setq doom-theme 'doom-gruvbox)
+(setq doom-theme 'doom-feather-dark)
+
 (setq doom-font (font-spec
                  :family "DejaVu Sans Mono"
                  :size 18))
@@ -200,8 +202,8 @@ Add this line to your configuration file and restart Emacs for the changes to ta
 *** Lines
 Enable relative line numbers and make their slant normal (not italic).
 #+begin_src emacs-lisp
-(setq global-display-line-numbers-mode nil)
-;; (setq display-line-numbers-type 'relative) ;; TODO change to 'visual in org-mode
+(setq display-line-numbers nil)
+(setq display-line-numbers-type nil) ;; TODO change to 'visual in org-mode
 #+end_src
 
 Disable highlighting of the current line.
@@ -789,104 +791,105 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
       :desc "Open file at point with default app"
       "x" #'my/xdg-open-path-at-point)
 
-;; (defun x11-yank-image-at-point-as-image ()
-;;   "Yank the image at point to the X11 clipboard as image/png."
-;;   (interactive)
-;;   (let ((image (get-text-property (point) 'display)))
-;;     (if (eq (car image) 'image)
-;;         (let ((data (plist-get (cdr image) ':data))
-;;               (file (plist-get (cdr image) ':file)))
-;;           (cond (data
-;;                  (with-temp-buffer
-;;                    (insert data)
-;;                    (call-shell-region
-;;                     (point-min) (point-max)
-;;                     "xclip -i -selection clipboard -t image/png")))
-;;                 (file
-;;                  (if (file-exists-p file)
-;;                      (start-process
-;;                       "xclip-proc" nil "xclip"
-;;                       "-i" "-selection" "clipboard" "-t" "image/png"
-;;                       "-quiet" (file-truename file))))
-;;                 (t
-;;                  (message "The image seems to be malformed."))))
-;;       (message "Point is not at an image."))))
-
-;; (defun org-attach-copy-image-to-clipboard ()
-;;   "Copy an image from the current entry's attachments to clipboard as image/png.
-;; Prompts for the image file if not on an image link."
-;;   (interactive)
-;;   (let* ((attach-dir (org-attach-dir))
-;;          (file (cond
-;;                 ((org-element-type-p (org-element-context) 'link)
-;;                  (org-element-property :path (org-element-context)))
-;;                 (t
-;;                  (completing-read "Select image: "
-;;                                   (org-attach-file-list attach-dir)
-;;                                   nil t))))
-;;          (full-path (expand-file-name file attach-dir)))
-
-;;     (unless attach-dir
-;;       (user-error "No attachment directory for current entry"))
-;;     (unless (file-exists-p full-path)
-;;       (user-error "File %s not found in attachment directory" file))
-
-;;     (if (and (executable-find "xclip")
-;;              (image-type-from-file-name full-path))
-;;         (progn
-;;           (start-process "xclip-proc" nil "xclip"
-;;                          "-i" "-selection" "clipboard" "-t" "image/png"
-;;                          "-quiet" (file-truename full-path))
-;;           (message "Image %s copied to clipboard as PNG" file))
-;;       (user-error "Either xclip is not available or not a recognized image file"))))
-
-(defun copy-image-to-x11-clipboard (&optional force-prompt)
-  "Copy an image to the X11 clipboard as image/png.
-If FORCE-PROMPT is non-nil or point is not on an image, prompt for a file in the current org entry's attachment directory."
+(defun copy-image-to-system-clipboard (&optional force-prompt)
+  "Copy an image to the clipboard as image/png.
+- On Linux: uses `xclip`.
+- On WSL2 or Windows: uses `powershell.exe` to call .NET Clipboard APIs.
+If FORCE-PROMPT is non-nil, always prompt for image file."
   (interactive "P")
-  (let ((image (get-text-property (point) 'display))
-        (xclip (executable-find "xclip")))
+  (let* ((image (get-text-property (point) 'display))
+         (file
+          (cond
+           ;; Inline image at point (check for both :file and :data)
+           ((and (not force-prompt) (eq (car-safe image) 'image))
+            (let ((image-data (plist-get (cdr image) ':data))
+                  (image-file (plist-get (cdr image) ':file)))
+              (cond
+               ;; Handle inline image data
+               (image-data
+                (cons 'data image-data))
+               ;; Handle image file
+               (image-file
+                image-file)
+               (t nil))))
+           ;; Check if point is on a link to an image file
+           ((and (not force-prompt)
+                 (org-element-type-p (org-element-context) 'link))
+            (let ((link-path (org-element-property :path (org-element-context)))
+                  (attach-dir (org-attach-dir)))
+              (when (and link-path attach-dir)
+                (let ((full-path (expand-file-name link-path attach-dir)))
+                  (when (and (file-exists-p full-path)
+                            (image-type-from-file-name full-path))
+                    full-path)))))
+           ;; Prompted file from org-attach
+           (t
+            (let* ((attach-dir (or (org-attach-dir) (user-error "No attachment directory")))
+                   (selection (completing-read "Select image: " (org-attach-file-list attach-dir) nil t)))
+              (expand-file-name selection attach-dir)))))
+         (truename (and (stringp file) (file-truename file))))
 
-    (unless xclip
-      (user-error "xclip is not available"))
+    ;; Handle inline image data case
+    (when (and (consp file) (eq (car file) 'data))
+      (cond
+       ;; WSL2 or Windows - need to save data to temp file first
+       ((or (eq system-type 'windows-nt)
+            (and (eq system-type 'gnu/linux)
+                 (string-match "Microsoft" (shell-command-to-string "uname -r"))))
+        (let ((temp-file (make-temp-file "emacs-image-" nil ".png")))
+          (with-temp-buffer
+            (insert (cdr file))
+            (write-region (point-min) (point-max) temp-file))
+          (let ((win-path
+                 (replace-regexp-in-string
+                  "/" "\\\\"
+                  (replace-regexp-in-string "^/mnt/\\([a-z]\\)/"
+                                            (lambda (m) (concat (upcase (match-string 1 m)) ":\\\\"))
+                                            (file-truename temp-file) t t))))
+            (start-process "powershell-copy-image" nil "powershell.exe" "-Command"
+                           (concat "[System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') | Out-Null; "
+                                   "[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null; "
+                                   "[System.Windows.Forms.Clipboard]::SetImage([System.Drawing.Image]::FromFile('"
+                                   win-path "'))"))
+            (message "Copied inline image data to Windows clipboard"))))
+       ;; Linux (X11) - can pipe data directly
+       ((executable-find "xclip")
+        (with-temp-buffer
+          (insert (cdr file))
+          (call-shell-region
+           (point-min) (point-max)
+           "xclip -i -selection clipboard -t image/png"))
+        (message "Copied inline image data to X11 clipboard"))
+       (t
+        (user-error "No supported clipboard mechanism found on this platform")))
+      (return))
+
+    ;; Handle file-based images
+    (unless (and truename (file-exists-p truename))
+      (user-error "Image file not found: %s" (or truename file)))
 
     (cond
-     ((and (not force-prompt) (eq (car image) 'image))
-      (let ((data (plist-get (cdr image) ':data))
-            (file (plist-get (cdr image) ':file)))
-        (cond
-         (data
-          (with-temp-buffer
-            (insert data)
-            (call-shell-region
-             (point-min) (point-max)
-             "xclip -i -selection clipboard -t image/png")))
-         ((and file (file-exists-p file))
-          (start-process "xclip-proc" nil "xclip"
-                         "-i" "-selection" "clipboard" "-t" "image/png"
-                         "-quiet" (file-truename file)))
-         (t
-          (message "The image seems to be malformed.")))))
-
+     ;; WSL2 or Windows
+     ((or (eq system-type 'windows-nt)
+          (and (eq system-type 'gnu/linux)
+               (string-match "Microsoft" (shell-command-to-string "uname -r"))))
+      (let ((win-path
+             ;; Convert /mnt/c/... to C:\\... for PowerShell
+             (replace-regexp-in-string
+              "/" "\\\\"
+              (replace-regexp-in-string "^/mnt/\\([a-z]\\)/"
+                                        (lambda (m) (concat (upcase (match-string 1 m)) ":\\\\")) truename t t))))
+        (start-process "powershell-copy-image" nil "powershell.exe" "-Command"
+                       (concat "[System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') | Out-Null; "
+                               "[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null; "
+                               "[System.Windows.Forms.Clipboard]::SetImage([System.Drawing.Image]::FromFile('"
+                               win-path "'))"))
+        (message "Copied image to Windows clipboard: %s" win-path)))
+     ;; Linux (X11)
+     ((executable-find "xclip")
+      (start-process "xclip-proc" nil "xclip"
+                     "-i" "-selection" "clipboard" "-t" "image/png" "-quiet" truename)
+      (message "Copied image to X11 clipboard: %s" truename))
      (t
-      (let* ((attach-dir (org-attach-dir))
-             (file (cond
-                    ((org-element-type-p (org-element-context) 'link)
-                     (org-element-property :path (org-element-context)))
-                    (t
-                     (completing-read "Select image: "
-                                      (org-attach-file-list attach-dir)
-                                      nil t))))
-             (full-path (expand-file-name file attach-dir)))
-        (unless attach-dir
-          (user-error "No attachment directory for current entry"))
-        (unless (file-exists-p full-path)
-          (user-error "File %s not found in attachment directory" file))
-        (unless (image-type-from-file-name full-path)
-          (user-error "File %s is not a recognized image file" file))
-        (start-process "xclip-proc" nil "xclip"
-                       "-i" "-selection" "clipboard" "-t" "image/png"
-                       "-quiet" (file-truename full-path))
-        (message "Image %s copied to clipboard as PNG" file))))))
-
+      (user-error "No supported clipboard mechanism found on this platform")))))
 #+end_src
