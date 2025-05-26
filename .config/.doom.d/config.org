@@ -172,6 +172,8 @@ Add this line to your configuration file and restart Emacs for the changes to ta
 (custom-set-faces
  '(bold ((t (:weight extra-bold :height 1.0))))
  '(italic ((t (:slant italic :weight normal :height 1.0)))))
+
+(setq indicate-empty-lines nil)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -214,7 +216,7 @@ Disable highlighting of the current line.
 Display a fill indicator at 80 characters in =prog-mode=.
 #+begin_src emacs-lisp
 (setq display-fill-column-indicator-column 80)
-(add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
+;; (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
 #+end_src
 
 Smooth scrolling.

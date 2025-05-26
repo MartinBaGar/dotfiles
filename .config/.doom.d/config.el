@@ -149,6 +149,8 @@
  '(bold ((t (:weight extra-bold :height 1.0))))
  '(italic ((t (:slant italic :weight normal :height 1.0)))))
 
+(setq indicate-empty-lines nil)
+
 (defvar current-monitor-name nil)
 
 (defun my/check-monitor-change (&rest _)
@@ -178,7 +180,7 @@
 (setq global-hl-line-modes nil)
 
 (setq display-fill-column-indicator-column 80)
-(add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
+;; (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
 
 ;; Run (package-vc-install '(ultra-scroll :vc-backend Git :url "https://github.com/jdtsmith/ultra-scroll")) in scratch buffer.
 ;; (use-package! ultra-scroll
