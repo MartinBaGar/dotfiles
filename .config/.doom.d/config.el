@@ -139,7 +139,8 @@
 (setq doom-modeline-project-name t)
 
 ;; (setq doom-theme 'doom-gruvbox)
-(setq doom-theme 'doom-feather-dark)
+;; (setq doom-theme 'doom-feather-dark)
+(setq doom-theme 'doom-oksolar-white)
 
 (setq doom-font (font-spec
                  :family "DejaVu Sans Mono"

@@ -163,7 +163,8 @@ Add this line to your configuration file and restart Emacs for the changes to ta
 *** Theme & Fonts
 #+begin_src emacs-lisp
 ;; (setq doom-theme 'doom-gruvbox)
-(setq doom-theme 'doom-feather-dark)
+;; (setq doom-theme 'doom-feather-dark)
+(setq doom-theme 'doom-oksolar-white)
 
 (setq doom-font (font-spec
                  :family "DejaVu Sans Mono"
