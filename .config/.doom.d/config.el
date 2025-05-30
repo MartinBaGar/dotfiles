@@ -140,7 +140,7 @@
 
 ;; (setq doom-theme 'doom-gruvbox)
 ;; (setq doom-theme 'doom-feather-dark)
-(setq doom-theme 'doom-oksolar-white)
+(setq doom-theme 'doom-oksolar-light)
 
 (setq doom-font (font-spec
                  :family "DejaVu Sans Mono"
