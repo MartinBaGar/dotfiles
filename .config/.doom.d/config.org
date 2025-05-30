@@ -93,8 +93,6 @@
 ;;   (define-key org-mode-map (kbd "TAB") #'my/org-tab-handler))
 #+end_src
 
-Add this line to your configuration file and restart Emacs for the changes to take effect.#+end_src
-
 *** Spell checking with selection menu
 
 #+begin_src emacs-lisp
@@ -164,7 +162,7 @@ Add this line to your configuration file and restart Emacs for the changes to ta
 #+begin_src emacs-lisp
 ;; (setq doom-theme 'doom-gruvbox)
 ;; (setq doom-theme 'doom-feather-dark)
-(setq doom-theme 'doom-oksolar-white)
+(setq doom-theme 'doom-oksolar-light)
 
 (setq doom-font (font-spec
                  :family "DejaVu Sans Mono"
