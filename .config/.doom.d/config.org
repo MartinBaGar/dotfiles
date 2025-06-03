@@ -40,6 +40,7 @@
               100 t)))
 
 (add-hook! 'LaTeX-mode-hook
+  (outline-minor-mode)
   (defun +corfu-add-cape-tex-h ()
     ;; Preserve existing completion-at-point-functions
     (let ((cape-dict-func (lambda ()
@@ -49,6 +50,21 @@
       ;; Add cape-dict and cape-tex preserving previous functions
       (add-hook 'completion-at-point-functions cape-dict-func 100 t)
       (add-hook 'completion-at-point-functions cape-tex-func -30 t))))
+
+;; (add-hook! 'LaTeX-mode-hook
+;;   (outline-minor-mode)
+;;   (defun +corfu-add-cape-tex-h ()
+;;     ;; Use cape-capf-super for better integration
+;;     (add-to-list 'completion-at-point-functions #'cape-dict t)
+;;     (add-to-list 'completion-at-point-functions #'cape-tex t)))
+
+;; (add-hook! 'LaTeX-mode-hook
+;;   (outline-minor-mode)
+;;   (defun +corfu-add-cape-tex-h ()
+;;     (setq-local completion-at-point-functions
+;;                 (append (list (cape-capf-super #'cape-dict))
+;;                         completion-at-point-functions
+;;                         (list #'cape-tex)))))
 
 ;; https://github.com/joaotavora/yasnippet/issues/998
 (defun my-yas-try-expanding-auto-snippets ()
