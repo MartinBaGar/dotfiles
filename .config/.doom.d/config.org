@@ -379,7 +379,7 @@ Start emacs in a full window.
 (define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
 #+end_src
 
-*** Vterm
+*** Shell Vterm
 
 #+begin_src emacs-lisp
 (after! vterm
@@ -450,6 +450,8 @@ Returns the vterm buffer."
 (map! :leader
       (:prefix-map ("d" . "dired")
         :desc "Dired vterm-cwd in new win" "v" #'vterm-dired-other-window))
+
+(setq shell-command-switch "-ic")
 #+end_src
 
 *** Latex 
