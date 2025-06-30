@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: hyperref
+# uuid: href
+# key: href
+# --
+${3:\href{$1}}{$2 \ref{${1:label}}}$0

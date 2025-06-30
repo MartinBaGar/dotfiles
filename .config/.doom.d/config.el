@@ -397,7 +397,7 @@ Returns the vterm buffer."
       (:prefix-map ("d" . "dired")
         :desc "Dired vterm-cwd in new win" "v" #'vterm-dired-other-window))
 
-(setq shell-command-switch "-ic")
+;; (setq shell-command-switch "-ic")
 
 (after! latex
   (setq +latex-viewers '(pdf-tools))

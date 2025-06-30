@@ -11,7 +11,10 @@
    '("/data/bari-garnier/endoU" "/home/bari-garnier/Documents/papiers"))
  '(org-agenda-files
    '("/home/bari-garnier/org/todo.org" "/home/mabagar/org/todo.org"))
- '(safe-local-variable-values '((cape-dict-file . "/usr/share/dict/words"))))
+ '(package-selected-packages '(eglot))
+ '(safe-local-variable-values
+   '((ispell-dictionary . "en_US") (cape-dict-file . /usr/share/dict/words)
+     (ispell-dictionary . en_US) (cape-dict-file . "/usr/share/dict/words"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
