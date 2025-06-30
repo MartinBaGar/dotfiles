@@ -3,6 +3,25 @@
 
 * General Settings
 
+** Editor
+
+#+begin_src emacs-lisp
+;; credentials
+(setq user-full-name "Martin Bari Garnier"
+      user-mail-address "martbari.g@gmail.com")
+
+;; autosave and backup
+(setq auto-save-default t
+      make-backup-files t)
+
+(setq doom-modeline-project-name t)
+(setq-default tab-width 4)
+(define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
+
+(after! evil-escape
+  (setq evil-escape-key-sequence "fd"))
+#+end_src
+
 ** Completion
 
 #+begin_src emacs-lisp
@@ -157,20 +176,6 @@
         )))
 #+end_src
 
-* Keybindings
-
-*** Basic
-#+begin_src emacs-lisp
-;; credentials
-(setq user-full-name "Martin Bari Garnier"
-      user-mail-address "martbari.g@gmail.com")
-
-;; autosave and backup
-(setq auto-save-default t
-      make-backup-files t)
-
-(setq doom-modeline-project-name t)
-#+end_src
 
 * Visual Enhancements
 
@@ -230,18 +235,8 @@ Disable highlighting of the current line.
 
 Display a fill indicator at 80 characters in =prog-mode=.
 #+begin_src emacs-lisp
-(setq display-fill-column-indicator-column 80)
+;; (setq display-fill-column-indicator-column 80)
 ;; (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
-#+end_src
-
-Smooth scrolling.
-#+begin_src emacs-lisp
-;; Run (package-vc-install '(ultra-scroll :vc-backend Git :url "https://github.com/jdtsmith/ultra-scroll")) in scratch buffer.
-;; (use-package! ultra-scroll
-;;   :init
-;;   (setq scroll-conservatively 101 ; important! ;;         scroll-margin 0)
-;;   :config
-;;   (ultra-scroll-mode 1))
 #+end_src
 
 *** Window
@@ -257,7 +252,7 @@ Start emacs in a full window.
 (after! org
   ;; Display
   ;; (setq org-display-remote-inline-images 'download)
-  (setq org-startup-with-inline-images t)
+  (setq org-startup-with-inline-images nil)
   (setq org-image-align 'left)
   (add-hook! 'org-mode-hook #'org-modern-mode)
   (add-hook! 'org-mode-hook #'+org-pretty-mode)
@@ -379,7 +374,7 @@ Start emacs in a full window.
 (define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
 #+end_src
 
-*** Shell Vterm
+*** Vterm
 
 #+begin_src emacs-lisp
 (after! vterm
@@ -742,7 +737,56 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
        :desc "Async shell command in project" "&" #'project-async-shell-command))
 #+end_src
 
-** Jupyter Notebooks
+* Language
+
+** Translation
+#+begin_src emacs-lisp
+;; (use-package! go-translate
+;;   :init
+;;   :config
+;;     (setq gt-preset-translators
+;;         `((en-fr . ,(gt-translator
+;;                     :taker (gt-taker :langs '(en fr) :text 'word)
+;;                     :engines (list (gt-bing-engine :if 'no-word) (gt-google-engine :if 'word))
+;;                     ;; :engines (list (gt-bing-engine))
+;;                     :render (list (gt-insert-render :type 'replace :if 'no-word) (gt-buffer-render))))
+;;             (fr-en . ,(gt-translator
+;;                     :taker (gt-taker :langs '(fr en) :text 'word)
+;;                     :engines (list (gt-bing-engine :if 'no-word) (gt-google-engine :if 'word))
+;;                     ;; :engines (list (gt-bing-engine))
+;;                     :render (list (gt-insert-render :type 'replace :if 'no-word) (gt-buffer-render)))))))
+
+;; (map! :leader
+;;     (:prefix ("t t" . "translate")
+;;     :desc "Translate" "t" #'gt-do-translate
+;;     :desc "Switch translator" "s" #'gt-switch-translator))
+
+  (use-package! go-translate
+    :config
+  (setq gt-default-translator
+        (gt-translator
+         :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
+         :engines (list
+                   (gt-google-engine :if 'word)
+                   (gt-deepl-engine :if 'not-word))
+         :render (list (gt-buffer-render :if 'word) (gt-insert-render :type 'replace)))))
+
+(map! :leader
+    (:prefix ("t t" . "translate")
+    :desc "Translate" "t" #'gt-do-translate))
+
+;; Il s'agit d'un test.
+;; This is a test.
+#+end_src
+
+** Grammar
+
+#+begin_src emacs-lisp
+(setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
+(require 'langtool)
+#+end_src
+
+* Default-Apps
 
 #+begin_src emacs-lisp
 (defun my/vscode-open-path-at-point ()
@@ -757,46 +801,7 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
       :prefix "o"
       :desc "Open file at point in VS Code"
       "v" #'my/vscode-open-path-at-point)
-#+end_src
 
-* Language
-
-** Translation
-#+begin_src emacs-lisp
-(use-package! go-translate
-  :init
-  :config
-    (setq gt-preset-translators
-        `((en-fr . ,(gt-translator
-                    :taker (gt-taker :langs '(en fr) :text 'word)
-                    :engines (list (gt-bing-engine :if 'no-word) (gt-google-engine :if 'word))
-                    ;; :engines (list (gt-bing-engine))
-                    :render (list (gt-insert-render :type 'replace :if 'no-word) (gt-buffer-render))))
-            (fr-en . ,(gt-translator
-                    :taker (gt-taker :langs '(fr en) :text 'word)
-                    :engines (list (gt-bing-engine :if 'no-word) (gt-google-engine :if 'word))
-                    ;; :engines (list (gt-bing-engine))
-                    :render (list (gt-insert-render :type 'replace :if 'no-word) (gt-buffer-render)))))))
-
-(map! :leader
-    (:prefix ("t t" . "translate")
-    :desc "Translate" "t" #'gt-do-translate
-    :desc "Switch translator" "s" #'gt-switch-translator))
-
-;; Ceci est un test
-;; This is a test
-#+end_src
-
-** Grammar
-
-#+begin_src emacs-lisp
-(setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
-(require 'langtool)
-#+end_src
-
-* Default-Apps
-
-#+begin_src emacs-lisp
 (defun my/xdg-open-path-at-point ()
   "Open the file at point with xdg-open."
   (interactive)
