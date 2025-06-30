@@ -1,3 +1,18 @@
+;; credentials
+(setq user-full-name "Martin Bari Garnier"
+      user-mail-address "martbari.g@gmail.com")
+
+;; autosave and backup
+(setq auto-save-default t
+      make-backup-files t)
+
+(setq doom-modeline-project-name t)
+(setq-default tab-width 4)
+(define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
+
+(after! evil-escape
+  (setq evil-escape-key-sequence "fd"))
+
 (setq text-mode-ispell-word-completion nil)
 
 (after! cape
@@ -144,16 +159,6 @@
         :desc "Toggle spell check" "s" #'flyspell-mode
         )))
 
-;; credentials
-(setq user-full-name "Martin Bari Garnier"
-      user-mail-address "martbari.g@gmail.com")
-
-;; autosave and backup
-(setq auto-save-default t
-      make-backup-files t)
-
-(setq doom-modeline-project-name t)
-
 ;; (setq doom-theme 'doom-gruvbox)
 ;; (setq doom-theme 'doom-feather-dark)
 (setq doom-theme 'doom-oksolar-light)
@@ -196,22 +201,15 @@
 
 (setq global-hl-line-modes nil)
 
-(setq display-fill-column-indicator-column 80)
+;; (setq display-fill-column-indicator-column 80)
 ;; (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
-
-;; Run (package-vc-install '(ultra-scroll :vc-backend Git :url "https://github.com/jdtsmith/ultra-scroll")) in scratch buffer.
-;; (use-package! ultra-scroll
-;;   :init
-;;   (setq scroll-conservatively 101 ; important! ;;         scroll-margin 0)
-;;   :config
-;;   (ultra-scroll-mode 1))
 
 ;; (add-hook 'window-setup-hook #'toggle-frame-maximized)
 
 (after! org
   ;; Display
   ;; (setq org-display-remote-inline-images 'download)
-  (setq org-startup-with-inline-images t)
+  (setq org-startup-with-inline-images nil)
   (setq org-image-align 'left)
   (add-hook! 'org-mode-hook #'org-modern-mode)
   (add-hook! 'org-mode-hook #'+org-pretty-mode)
@@ -325,8 +323,6 @@
       ;; Restore original timestamp
       (setq org-download-timestamp "%Y%m%d_%H%M%S")
       )))
-
-(define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
 
 (after! vterm
   (set-popup-rule! "*doom:vterm-popup-vertical:*" :size 0.25 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
@@ -652,6 +648,46 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
        :desc "Run shell command in project"   "!" #'project-shell-command
        :desc "Async shell command in project" "&" #'project-async-shell-command))
 
+;; (use-package! go-translate
+;;   :init
+;;   :config
+;;     (setq gt-preset-translators
+;;         `((en-fr . ,(gt-translator
+;;                     :taker (gt-taker :langs '(en fr) :text 'word)
+;;                     :engines (list (gt-bing-engine :if 'no-word) (gt-google-engine :if 'word))
+;;                     ;; :engines (list (gt-bing-engine))
+;;                     :render (list (gt-insert-render :type 'replace :if 'no-word) (gt-buffer-render))))
+;;             (fr-en . ,(gt-translator
+;;                     :taker (gt-taker :langs '(fr en) :text 'word)
+;;                     :engines (list (gt-bing-engine :if 'no-word) (gt-google-engine :if 'word))
+;;                     ;; :engines (list (gt-bing-engine))
+;;                     :render (list (gt-insert-render :type 'replace :if 'no-word) (gt-buffer-render)))))))
+
+;; (map! :leader
+;;     (:prefix ("t t" . "translate")
+;;     :desc "Translate" "t" #'gt-do-translate
+;;     :desc "Switch translator" "s" #'gt-switch-translator))
+
+  (use-package! go-translate
+    :config
+  (setq gt-default-translator
+        (gt-translator
+         :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
+         :engines (list
+                   (gt-google-engine :if 'word)
+                   (gt-deepl-engine :if 'not-word))
+         :render (list (gt-buffer-render :if 'word) (gt-insert-render :type 'replace)))))
+
+(map! :leader
+    (:prefix ("t t" . "translate")
+    :desc "Translate" "t" #'gt-do-translate))
+
+;; Il s'agit d'un test.
+;; This is a test.
+
+(setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
+(require 'langtool)
+
 (defun my/vscode-open-path-at-point ()
   "Open the file at point with VS Code."
   (interactive)
@@ -664,32 +700,6 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
       :prefix "o"
       :desc "Open file at point in VS Code"
       "v" #'my/vscode-open-path-at-point)
-
-(use-package! go-translate
-  :init
-  :config
-    (setq gt-preset-translators
-        `((en-fr . ,(gt-translator
-                    :taker (gt-taker :langs '(en fr) :text 'word)
-                    :engines (list (gt-bing-engine :if 'no-word) (gt-google-engine :if 'word))
-                    ;; :engines (list (gt-bing-engine))
-                    :render (list (gt-insert-render :type 'replace :if 'no-word) (gt-buffer-render))))
-            (fr-en . ,(gt-translator
-                    :taker (gt-taker :langs '(fr en) :text 'word)
-                    :engines (list (gt-bing-engine :if 'no-word) (gt-google-engine :if 'word))
-                    ;; :engines (list (gt-bing-engine))
-                    :render (list (gt-insert-render :type 'replace :if 'no-word) (gt-buffer-render)))))))
-
-(map! :leader
-    (:prefix ("t t" . "translate")
-    :desc "Translate" "t" #'gt-do-translate
-    :desc "Switch translator" "s" #'gt-switch-translator))
-
-;; Ceci est un test
-;; This is a test
-
-(setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
-(require 'langtool)
 
 (defun my/xdg-open-path-at-point ()
   "Open the file at point with xdg-open."

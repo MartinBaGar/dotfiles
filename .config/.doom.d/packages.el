@@ -63,3 +63,5 @@
 
 ;; (package! projectile :disable t)
 (package! go-translate)
+
+(package! quarto-mode :recipe (:host github :repo "quarto-dev/quarto-emacs"))
