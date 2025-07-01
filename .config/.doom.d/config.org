@@ -917,3 +917,15 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
      (t
       (user-error "No supported clipboard mechanism found on this platform")))))
 #+end_src
+* Third party apps
+** Blender
+#+begin_src emacs-lisp
+(use-package blender
+  :defer t
+  :commands (blender-mode blender-start blender-run-current-buffer)
+  :init
+  :custom
+  (blender-executable "/mnt/c/Program Files/Blender Foundation/Blender 4.4/blender.exe")
+  (blender-addon-directory "C:/Users/martb/Documents/Blender/my_addons")
+  )
+#+end_src

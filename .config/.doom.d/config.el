@@ -324,6 +324,8 @@
       (setq org-download-timestamp "%Y%m%d_%H%M%S")
       )))
 
+(define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
+
 (after! vterm
   (set-popup-rule! "*doom:vterm-popup-vertical:*" :size 0.25 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
   (setq vterm-shell "/usr/bin/zsh")
@@ -817,3 +819,12 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
       (message "Copied image to X11 clipboard: %s" truename))
      (t
       (user-error "No supported clipboard mechanism found on this platform")))))
+
+(use-package blender
+  :defer t
+  :commands (blender-mode blender-start blender-run-current-buffer)
+  :init
+  :custom
+  (blender-executable "/mnt/c/Program Files/Blender Foundation/Blender 4.4/blender.exe")
+  (blender-addon-directory "C:/Users/martb/Documents/Blender/my_addons")
+  )

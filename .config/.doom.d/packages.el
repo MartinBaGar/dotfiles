@@ -65,3 +65,4 @@
 (package! go-translate)
 
 (package! quarto-mode :recipe (:host github :repo "quarto-dev/quarto-emacs"))
+(package! blender :recipe (:host github :repo "MartinBaGar/blender.el"))
