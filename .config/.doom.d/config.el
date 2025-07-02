@@ -629,6 +629,24 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
 (setq-hook! 'python-mode-hook +format-with '(isort black))
    ;; (setq-hook! 'python-mode-hook +format-with 'black)
 
+;; The proper Doom way
+(setq-hook! 'markdown-mode-hook
+  markdown-hide-markup t
+  markdown-fontify-code-blocks-natively t
+  markdown-hide-urls t
+  markdown-italic-underscore t
+  markdown-asymmetric-header t
+  markdown-gfm-additional-languages '("sh" "json" "elisp"))
+
+(custom-set-faces!
+'(markdown-header-delimiter-face :foreground "#616161" :height 0.9)
+'(markdown-header-face-1 :height 1.8 :foreground "#A3BE8C" :weight extra-bold :inherit markdown-header-face)
+'(markdown-header-face-2 :height 1.4 :foreground "#EBCB8B" :weight extra-bold :inherit markdown-header-face)
+'(markdown-header-face-3 :height 1.2 :foreground "#D08770" :weight extra-bold :inherit markdown-header-face)
+'(markdown-header-face-4 :height 1.15 :foreground "#BF616A" :weight bold :inherit markdown-header-face)
+'(markdown-header-face-5 :height 1.1 :foreground "#b48ead" :weight bold :inherit markdown-header-face)
+'(markdown-header-face-6 :height 1.05 :foreground "#5e81ac" :weight semi-bold :inherit markdown-header-face))
+
 (map! :leader
       (:prefix ("p" . "project.el") ; Use a different prefix like "P" instead of "p"
        :desc "Find file in project"           "f" #'project-find-file
