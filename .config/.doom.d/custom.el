@@ -13,7 +13,8 @@
    '("/home/bari-garnier/org/todo.org" "/home/mabagar/org/todo.org"))
  '(package-selected-packages '(eglot))
  '(safe-local-variable-values
-   '((ispell-dictionary . "en_US") (cape-dict-file . /usr/share/dict/words)
+   '((cape-dict-file . "/usr/share/dict/american-english")
+     (ispell-dictionary . "en_US") (cape-dict-file . /usr/share/dict/words)
      (ispell-dictionary . en_US) (cape-dict-file . "/usr/share/dict/words"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

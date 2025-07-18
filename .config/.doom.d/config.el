@@ -13,6 +13,44 @@
 (after! evil-escape
   (setq evil-escape-key-sequence "fd"))
 
+(after! ibuffer
+  (defvar-local my/ibuffer-auto-preview-mode nil
+    "Whether auto-preview is enabled in this ibuffer.")
+
+  (defun my/ibuffer-consistent-preview ()
+    "Preview buffer with consistent window behavior."
+    (when (and my/ibuffer-auto-preview-mode
+               (eq major-mode 'ibuffer-mode))
+      (let ((buffer (ibuffer-current-buffer)))
+        (when buffer
+          (display-buffer buffer
+                          '(display-buffer-in-side-window
+                            (side . right)
+                            (window-width . 0.5)))))))
+
+  (defun my/ibuffer-toggle-auto-preview ()
+    "Toggle auto-preview mode in ibuffer."
+    (interactive)
+    (setq my/ibuffer-auto-preview-mode (not my/ibuffer-auto-preview-mode))
+    (if my/ibuffer-auto-preview-mode
+        (progn
+          (add-hook 'post-command-hook 'my/ibuffer-consistent-preview nil t)
+          (message "ibuffer auto-preview enabled"))
+      (progn
+        (remove-hook 'post-command-hook 'my/ibuffer-consistent-preview t)
+        (message "ibuffer auto-preview disabled"))))
+
+  ;; Manual preview (always available)
+  (defun my/ibuffer-manual-preview ()
+    "Manually preview current buffer."
+    (interactive)
+    (let ((buffer (ibuffer-current-buffer)))
+      (when buffer
+        (display-buffer buffer
+                        '(display-buffer-in-side-window
+                          (side . right)
+                          (window-width . 0.5)))))))
+
 (setq text-mode-ispell-word-completion nil)
 
 (after! cape
@@ -159,8 +197,15 @@
         :desc "Toggle spell check" "s" #'flyspell-mode
         )))
 
-;; (setq doom-theme 'doom-gruvbox)
+;; Night
 ;; (setq doom-theme 'doom-feather-dark)
+;; (setq doom-theme 'doom-moonlight)
+;; (setq doom-theme 'doom-fairy-floss)
+;; (setq doom-theme 'doom-solarized-dark)
+;; (setq doom-theme 'doom-oksolar-dark)
+;; (setq doom-theme 'doom-solarized-dark-high-contrast)
+;; Day
+;; (setq doom-theme 'doom-gruvbox)
 (setq doom-theme 'doom-oksolar-light)
 
 (setq doom-font (font-spec
@@ -323,8 +368,6 @@
       ;; Restore original timestamp
       (setq org-download-timestamp "%Y%m%d_%H%M%S")
       )))
-
-(define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
 
 (after! vterm
   (set-popup-rule! "*doom:vterm-popup-vertical:*" :size 0.25 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
@@ -616,6 +659,8 @@ Returns the vterm buffer."
   (setf (alist-get 'md-expert gptel-directives)
         "Act as an expert in molecular dynamics simulations. You have deep knowledge of theory, workflows, force fields, and major software.
 Answer my questions with technical accuracy and clarity. Focus on concepts, practical advice, and common pitfalls. Keep explanations concise but complete.")
+(setf (alist-get 'job-applicant gptel-directives)
+      "Act as a skilled assistant for job applications. You specialize in writing professional materials such as cover letters, tailored resumes, follow-up emails, and LinkedIn messages. Help me research roles, tailor applications to specific jobs, and communicate effectively with employers. Write in a clear, confident, and professional tone. Be concise, actionable, and focused on helping me succeed in the job search.")
   (setf (alist-get 'LaTeX-assistant gptel-directives)
         "Act as an expert in LaTeX document writing and formatting. You know best practices for structure, typography, equations, figures, tables, and citations. Be decisive about when to use built-in solutions vs. recommended packages, and suggest packages when appropriate. Answer clearly with clean LaTeX code. Keep responses concise, practical, and focused on document quality."))
 
