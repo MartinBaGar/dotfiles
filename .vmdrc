@@ -26,7 +26,7 @@ proc bring_windows {} {
 
 user add key Control-b bring_windows
 
-# Wrapper procedure to source toto.tcl and make its functions available
+# Wrapper procedure to source custom_scripts.tcl and make its functions available
 source "/data/bari-garnier/scripts/vmd/custom_scripts.tcl"
 
 set env(TMPDIR) /tmp
