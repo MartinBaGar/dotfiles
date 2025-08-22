@@ -21,12 +21,18 @@
 (add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
 
 ;; (setq doom-theme 'doom-gruvbox)
-;; (setq doom-theme 'doom-feather-dark)
-(setq doom-theme 'doom-oksolar-light)
+(setq doom-theme 'doom-feather-dark)
+;; (setq doom-theme 'doom-oksolar-light)
 
 (setq doom-font (font-spec
                  :family "DejaVu Sans Mono"
                  :size 18))
+
+(add-to-list 'default-frame-alist '(undecorated . t))
+(add-to-list 'default-frame-alist '(alpha-background . 96))
+
+(setq display-line-numbers nil)
+(setq display-line-numbers-type nil)
 
 (setq org-image-max-width 500)
 (after! org
@@ -167,8 +173,6 @@
     :endpoint "/openai/v1/chat/completions"
     :stream nil
     :key #'gptel-api-key-from-auth-source
-    :stream nil
-    :key #'gptel-api-key-from-auth-source
     :models '(llama-3.1-70b-versatile
                 llama-3.1-8b-instant
                 llama3-70b-8192
@@ -216,7 +220,7 @@ packages when appropriate. Answer clearly with clean LaTeX code. Keep responses 
 
 (custom-set-faces!
 '(markdown-header-delimiter-face :foreground "#616161" :height 0.9)
-'(markdown-header-face-1 :height 1.8 :foreground "#A3BE8C" :weight extra-bold :inherit markdown-header-face)
+'(markdown-header-face-1 :height 1.6 :foreground "#A3BE8C" :weight extra-bold :inherit markdown-header-face)
 '(markdown-header-face-2 :height 1.4 :foreground "#EBCB8B" :weight extra-bold :inherit markdown-header-face)
 '(markdown-header-face-3 :height 1.2 :foreground "#D08770" :weight extra-bold :inherit markdown-header-face)
 '(markdown-header-face-4 :height 1.15 :foreground "#BF616A" :weight bold :inherit markdown-header-face)
