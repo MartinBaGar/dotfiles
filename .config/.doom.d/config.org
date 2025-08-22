@@ -22,162 +22,18 @@
   (setq evil-escape-key-sequence "fd"))
 #+end_src
 
+* Editor
 ** Completion
-
 #+begin_src emacs-lisp
-(setq text-mode-ispell-word-completion nil)
-
-(after! cape
-  (setq cape-dict-file "/usr/share/dict/french"))
-
-;; Org Mode: Enable cape-dict only outside src blocks
-(add-hook! 'org-mode-hook
-  (defun +corfu-cape-dict-maybe-org ()
-    ;; Preserve existing completion-at-point-functions
-    (let ((cape-func (lambda ()
-                       (unless (org-in-src-block-p)
-                         (cape-dict)))))
-      ;; Add cape-dict preserving previous functions
-      (add-hook 'completion-at-point-functions cape-func 100 t))))
-
-;; Markdown Mode: Enable cape-dict only outside code blocks
-(add-hook! 'markdown-mode-hook
-  (defun +corfu-cape-dict-maybe ()
-    (let ((cape-func (lambda ()
-                       (unless (markdown-code-block-at-point-p)
-                         (cape-dict)))))
-      ;; Add cape-dict preserving previous functions
-      (add-hook 'completion-at-point-functions cape-func 100 t))))
-
-;; Markdown Mode: Enable cape-dict only outside code blocks
-(add-hook! 'markdown-mode-hook
-  (defun +corfu-cape-dict-maybe ()
-    (add-hook 'completion-at-point-functions
-              (lambda ()
-                (unless (markdown-code-block-at-point-p)
-                  (cape-dict)))
-              100 t)))
-
-(add-hook! 'LaTeX-mode-hook
-  (outline-minor-mode)
-  (defun +corfu-add-cape-tex-h ()
-    ;; Preserve existing completion-at-point-functions
-    (let ((cape-dict-func (lambda ()
-                           (cape-dict)))
-          (cape-tex-func  (lambda ()
-                            (cape-tex))))
-      ;; Add cape-dict and cape-tex preserving previous functions
-      (add-hook 'completion-at-point-functions cape-dict-func 100 t)
-      (add-hook 'completion-at-point-functions cape-tex-func -30 t))))
-
-;; (add-hook! 'LaTeX-mode-hook
-;;   (outline-minor-mode)
-;;   (defun +corfu-add-cape-tex-h ()
-;;     ;; Use cape-capf-super for better integration
-;;     (add-to-list 'completion-at-point-functions #'cape-dict t)
-;;     (add-to-list 'completion-at-point-functions #'cape-tex t)))
-
-;; (add-hook! 'LaTeX-mode-hook
-;;   (outline-minor-mode)
-;;   (defun +corfu-add-cape-tex-h ()
-;;     (setq-local completion-at-point-functions
-;;                 (append (list (cape-capf-super #'cape-dict))
-;;                         completion-at-point-functions
-;;                         (list #'cape-tex)))))
-
 ;; https://github.com/joaotavora/yasnippet/issues/998
 (defun my-yas-try-expanding-auto-snippets ()
 (when (and (boundp 'yas-minor-mode) yas-minor-mode)
     (let ((yas-buffer-local-condition ''(require-snippet-condition . auto)))
     (yas-expand))))
 (add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
-
-;; 1. Enable yasnippet and load LaTeX snippets when editing Org
-(defun my-org-latex-yas ()
-  "Enable YASnippet and activate LaTeX snippets in Org mode."
-  (yas-minor-mode)
-  (yas-activate-extra-mode 'latex-mode))  ; load LaTeX snippets
-
-(add-hook 'org-mode-hook #'my-org-latex-yas)
-
-(setq org-image-max-width 500)
-
-;; ;; 2. Function to expand YAS only inside LaTeX fragments in Org
-;; (defun my/org-inline-latex-snippet-expand ()
-;;   "Expand LaTeX snippets when inside an Org inline LaTeX fragment."
-;;   (interactive)
-;;   (when (and (org-inside-LaTeX-fragment-p)
-;;              (bound-and-true-p yas-minor-mode))
-;;     (yas-expand)))
-
-;; ;; 3. Bind it to a key in Org mode (e.g., C-c y or TAB)
-;; (with-eval-after-load 'org
-;;   (define-key org-mode-map (kbd "C-c y") #'my/org-inline-latex-snippet-expand))
-
-;; ;; Optional: If you want TAB to auto-expand snippets inside inline LaTeX
-;; (defun my/org-tab-handler ()
-;;   "Custom TAB handler: expands YAS in LaTeX fragments or cycles otherwise."
-;;   (interactive)
-;;   (cond
-;;    ((and (org-inside-LaTeX-fragment-p)
-;;          (bound-and-true-p yas-minor-mode)
-;;          (yas-expand)))
-;;    (t (org-cycle))))  ; fallback behavior
-
-;; (with-eval-after-load 'org
-;;   (define-key org-mode-map (kbd "TAB") #'my/org-tab-handler))
 #+end_src
 
-*** Spell checking with selection menu
-
-#+begin_src emacs-lisp
-;; Set default dictionary
-(setq ispell-dictionary "fr_FR")
-
-;; Define function to update cape-dict-file when dictionary changes
-(defun update-cape-dict-file (dict-name)
-  "Update cape-dict-file based on selected dictionary."
-  (setq-default cape-dict-file
-        (cond
-         ((string= dict-name "fr_FR") "/usr/share/dict/french")
-         ((string= dict-name "en_US") "/usr/share/dict/american-english")
-         (t "/usr/share/dict/american-english")))
-  (message "Cape dictionary set to %s" cape-dict-file))
-
-;; Modify your dictionary selection functions to also update cape-dict-file
-(defun select-dictionary ()
-  "Select spelling dictionary."
-  (interactive)
-  (let* ((dicts '("en_US" "fr_FR"))
-         (selection (completing-read "Select dictionary: " dicts nil t)))
-    (ispell-change-dictionary selection)
-    (update-cape-dict-file selection)
-    (message "Dictionary switched to %s" selection)))
-
-;; Advise ispell-change-dictionary to update cape-dict-file
-(advice-add 'ispell-change-dictionary :after
-            (lambda (dict)
-              (when (member dict '("fr_FR" "en_US"))
-                (update-cape-dict-file dict))))
-
-;; Your existing keybindings with modified functions
-(map! :leader
-      (:prefix-map ("t" . "toggle")
-       (:prefix-map ("s" . "spell")
-        :desc "French Dictionary" "f" (lambda ()
-                                        (interactive)
-                                        (ispell-change-dictionary "fr_FR")
-                                        (update-cape-dict-file "fr_FR"))
-        :desc "English Dictionary" "e" (lambda ()
-                                         (interactive)
-                                         (ispell-change-dictionary "en_US")
-                                         (update-cape-dict-file "en_US"))
-        :desc "Toggle spell check" "s" #'flyspell-mode
-        )))
-#+end_src
-
-
-* Visual Enhancements
+* Aestethics
 
 *** Theme & Fonts
 #+begin_src emacs-lisp
@@ -188,103 +44,35 @@
 (setq doom-font (font-spec
                  :family "DejaVu Sans Mono"
                  :size 18))
-
-(custom-set-faces
- '(bold ((t (:weight extra-bold :height 1.0))))
- '(italic ((t (:slant italic :weight normal :height 1.0)))))
-
-(setq indicate-empty-lines nil)
 #+end_src
 
-#+begin_src emacs-lisp
-(defvar current-monitor-name nil)
-
-(defun my/check-monitor-change (&rest _)
-  "Check if monitor has changed and adjust font if needed."
-  (let* ((monitor-attrs (frame-monitor-attributes))
-         (monitor-name (cdr (assoc 'name monitor-attrs))))
-    (when (and monitor-name (not (string= monitor-name current-monitor-name)))
-      (let ((font-size (cond
-                       ((string= monitor-name "XWAYLAND0") 17)  ;; smaller font
-                       ((string= monitor-name "XWAYLAND1") 20)  ;; normal font
-                       (t 18))))  ;; fallback font size
-        (message "Monitor changed: %s → Font size: %.1f" monitor-name font-size)
-        (setq doom-font (font-spec :family "DejaVu Sans Mono" :size font-size))
-        (setq current-monitor-name monitor-name)
-        (doom/reload-font)))))
-
-;; Alternative approach: advise doom-modeline function
-(advice-add 'doom-modeline-window-size-change-function
-            :after #'my/check-monitor-change)
-
-;; Run once initially at startup
-(my/check-monitor-change)
-#+end_src
-
-*** Lines
-Enable relative line numbers and make their slant normal (not italic).
-#+begin_src emacs-lisp
-(setq display-line-numbers nil)
-(setq display-line-numbers-type nil) ;; TODO change to 'visual in org-mode
-#+end_src
-
-Disable highlighting of the current line.
-#+begin_src emacs-lisp
-(setq global-hl-line-modes nil)
-#+end_src
-
-Display a fill indicator at 80 characters in =prog-mode=.
-#+begin_src emacs-lisp
-;; (setq display-fill-column-indicator-column 80)
-;; (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
-#+end_src
-
-*** Window
-
-Start emacs in a full window.
-#+begin_src emacs-lisp
-;; (add-hook 'window-setup-hook #'toggle-frame-maximized)
-#+end_src
-
-*** Org functionalities
+* Org functionalities
 
 #+begin_src emacs-lisp
+(setq org-image-max-width 500)
 (after! org
-  ;; Display
-  ;; (setq org-display-remote-inline-images 'download)
-  (setq org-startup-with-inline-images nil)
-  (setq org-image-align 'left)
   (add-hook! 'org-mode-hook #'org-modern-mode)
   (add-hook! 'org-mode-hook #'+org-pretty-mode)
 
-  ;; Use a timer to ensure the file is fully loaded before previewing LaTeX
-  (add-hook! 'org-mode-hook
-    (run-with-timer 1 nil
-                  (lambda ()
-                    (when (and (buffer-live-p (current-buffer))
-                              (display-graphic-p))
-                      (org-latex-preview '(16))))))
   ;; TODOs
   (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
   (setq org-tag-alist
         '(("baal" . ?b) ("adastra" . ?a)))
   (setq org-log-done t)
+
   (setq-default org-display-custom-times t)
   (setq org-time-stamp-formats '("<%Y-%m-%d %a %H:%M>" . "<%Y-%m-%d %a %H:%M>"))
-  (use-package! org-pandoc-import)
-
 
   ;; Folding persistence via savefold.el
   (setq org-startup-folded 'showeverything) ; default fold behavior
-
   (setq savefold-backends '(org))
   (setq savefold-directory (locate-user-emacs-file "savefold"))
   (savefold-mode 1)
 
   ;; Attach
   (setq org-attach-id-dir "~/org/.attach")
-  (require 'org-download)
 )
+
 (use-package! org-transclusion
               :after org
               :init
@@ -310,37 +98,10 @@ Start emacs in a full window.
     (kill-new link)
     (message "Copied: %s" link)))
 
-;; (use-package! org-download
-;;   :after org
-;;   :defer nil
-;;   :config
-
-;; (setq org-download-screenshot-method "flameshot gui --raw > %s")
-
-;; (defun my/org-download-clipboard-with-name ()
-;;   "Prompt for a filename and save the clipboard image as <buffername>_<name>.png."
-;;   (interactive)
-;;   ;; (setq org-download-timestamp "")
-;;   (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
-;;          (name (read-string "Image name (without extension): "))
-;;          (filename (format "%s_%s.png" buffer-name-base name)))
-;;     (org-download-clipboard filename)
-;;     (message "Saved image as: %s" filename)))
-
-;; (defun my/org-download-screenshot ()
-;;   "Prompt for a filename and save the clipboard image as <buffername>_<name>.png."
-;;   (interactive)
-;;   ;; (setq org-download-timestamp "")
-;;   (let* ((buffer-name-base (file-name-base (or (buffer-file-name) (buffer-name))))
-;;          (name (read-string "Image name (without extension): "))
-;;          (filename (format "%s_%s.png" buffer-name-base name)))
-;;     (org-download-screenshot filename)
-;;     (message "Saved image as: %s" filename))))
 (after! org-download
   ;; Fix the underscore prefix issue
   (setq org-download-timestamp "%Y%m%d-%H%M%S")
   (setq org-download-screenshot-method "flameshot gui --raw > %s")
-  ;; (setq org-download-timestamp "")
 
   ;; Add a custom function to prompt for a filename
   (defun my/org-download-screenshot ()
@@ -367,71 +128,8 @@ Start emacs in a full window.
       (setq org-download-timestamp "%Y%m%d_%H%M%S")
       )))
 #+end_src
-
-*** Editing
-
+* Vterm
 #+begin_src emacs-lisp
-(define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
-#+end_src
-
-*** Vterm
-
-#+begin_src emacs-lisp
-(after! vterm
-  (set-popup-rule! "*doom:vterm-popup-vertical:*" :size 0.25 :vslot -4 :select t :quit nil :ttl 0 :side 'right)
-  (setq vterm-shell "/usr/bin/zsh")
-
-  (define-key vterm-mode-map (kbd "M-h") 'windmove-left)
-  (define-key vterm-mode-map (kbd "M-j") 'windmove-down)
-  (define-key vterm-mode-map (kbd "M-k") 'windmove-up)
-  (define-key vterm-mode-map (kbd "M-l") 'windmove-right)
-  )
-
-;; Create vertical toggle command
-(defun +vterm/toggle-vertical (arg)
-  "Toggles a terminal popup window at project root.
-
-If prefix ARG is non-nil, recreate vterm buffer in the current project's root.
-
-Returns the vterm buffer."
-  (interactive "P")
-  (+vterm--configure-project-root-and-display
-   arg
-   (lambda ()
-     (let ((buffer-name
-            (format "*doom:vterm-popup-vertical:%s*"
-                    (if (bound-and-true-p persp-mode)
-                        (safe-persp-name (get-current-persp))
-                      "main")))
-           confirm-kill-processes
-           current-prefix-arg)
-       (when arg
-         (let ((buffer (get-buffer buffer-name))
-               (window (get-buffer-window buffer-name)))
-           (when (buffer-live-p buffer)
-             (kill-buffer buffer))
-           (when (window-live-p window)
-             (delete-window window))))
-       (if-let* ((win (get-buffer-window buffer-name)))
-           (delete-window win)
-         (let ((buffer (or (cl-loop for buf in (doom-buffers-in-mode 'vterm-mode)
-                                    if (equal (buffer-local-value '+vterm--id buf)
-                                              buffer-name)
-                                    return buf)
-                           (get-buffer-create buffer-name))))
-           (with-current-buffer buffer
-             (setq-local +vterm--id buffer-name)
-             (unless (eq major-mode 'vterm-mode)
-               (vterm-mode)))
-           (pop-to-buffer buffer)))
-       (get-buffer buffer-name)))))
-
-(map! :leader
-      (:prefix-map ("o" . "open")
-       (:prefix-map ("t" . "terminal")
-        :desc "Toggle vterm horizontally" "h" #'+vterm/toggle
-        :desc "Toggle vterm vertically" "v" #'+vterm/toggle-vertical)))
-
 (defun vterm-dired-other-window ()
   "Open dired in the current working directory of vterm in another window."
   (interactive)
@@ -445,165 +143,9 @@ Returns the vterm buffer."
 (map! :leader
       (:prefix-map ("d" . "dired")
         :desc "Dired vterm-cwd in new win" "v" #'vterm-dired-other-window))
-
-;; (setq shell-command-switch "-ic")
 #+end_src
 
-*** Latex 
-
-#+begin_src emacs-lisp
-(after! latex
-  (setq +latex-viewers '(pdf-tools))
-  (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
-  (setq TeX-view-program-list
-        '(("PDF Tools" TeX-pdf-tools-sync-view)))
-  ;; Correct way to set LaTeXmk as default in Doom Emacs
-  (setq-hook! LaTeX-mode TeX-command-default "LaTeXMK"))
-
-(after! cdlatex
-  (setq cdlatex-math-modify-prefix ?²)
-  ;; First, remove the old keybinding
-  (define-key cdlatex-mode-map "'" nil)
-  ;; Then, bind the new one manually
-  (define-key cdlatex-mode-map (string cdlatex-math-modify-prefix) #'cdlatex-math-modify))
-
-;; (defun my/update-prefix-key (map old-key new-key command)
-;;   "In MAP, unbind OLD-KEY and bind NEW-KEY to COMMAND."
-;;   (when (boundp map)
-;;     (let ((map (symbol-value map)))
-;;       (when map
-;;         (define-key map (kbd old-key) nil)
-;;         (define-key map (kbd new-key) command)))))
-
-;; (after! cdlatex
-;;   (setq cdlatex-math-modify-prefix ?/)
-;;   (my/update-prefix-key 'cdlatex-mode-map "'" "/" #'cdlatex-math-modify))
-
-; use cdlatex completion instead of yasnippet
-;; (map! :map cdlatex-mode-map
-;;       :i "TAB" #'cdlatex-tab)
-
-;; (map! :after latex
-;;       :map cdlatex-mode-map
-;;       :localleader
-;;       :desc "Insert math symbol"
-;;       "i" #'cdlatex-math-symbol
-;;       :desc "Begin environment"
-;;       "e" #'cdlatex-environment)
-#+end_src
-
-#+RESULTS:
-
-*** Zoom
-
-#+begin_src emacs-lisp
-(defvar-local toggle-maximize--saved-config nil
-  "Holds the window configuration before maximizing.")
-
-(defun toggle-maximize-window ()
-  "Toggle maximization of the current window."
-  (interactive)
-  (if toggle-maximize--saved-config
-      (progn
-        (set-window-configuration toggle-maximize--saved-config)
-        (setq toggle-maximize--saved-config nil)
-        (message "Window layout restored"))
-    (setq toggle-maximize--saved-config (current-window-configuration))
-    (delete-other-windows)
-    (message "Window maximized")))
-
-(defun toggle-maximize--reset-on-change (&rest _)
-  "Reset toggle state if the window layout changes outside the toggle function."
-  (when toggle-maximize--saved-config
-    (setq toggle-maximize--saved-config nil)))
-
-(advice-add 'split-window :after #'toggle-maximize--reset-on-change)
-(advice-add 'delete-window :after #'toggle-maximize--reset-on-change)
-(advice-add 'other-window :after #'toggle-maximize--reset-on-change)
-
-(map! :leader
-        "z" #'toggle-maximize-window)
-#+end_src
-
-*** Layouts
-
-#+begin_src emacs-lisp
-(defvar window-layout-stack '()
-  "A stack of saved window configurations with user-defined names.")
-
-(defvar max-window-layouts 10
-  "The maximum number of window layouts to store in the stack.")
-
-(defun save-window-layout ()
-  "Save the current window configuration to the layout stack with a user-defined name."
-  (interactive)
-  (let ((name (read-string "Enter layout name: ")))  ; Prompt for a name
-    (if (>= (length window-layout-stack) max-window-layouts)
-        (setq window-layout-stack (butlast window-layout-stack 1)))  ; Remove oldest if over limit
-    (push (cons name (current-window-configuration)) window-layout-stack)
-    (message "Window layout saved: %s" name)))
-
-(defun restore-window-layout ()
-  "Choose and restore a saved window configuration from the stack."
-  (interactive)
-  (if window-layout-stack
-      (let* ((choices (mapcar #'car window-layout-stack))
-             (selected (completing-read "Restore layout: " choices nil t)))
-        (when selected
-          (let ((config (cdr (assoc selected window-layout-stack))))
-            (when config
-              (set-window-configuration config)
-              (message "Restored layout: %s" selected)))))
-    (message "No saved layouts.")))
-
-(map! :leader
-      (:prefix-map ("l" . "layout")
-        "s" #'save-window-layout
-        "r" #'restore-window-layout))
-#+end_src
-
-*** Conversion markdown to org
-
-#+begin_src emacs-lisp
-(defun my/org-pandoc-import-multiple (files)
-  "Convert multiple FILES (Markdown) to Org using `org-pandoc-import-to-org`."
-  (interactive
-   (list (file-expand-wildcards (read-file-name "Glob pattern (e.g., *.md): " nil "*.md" t))))
-  (dolist (file files)
-    (message "Converting %s..." file)
-    (org-pandoc-import-to-org nil file)))
-
-(defun my/org-pandoc-import-md-recursive ()
-  "Convert all Markdown files in current directory and subdirectories to Org format."
-  (interactive)
-  (let ((files (directory-files-recursively default-directory "\\.md$")))
-    (dolist (file files)
-      (message "Converting %s..." file)
-      (org-pandoc-import-to-org nil file))))
-
-(defun my/org-roam-convert-existing-notes ()
-  "Convert all .org files under `org-roam-directory` into Org-roam nodes."
-  (interactive)
-  (require 'org-id)
-  ;; (dolist (file (directory-files-recursively org-roam-directory "\\.org$"))
-  (dolist (file (directory-files-recursively default-directory "\\.org$"))
-    (with-current-buffer (find-file-noselect file)
-      (goto-char (point-min))
-      ;; Add title if missing
-      (unless (re-search-forward "^\:ID\:" nil t)
-        (goto-char (point-min))
-        (org-id-get-create))
-      (goto-char (point-min))
-      (unless (re-search-forward "^#\\+title: " nil t)
-        (re-search-forward "^:PROPERTIES:\n\\(?:.*\n\\)*?:END:" nil t)
-        (forward-line 1)
-        (insert (format "#+title: %s\n\n" (file-name-base file))))
-      ;; Add ID if missing
-      (save-buffer)
-      (kill-buffer))))
-#+end_src
-
-*** Window management
+* Window management
 
 #+begin_src emacs-lisp
 (defun toggle-window-split ()
@@ -638,21 +180,11 @@ Returns the vterm buffer."
         :desc "Toggle window split" "t" #'toggle-window-split))
 #+end_src
 
-*** LLM
+* LLM
 
 #+begin_src emacs-lisp
 (use-package! gptel
   :config
-  ;; Use authinfo (nil falls back to auth-source)
-  ;; (setq! gptel-api-key nil)
-
-  ;; Register OpenAI backend
-  (gptel-make-openai "OpenAI"
-    :host "api.openai.com"
-    :endpoint "/v1/chat/completions"
-    :models '("gpt-4" "gpt-3.5-turbo")
-    :key #'gptel-api-key-from-auth-source)
-
   ;; Register Mistral backend
   (gptel-make-openai "Mistral"
     :host "api.mistral.ai"
@@ -661,20 +193,21 @@ Returns the vterm buffer."
     :key #'gptel-api-key-from-auth-source)
 
   ;; Groq offers an OpenAI compatible API
-    (gptel-make-openai "Groq"               ;Any name you want
+    (gptel-make-openai "Groq"
     :host "api.groq.com"
     :endpoint "/openai/v1/chat/completions"
+    :stream nil
+    :key #'gptel-api-key-from-auth-source
     :stream nil
     :key #'gptel-api-key-from-auth-source
     :models '(llama-3.1-70b-versatile
                 llama-3.1-8b-instant
                 llama3-70b-8192
                 llama3-8b-8192
-                mixtral-8x7b-32768
-                gemma-7b-it))
+                mixtral-8x7b-32768))
 
    ;; OpenRouter offers an OpenAI compatible API
-  (gptel-make-openai "OpenRouter"               ;Any name you want
+  (gptel-make-openai "OpenRouter"
   :host "openrouter.ai"
   :endpoint "/api/v1/chat/completions"
   :stream t
@@ -686,17 +219,18 @@ Returns the vterm buffer."
 
   ;; Default model + backend
   (setq! gptel-backend (gptel-get-backend "OpenRouter"))
-  (setq! gptel-model 'deepseek/deepseek-chat-v3-0324:free))
+  (setq! gptel-model 'deepseek/deepseek-chat-v3-0324:free)
 
-(after! gptel
   ;; Add a new directive called ‘my-prompt’
   (setf (alist-get 'md-expert gptel-directives)
         "Act as an expert in molecular dynamics simulations. You have deep knowledge of theory, workflows, force fields, and major software.
 Answer my questions with technical accuracy and clarity. Focus on concepts, practical advice, and common pitfalls. Keep explanations concise but complete.")
   (setf (alist-get 'LaTeX-assistant gptel-directives)
-        "Act as an expert in LaTeX document writing and formatting. You know best practices for structure, typography, equations, figures, tables, and citations. Be decisive about when to use built-in solutions vs. recommended packages, and suggest packages when appropriate. Answer clearly with clean LaTeX code. Keep responses concise, practical, and focused on document quality."))
+        "Act as an expert in LaTeX document writing and formatting. You know best practices for structure, typography, equations, figures, tables, and citations. Be decisive about when to use built-in solutions vs. recommended packages, and suggest
+packages when appropriate. Answer clearly with clean LaTeX code. Keep responses concise, practical, and focused on document quality."))
 #+end_src
-*** Bibliography
+
+* Bibliography
 
 #+begin_src emacs-lisp
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
@@ -706,11 +240,7 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
 (setq! citar-library-paths '("~/zotero-lib/"))
 ;; (setq! citar-file-parser-functions '("/mnt/c/Users/martb/Documents/zotero-lib/"))
 #+end_src
-*** Python
-#+begin_src emacs-lisp
-(setq-hook! 'python-mode-hook +format-with '(isort black))
-   ;; (setq-hook! 'python-mode-hook +format-with 'black)
-#+end_src
+
 *** Markdown
 #+begin_src emacs-lisp
 ;; The proper Doom way
@@ -761,49 +291,26 @@ Answer my questions with technical accuracy and clarity. Focus on concepts, prac
 
 ** Translation
 #+begin_src emacs-lisp
-;; (use-package! go-translate
-;;   :init
-;;   :config
-;;     (setq gt-preset-translators
-;;         `((en-fr . ,(gt-translator
-;;                     :taker (gt-taker :langs '(en fr) :text 'word)
-;;                     :engines (list (gt-bing-engine :if 'no-word) (gt-google-engine :if 'word))
-;;                     ;; :engines (list (gt-bing-engine))
-;;                     :render (list (gt-insert-render :type 'replace :if 'no-word) (gt-buffer-render))))
-;;             (fr-en . ,(gt-translator
-;;                     :taker (gt-taker :langs '(fr en) :text 'word)
-;;                     :engines (list (gt-bing-engine :if 'no-word) (gt-google-engine :if 'word))
-;;                     ;; :engines (list (gt-bing-engine))
-;;                     :render (list (gt-insert-render :type 'replace :if 'no-word) (gt-buffer-render)))))))
-
-;; (map! :leader
-;;     (:prefix ("t t" . "translate")
-;;     :desc "Translate" "t" #'gt-do-translate
-;;     :desc "Switch translator" "s" #'gt-switch-translator))
-
-  (use-package! go-translate
-    :config
-  (setq gt-default-translator
-        (gt-translator
-         :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
-         :engines (list
-                   (gt-google-engine :if 'word)
-                   (gt-deepl-engine :if 'not-word))
-         :render (list (gt-buffer-render :if 'word) (gt-insert-render :type 'replace)))))
+(use-package! gt
+:config
+(setq gt-default-translator
+    (gt-translator
+        :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
+        :engines (list
+                (gt-google-engine :if 'word)
+                (gt-deepl-engine :if 'not-word))
+        :render (list (gt-buffer-render :if 'word) (gt-insert-render :type 'replace)))))
 
 (map! :leader
     (:prefix ("t t" . "translate")
     :desc "Translate" "t" #'gt-do-translate))
-
-;; Il s'agit d'un test.
-;; This is a test.
 #+end_src
 
 ** Grammar
 
 #+begin_src emacs-lisp
-(setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
-(require 'langtool)
+;; (setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
+;; (require 'langtool)
 #+end_src
 
 * Default-Apps
@@ -869,6 +376,9 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
            ;; Prompted file from org-attach
            (t
             (let* ((attach-dir (or (org-attach-dir) (user-error "No attachment directory")))
+                   (selection (completing-read "Select image: " (org-attach-file-list attach-dir) nil t)))
+            (let* ((attach-dir (or (org-attach-dir) (user-error "No attachment directory")))
+                   (selection (completing-read "Select image: " (org-attach-file-list attach-dir) nil t)))
                    (selection (completing-read "Select image: " (org-attach-file-list attach-dir) nil t)))
               (expand-file-name selection attach-dir)))))
          (truename (and (stringp file) (file-truename file))))
@@ -937,6 +447,7 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
      (t
       (user-error "No supported clipboard mechanism found on this platform")))))
 #+end_src
+
 * Third party apps
 ** Blender
 #+begin_src emacs-lisp

@@ -48,10 +48,10 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;; (unpin! t)
 
-(package! org-pandoc-import
-  :recipe (:host github
-           :repo "tecosaur/org-pandoc-import"
-           :files ("*.el" "filters" "preprocessors")))
+; (package! org-pandoc-import
+;   :recipe (:host github
+;            :repo "tecosaur/org-pandoc-import"
+;            :files ("*.el" "filters" "preprocessors")))
 
 (package! org-modern)
 
@@ -59,10 +59,12 @@
   :recipe (:host github :repo "jcfk/savefold.el"))
 
 (package! gptel :recipe (:nonrecursive t))
+
 (package! org-transclusion)
 
 ;; (package! projectile :disable t)
-(package! go-translate)
+(package! gt)
 
-(package! quarto-mode :recipe (:host github :repo "quarto-dev/quarto-emacs"))
+; (package! quarto-mode :recipe (:host github :repo "quarto-dev/quarto-emacs"))
 (package! blender :recipe (:host github :repo "MartinBaGar/blender.el"))
+(package! gdoc-handler :recipe (:host github :repo "MartinBaGar/gdoc-handler"))
