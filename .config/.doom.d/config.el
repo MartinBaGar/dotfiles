@@ -21,7 +21,8 @@
 (add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
 
 ;; (setq doom-theme 'doom-gruvbox)
-(setq doom-theme 'doom-feather-dark)
+;; (setq doom-theme 'doom-feather-dark)
+(setq doom-theme 'doom-testing-dark)
 ;; (setq doom-theme 'doom-oksolar-light)
 
 (setq doom-font (font-spec
@@ -267,6 +268,11 @@ packages when appropriate. Answer clearly with clean LaTeX code. Keep responses 
 ;; (setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
 ;; (require 'langtool)
 
+(use-package jinx
+  :hook (emacs-startup . global-jinx-mode)
+  :bind (("M-$" . jinx-correct)
+         ("C-M-$" . jinx-languages)))
+
 (defun my/vscode-open-path-at-point ()
   "Open the file at point with VS Code."
   (interactive)
@@ -406,3 +412,21 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
   (blender-executable "/mnt/c/Program Files/Blender Foundation/Blender 4.4/blender.exe")
   (blender-addon-directory "C:/Users/martb/Documents/Blender/my_addons")
   )
+
+(use-package typst-preview
+  :custom
+  (typst-preview-browser "default")
+  (typst-preview-open-browser-automatically t)
+  (typst-preview-autostart t)
+  (typst-preview-invert-colors "never"))
+
+(after! eglot
+  (after! typst-ts-mode
+    (add-to-list 'eglot-server-programs
+                 `((typst-ts-mode) .
+                   ,(eglot-alternatives `(,typst-ts-lsp-download-path
+                                          "tinymist"
+                                          "typst-lsp"))))))
+
+(after! cc-mode
+  (set-eglot-client! 'cc-mode '("clangd" "-j=3" "--clang-tidy")))

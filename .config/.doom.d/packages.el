@@ -48,10 +48,10 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;; (unpin! t)
 
-; (package! org-pandoc-import
-;   :recipe (:host github
-;            :repo "tecosaur/org-pandoc-import"
-;            :files ("*.el" "filters" "preprocessors")))
+                                        ; (package! org-pandoc-import
+                                        ;   :recipe (:host github
+                                        ;            :repo "tecosaur/org-pandoc-import"
+                                        ;            :files ("*.el" "filters" "preprocessors")))
 
 (package! org-modern)
 
@@ -65,6 +65,10 @@
 ;; (package! projectile :disable t)
 (package! gt)
 
-; (package! quarto-mode :recipe (:host github :repo "quarto-dev/quarto-emacs"))
+(package! jinx)
+
+                                        ; (package! quarto-mode :recipe (:host github :repo "quarto-dev/quarto-emacs"))
 (package! blender :recipe (:host github :repo "MartinBaGar/blender.el"))
 (package! gdoc-handler :recipe (:host github :repo "MartinBaGar/gdoc-handler"))
+(package! typst-ts-mode :recipe (:host nil :repo "https://git.sr.ht/~meow_king/typst-ts-mode"))
+(package! typst-preview :recipe (:host github :repo "havarddj/typst-preview.el"))
