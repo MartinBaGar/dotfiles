@@ -22,8 +22,8 @@
 
 ;; (setq doom-theme 'doom-gruvbox)
 ;; (setq doom-theme 'doom-feather-dark)
-(setq doom-theme 'doom-testing-dark)
-;; (setq doom-theme 'doom-oksolar-light)
+(setq doom-theme 'doom-myfeather-dark)
+;; (setq doom-theme 'doom-myoksolar-light)
 
 (setq doom-font (font-spec
                  :family "DejaVu Sans Mono"
@@ -191,6 +191,20 @@
             google/gemini-2.5-pro-exp-03-25:free
             google/gemma-3-27b-it:free))
 
+  ;; Llama.cpp offers an OpenAI compatible API
+  (gptel-make-openai "llama-cpp"          ;Any name
+  :stream t                             ;Stream responses
+  :protocol "http"
+  :host "localhost:8080"                ;Llama.cpp server location
+  :models '(LLAMA))                    ;Any names, doesn't matter for Llama
+
+  ;; Llama.cpp offers an OpenAI compatible API
+  (gptel-make-openai "koboldcpp"          ;Any name
+  :stream t                             ;Stream responses
+  :protocol "http"
+  :host "localhost:5001"                ;Llama.cpp server location
+  :models '(KOBOLD))                    ;Any names, doesn't matter for Llama
+
   ;; Default model + backend
   (setq! gptel-backend (gptel-get-backend "OpenRouter"))
   (setq! gptel-model 'deepseek/deepseek-chat-v3-0324:free)
@@ -263,7 +277,7 @@ packages when appropriate. Answer clearly with clean LaTeX code. Keep responses 
 
 (map! :leader
     (:prefix ("t t" . "translate")
-    :desc "Translate" "t" #'gt-do-translate))
+    :desc "Translate" "t" #'gt-translate))
 
 ;; (setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
 ;; (require 'langtool)
@@ -272,6 +286,32 @@ packages when appropriate. Answer clearly with clean LaTeX code. Keep responses 
   :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
          ("C-M-$" . jinx-languages)))
+
+(after! jinx
+;; Limitations:
+;; 1. since raw block highlighting let the local parser highlights the area,
+;; some area doesn't contain face (like `bash-ts-mode'), and those areas will
+;; be checked by jinx
+(add-to-list
+  'jinx-exclude-faces
+  '(typst-ts-mode
+  ;; not included font lock faces
+  ;; `font-lock-comment-face', `font-lock-string-face', `font-lock-doc-face'
+  ;; `font-lock-doc-markup-face'
+  font-lock-warning-face font-lock-function-name-face font-lock-function-call-face
+  font-lock-variable-name-face font-lock-variable-use-face font-lock-keyword-face
+  font-lock-comment-delimiter-face font-lock-type-face font-lock-constant-face
+  font-lock-builtin-face font-lock-preprocessor-face
+  font-lock-negation-char-face font-lock-escape-face font-lock-number-face
+  font-lock-operator-face font-lock-property-use-face font-lock-punctuation-face
+  font-lock-bracket-face font-lock-delimiter-face font-lock-misc-punctuation-face
+  ;; typst-ts-mode created faces
+  typst-ts-markup-item-indicator-face typst-ts-markup-term-indicator-face
+  typst-ts-markup-rawspan-indicator-face typst-ts-markup-rawspan-blob-face
+  typst-ts-markup-rawblock-indicator-face typst-ts-markup-rawblock-lang-face
+  typst-ts-markup-rawblock-blob-face
+  typst-ts-error-face typst-ts-shorthand-face typst-ts-markup-linebreak-face
+  typst-ts-markup-quote-face typst-ts-markup-url-face typst-ts-math-indicator-face)))
 
 (defun my/vscode-open-path-at-point ()
   "Open the file at point with VS Code."

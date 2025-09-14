@@ -1,45 +1,57 @@
-;;; doom-testing-dark-theme.el --- a purple-tinted theme, inspired by doom-one -*- lexical-binding: t; no-byte-compile: t; -*-
+;;; doom-myfeather-dark-theme.el --- a purple-tinted theme, inspired by doom-one -*- lexical-binding: t; no-byte-compile: t; -*-
 ;;
 ;; Date: November 12, 2022
 ;; Author: Lena SAVY-LARIGALDIE <https://gitlab.com/Plunne>
 ;; Maintainer: Lena SAVY-LARIGALDIE <https://gitlab.com/Plunne>
-;; Source: [https://github.com/Plunne/doom-feather-theme](https://github.com/Plunne/doom-feather-theme)
+;; Source: https://github.com/Plunne/doom-myfeather-theme
 ;;
 ;;; Code:
+
 (require 'doom-themes)
+
 ;;
 ;;; Variables
-(defgroup doom-testing-dark-theme nil
-  "Options for the `doom-testing' theme."
+
+(defgroup doom-myfeather-dark-theme nil
+  "Options for the `doom-myfeather' theme."
   :group 'doom-themes)
-(defcustom doom-testing-brighter-modeline nil
+
+(defcustom doom-myfeather-brighter-modeline nil
   "If non-nil, more vivid colors will be used to style the mode-line."
-  :group 'doom-testing-dark-theme
+  :group 'doom-myfeather-dark-theme
   :type 'boolean)
-(defcustom doom-testing-brighter-comments nil
+
+(defcustom doom-myfeather-brighter-comments nil
   "If non-nil, comments will be highlighted in more vivid colors."
-  :group 'doom-testing-dark-theme
+  :group 'doom-myfeather-dark-theme
   :type 'boolean)
-(defcustom doom-testing-dark-padded-modeline doom-themes-padded-modeline
+
+(defcustom doom-myfeather-dark-padded-modeline doom-themes-padded-modeline
   "If non-nil, adds a 4px padding to the mode-line.
 Can be an integer to determine the exact padding."
-  :group 'doom-testing-dark-theme
+  :group 'doom-myfeather-dark-theme
   :type '(choice integer boolean))
+
+
 ;;
 ;;; Theme definition
-(def-doom-theme doom-testing-dark
+
+(def-doom-theme doom-myfeather-dark
     "A dark theme based on Doom One Dark."
-  :family 'doom-testing
+  :family 'doom-myfeather
   :background-mode 'dark
+
   ;; name        default   256           16
   ((bg         '("#251D2F" "#262626"    "black"                         ))
    (fg         '("#c4b8d3" "#c6c6c6"    "brightwhite"   ))
+
    ;; These are off-color variants of bg/fg, used primarily for `solaire-mode',
    ;; but can also be useful as a basis for subtle highlights (e.g. for hl-line
    ;; or region), especially when paired with the `doom-darken', `doom-lighten',
    ;; and `doom-blend' helper functions.
    (bg-alt     '("#1A1521" "#1c1c1c"    "black"                         ))
    (fg-alt     '("#503F65" "#2d2d2d"    "white"                         ))
+
    ;; These should represent a spectrum from bg to fg, where base0 is a starker
    ;; bg and base8 is a starker fg. For example, if bg is light grey and fg is
    ;; dark grey, base0 should be white and base8 should be black.
@@ -52,6 +64,7 @@ Can be an integer to determine the exact padding."
    (base6      '("#6C5689" "#666666"    "brightblack"   ))
    (base7      '("#9783b1" "#949494"    "brightblack"   ))
    (base8      '("#D3CADE" "#dadada"    "white"                         ))
+
    (grey       base4)
    (red        '("#ff6c6b" "#ff5f5f"    "red"                   ))
    (orange     '("#da8548" "#ff8700"    "brightred"             ))
@@ -64,6 +77,7 @@ Can be an integer to determine the exact padding."
    (violet     '("#9783b1" "#8787af"    "magenta"               ))
    (cyan       '("#7dcfff" "#87d7ff"    "brightcyan"    ))
    (dark-cyan  '("#5699AF" "#5fafd7"    "cyan"                  ))
+
    ;; These are the "universal syntax classes" that doom-themes establishes.
    ;; These *must* be included in every doom themes, or your theme will throw an
    ;; error, as they are used in the base theme defined in doom-themes-base.
@@ -71,8 +85,8 @@ Can be an integer to determine the exact padding."
    (vertical-bar   (doom-darken base1 0.1))
    (selection      dark-blue)
    (builtin        magenta)
-   (comments       (if doom-testing-brighter-comments dark-cyan base5))
-   (doc-comments   (doom-lighten (if doom-testing-brighter-comments dark-cyan base5) 0.25))
+   (comments       (if doom-myfeather-brighter-comments dark-cyan base5))
+   (doc-comments   (doom-lighten (if doom-myfeather-brighter-comments dark-cyan base5) 0.25))
    (constants      orange)
    (functions      blue)
    (keywords       violet)
@@ -89,35 +103,38 @@ Can be an integer to determine the exact padding."
    (vc-modified    orange)
    (vc-added       green)
    (vc-deleted     red)
+
    ;; These are extra color variables used only in this theme; i.e. they aren't
    ;; mandatory for derived themes.
    (modeline-fg              fg)
    (modeline-fg-alt          base5)
-   (modeline-bg              (if doom-testing-brighter-modeline
+   (modeline-bg              (if doom-myfeather-brighter-modeline
                                  (doom-darken blue 0.45)
                                (doom-darken bg-alt 0.1)))
-   (modeline-bg-alt          (if doom-testing-brighter-modeline
+   (modeline-bg-alt          (if doom-myfeather-brighter-modeline
                                  (doom-darken blue 0.475)
                                `(,(doom-darken (car bg-alt) 0.15) ,@(cdr bg))))
    (modeline-bg-inactive     `(,(car bg-alt) ,@(cdr base1)))
    (modeline-bg-inactive-alt `(,(doom-darken (car bg-alt) 0.1) ,@(cdr bg)))
+
    (-modeline-pad
-    (when doom-testing-dark-padded-modeline
-      (if (integerp doom-testing-dark-padded-modeline) doom-testing-dark-padded-modeline 4))))
+    (when doom-myfeather-dark-padded-modeline
+      (if (integerp doom-myfeather-dark-padded-modeline) doom-myfeather-dark-padded-modeline 4))))
+
+
   ;;;; Base theme face overrides
   (((line-number &override) :foreground base5)
    ((line-number-current-line &override) :background (doom-lighten bg 0.00) :foreground base7 :weight 'bold)
    ((font-lock-comment-face &override)
-    :background (if doom-testing-brighter-comments (doom-lighten bg 0.05) 'unspecified) :italic t)
-   ;; Custom bold face override - make all bold text blue
-   (bold :foreground blue :weight 'bold)
+    :background (if doom-myfeather-brighter-comments (doom-lighten bg 0.05) 'unspecified) :italic t)
    (mode-line
     :background modeline-bg :foreground modeline-fg
     :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg)))
    (mode-line-inactive
     :background modeline-bg-inactive :foreground modeline-fg-alt
     :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg-inactive)))
-   (mode-line-emphasis :foreground (if doom-testing-brighter-modeline base8 highlight))
+   (mode-line-emphasis :foreground (if doom-myfeather-brighter-modeline base8 highlight))
+   ;; (bold :foreground "#D3D2B8" :weight 'bold)
    ;;;; button (#include "strings")
    (button :foreground strings)
    ;;;; css-mode <built-in> / scss-mode
@@ -127,7 +144,7 @@ Can be an integer to determine the exact padding."
    ;;;; dashboard
    (dashboard-navigator :foreground teal)
    ;;;; doom-modeline
-   (doom-modeline-bar :background (if doom-testing-brighter-modeline modeline-bg highlight))
+   (doom-modeline-bar :background (if doom-myfeather-brighter-modeline modeline-bg highlight))
    (doom-modeline-buffer-file :inherit 'mode-line-buffer-id :weight 'bold)
    (doom-modeline-buffer-path :inherit 'mode-line-emphasis :weight 'bold)
    (doom-modeline-buffer-project-root :foreground green :weight 'bold)
@@ -142,7 +159,7 @@ Can be an integer to determine the exact padding."
    (markdown-header-face :inherit 'bold :foreground red)
    ((markdown-code-face &override) :background (doom-lighten base3 0.05))
    ;;;; Outlines
-   (outline-1 :height 1.8 :foreground blue :weight 'bold)
+   (outline-1 :height 1.4 :foreground blue :weight 'bold)
    (outline-2 :height 1.2 :foreground magenta :weight 'bold)
    (outline-3 :height 1.1 :foreground violet :weight 'bold)
    (outline-4 :height 1.0 :foreground (doom-lighten blue 0.25) :weight 'bold)
@@ -183,6 +200,8 @@ Can be an integer to determine the exact padding."
     :inherit 'mode-line-inactive
     :background modeline-bg-inactive-alt
     :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg-inactive-alt))))
+
   ;;;; Base theme variable overrides-
   ())
-;;; doom-testing-dark-theme.el ends here
+
+;;; doom-myfeather-dark-theme.el ends here
