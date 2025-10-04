@@ -134,7 +134,7 @@ Can be an integer to determine the exact padding."
     :background modeline-bg-inactive :foreground modeline-fg-alt
     :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg-inactive)))
    (mode-line-emphasis :foreground (if doom-myfeather-brighter-modeline base8 highlight))
-   ;; (bold :foreground "#D3D2B8" :weight 'bold)
+   (bold :foreground "#D3D2B8" :weight 'bold)
    ;;;; button (#include "strings")
    (button :foreground strings)
    ;;;; css-mode <built-in> / scss-mode

@@ -15,9 +15,9 @@
 
 ;; https://github.com/joaotavora/yasnippet/issues/998
 (defun my-yas-try-expanding-auto-snippets ()
-(when (and (boundp 'yas-minor-mode) yas-minor-mode)
+  (when (and (boundp 'yas-minor-mode) yas-minor-mode)
     (let ((yas-buffer-local-condition ''(require-snippet-condition . auto)))
-    (yas-expand))))
+      (yas-expand))))
 (add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
 
 ;; (setq doom-theme 'doom-gruvbox)
@@ -57,16 +57,16 @@
 
   ;; Attach
   (setq org-attach-id-dir "~/org/.attach")
-)
+  )
 
 (use-package! org-transclusion
-              :after org
-              :init
-              (map!
-               :map global-map "<f12>" #'org-transclusion-add
-               :leader
-               :prefix "n"
-               :desc "Org Transclusion Mode" "t" #'org-transclusion-mode))
+  :after org
+  :init
+  (map!
+   :map global-map "<f12>" #'org-transclusion-add
+   :leader
+   :prefix "n"
+   :desc "Org Transclusion Mode" "t" #'org-transclusion-mode))
 
 (defun my/org-copy-heading-link ()
   "Copy file: link to current Org heading using heading name, not ID."
@@ -126,7 +126,7 @@
 
 (map! :leader
       (:prefix-map ("d" . "dired")
-        :desc "Dired vterm-cwd in new win" "v" #'vterm-dired-other-window))
+       :desc "Dired vterm-cwd in new win" "v" #'vterm-dired-other-window))
 
 (defun toggle-window-split ()
   "Toggle between horizontal and vertical split with two windows."
@@ -156,8 +156,8 @@
 
 ;; Bind the function to a key
 (map! :leader
-      (:prefix-map ("l" . "layout")
-        :desc "Toggle window split" "t" #'toggle-window-split))
+      (:prefix-map ("t" . "toggle")
+       :desc "Toggle window split" "W" #'toggle-window-split))
 
 (use-package! gptel
   :config
@@ -206,8 +206,30 @@
   :models '(KOBOLD))                    ;Any names, doesn't matter for Llama
 
   ;; Default model + backend
-  (setq! gptel-backend (gptel-get-backend "OpenRouter"))
-  (setq! gptel-model 'deepseek/deepseek-chat-v3-0324:free)
+  (setq! gptel-backend (gptel-get-backend "Mistral"))
+  (setq! gptel-model 'mistral-small)
+  (setq! gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
+  (setq! gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
+  (setq! gptel-default-mode 'org-mode)
+
+  (defun gptel-send-with-options (&optional arg)
+    "Send query.  With prefix ARG open gptel's menu instead."
+    (interactive "P")
+    (if arg
+        (call-interactively 'gptel-menu)
+      (gptel--suffix-send (transient-args 'gptel-menu))))
+  
+  (defun gptel-scratch-from-minibuffer ()
+    "Send prompt from minibuffer to *scratch* buffer using 'scratch preset."
+    (interactive)
+    ;; Then send with specific UI flags: "m" for minibuffer, "b" for specific buffer
+    (gptel--suffix-send (list "m" "b*scratch*")))
+
+  (map! :leader
+        (:prefix-map ("l" . "LLM")
+         :desc "Select a gptel buffer"   "b" #'gptel
+         :desc "Send with options"   "l" #'gptel-scratch-from-minibuffer
+         :desc "Show menu"           "m" #'gptel-menu))
 
   ;; Add a new directive called ‘my-prompt’
   (setf (alist-get 'md-expert gptel-directives)
@@ -234,13 +256,13 @@ packages when appropriate. Answer clearly with clean LaTeX code. Keep responses 
   markdown-gfm-additional-languages '("sh" "json" "elisp"))
 
 (custom-set-faces!
-'(markdown-header-delimiter-face :foreground "#616161" :height 0.9)
-'(markdown-header-face-1 :height 1.6 :foreground "#A3BE8C" :weight extra-bold :inherit markdown-header-face)
-'(markdown-header-face-2 :height 1.4 :foreground "#EBCB8B" :weight extra-bold :inherit markdown-header-face)
-'(markdown-header-face-3 :height 1.2 :foreground "#D08770" :weight extra-bold :inherit markdown-header-face)
-'(markdown-header-face-4 :height 1.15 :foreground "#BF616A" :weight bold :inherit markdown-header-face)
-'(markdown-header-face-5 :height 1.1 :foreground "#b48ead" :weight bold :inherit markdown-header-face)
-'(markdown-header-face-6 :height 1.05 :foreground "#5e81ac" :weight semi-bold :inherit markdown-header-face))
+  '(markdown-header-delimiter-face :foreground "#616161" :height 0.9)
+  '(markdown-header-face-1 :height 1.6 :foreground "#A3BE8C" :weight extra-bold :inherit markdown-header-face)
+  '(markdown-header-face-2 :height 1.4 :foreground "#EBCB8B" :weight extra-bold :inherit markdown-header-face)
+  '(markdown-header-face-3 :height 1.2 :foreground "#D08770" :weight extra-bold :inherit markdown-header-face)
+  '(markdown-header-face-4 :height 1.15 :foreground "#BF616A" :weight bold :inherit markdown-header-face)
+  '(markdown-header-face-5 :height 1.1 :foreground "#b48ead" :weight bold :inherit markdown-header-face)
+  '(markdown-header-face-6 :height 1.05 :foreground "#5e81ac" :weight semi-bold :inherit markdown-header-face))
 
 (map! :leader
       (:prefix ("p" . "project.el") ; Use a different prefix like "P" instead of "p"
@@ -266,18 +288,18 @@ packages when appropriate. Answer clearly with clean LaTeX code. Keep responses 
        :desc "Async shell command in project" "&" #'project-async-shell-command))
 
 (use-package! gt
-:config
-(setq gt-default-translator
-    (gt-translator
-        :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
-        :engines (list
-                (gt-google-engine :if 'word)
-                (gt-deepl-engine :if 'not-word))
-        :render (list (gt-buffer-render :if 'word) (gt-insert-render :type 'replace)))))
+  :config
+  (setq gt-default-translator
+        (gt-translator
+         :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
+         :engines (list
+                   (gt-google-engine :if 'word)
+                   (gt-deepl-engine :if 'not-word))
+         :render (list (gt-buffer-render :if 'word) (gt-insert-render :type 'replace)))))
 
 (map! :leader
-    (:prefix ("t t" . "translate")
-    :desc "Translate" "t" #'gt-translate))
+      (:prefix ("t t" . "translate")
+       :desc "Translate" "t" #'gt-translate))
 
 ;; (setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
 ;; (require 'langtool)
@@ -288,30 +310,30 @@ packages when appropriate. Answer clearly with clean LaTeX code. Keep responses 
          ("C-M-$" . jinx-languages)))
 
 (after! jinx
-;; Limitations:
-;; 1. since raw block highlighting let the local parser highlights the area,
-;; some area doesn't contain face (like `bash-ts-mode'), and those areas will
-;; be checked by jinx
-(add-to-list
-  'jinx-exclude-faces
-  '(typst-ts-mode
-  ;; not included font lock faces
-  ;; `font-lock-comment-face', `font-lock-string-face', `font-lock-doc-face'
-  ;; `font-lock-doc-markup-face'
-  font-lock-warning-face font-lock-function-name-face font-lock-function-call-face
-  font-lock-variable-name-face font-lock-variable-use-face font-lock-keyword-face
-  font-lock-comment-delimiter-face font-lock-type-face font-lock-constant-face
-  font-lock-builtin-face font-lock-preprocessor-face
-  font-lock-negation-char-face font-lock-escape-face font-lock-number-face
-  font-lock-operator-face font-lock-property-use-face font-lock-punctuation-face
-  font-lock-bracket-face font-lock-delimiter-face font-lock-misc-punctuation-face
-  ;; typst-ts-mode created faces
-  typst-ts-markup-item-indicator-face typst-ts-markup-term-indicator-face
-  typst-ts-markup-rawspan-indicator-face typst-ts-markup-rawspan-blob-face
-  typst-ts-markup-rawblock-indicator-face typst-ts-markup-rawblock-lang-face
-  typst-ts-markup-rawblock-blob-face
-  typst-ts-error-face typst-ts-shorthand-face typst-ts-markup-linebreak-face
-  typst-ts-markup-quote-face typst-ts-markup-url-face typst-ts-math-indicator-face)))
+  ;; Limitations:
+  ;; 1. since raw block highlighting let the local parser highlights the area,
+  ;; some area doesn't contain face (like `bash-ts-mode'), and those areas will
+  ;; be checked by jinx
+  (add-to-list
+   'jinx-exclude-faces
+   '(typst-ts-mode
+     ;; not included font lock faces
+     ;; `font-lock-comment-face', `font-lock-string-face', `font-lock-doc-face'
+     ;; `font-lock-doc-markup-face'
+     font-lock-warning-face font-lock-function-name-face font-lock-function-call-face
+     font-lock-variable-name-face font-lock-variable-use-face font-lock-keyword-face
+     font-lock-comment-delimiter-face font-lock-type-face font-lock-constant-face
+     font-lock-builtin-face font-lock-preprocessor-face
+     font-lock-negation-char-face font-lock-escape-face font-lock-number-face
+     font-lock-operator-face font-lock-property-use-face font-lock-punctuation-face
+     font-lock-bracket-face font-lock-delimiter-face font-lock-misc-punctuation-face
+     ;; typst-ts-mode created faces
+     typst-ts-markup-item-indicator-face typst-ts-markup-term-indicator-face
+     typst-ts-markup-rawspan-indicator-face typst-ts-markup-rawspan-blob-face
+     typst-ts-markup-rawblock-indicator-face typst-ts-markup-rawblock-lang-face
+     typst-ts-markup-rawblock-blob-face
+     typst-ts-error-face typst-ts-shorthand-face typst-ts-markup-linebreak-face
+     typst-ts-markup-quote-face typst-ts-markup-url-face typst-ts-math-indicator-face)))
 
 (defun my/vscode-open-path-at-point ()
   "Open the file at point with VS Code."
@@ -368,15 +390,15 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
               (when (and link-path attach-dir)
                 (let ((full-path (expand-file-name link-path attach-dir)))
                   (when (and (file-exists-p full-path)
-                            (image-type-from-file-name full-path))
+                             (image-type-from-file-name full-path))
                     full-path)))))
            ;; Prompted file from org-attach
            (t
             (let* ((attach-dir (or (org-attach-dir) (user-error "No attachment directory")))
                    (selection (completing-read "Select image: " (org-attach-file-list attach-dir) nil t)))
-            (let* ((attach-dir (or (org-attach-dir) (user-error "No attachment directory")))
-                   (selection (completing-read "Select image: " (org-attach-file-list attach-dir) nil t)))
-                   (selection (completing-read "Select image: " (org-attach-file-list attach-dir) nil t)))
+              (let* ((attach-dir (or (org-attach-dir) (user-error "No attachment directory")))
+                     (selection (completing-read "Select image: " (org-attach-file-list attach-dir) nil t)))
+                (selection (completing-read "Select image: " (org-attach-file-list attach-dir) nil t)))
               (expand-file-name selection attach-dir)))))
          (truename (and (stringp file) (file-truename file))))
 
@@ -450,7 +472,8 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
   :init
   :custom
   (blender-executable "/mnt/c/Program Files/Blender Foundation/Blender 4.4/blender.exe")
-  (blender-addon-directory "C:/Users/martb/Documents/Blender/my_addons")
+  (blender-addon-directory "C:\\Users\\martb\\Documents\\Blender\\my_addons")
+  (blender-external-python "/mnt/c/Users/martb/blender/Scripts/python.exe")
   )
 
 (use-package typst-preview
@@ -459,6 +482,14 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
   (typst-preview-open-browser-automatically t)
   (typst-preview-autostart t)
   (typst-preview-invert-colors "never"))
+
+(use-package typst-ts-mode
+  :custom
+  (typst-ts-watch-options "--open")
+  (typst-ts-mode-grammar-location (expand-file-name "tree-sitter/libtree-sitter-typst.so" user-emacs-directory))
+  (typst-ts-mode-enable-raw-blocks-highlight t)
+  :config
+  (keymap-set typst-ts-mode-map "C-c C-c" #'typst-ts-tmenu))
 
 (after! eglot
   (after! typst-ts-mode
