@@ -293,13 +293,32 @@ packages when appropriate. Answer clearly with clean LaTeX code. Keep responses 
         (gt-translator
          :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
          :engines (list
-                   (gt-google-engine :if 'word)
+                   (gt-bing-engine :if 'word)
                    (gt-deepl-engine :if 'not-word))
-         :render (list (gt-buffer-render :if 'word) (gt-insert-render :type 'replace)))))
+         :render (gt-insert-render :type 'replace)))
+  
+  (setq gt-preset-translators
+      `((replacer . ,(gt-translator
+         :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
+         :engines (list
+                   (gt-bing-engine :if 'word)
+                   (gt-deepl-engine :if 'not-word))
+         :render (gt-insert-render :type 'replace)))
+        (translator . ,(gt-translator
+                  :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
+                  :engines (list
+                          (gt-google-engine :if 'word)
+                          (gt-deepl-engine :if 'not-word))
+                  :render (list
+                            (gt-overlay-render :type 'replace :if 'not-word)
+                            (gt-buffer-render :if 'word)
+                           ))))))
 
 (map! :leader
-      (:prefix ("t t" . "translate")
-       :desc "Translate" "t" #'gt-translate))
+    (:prefix ("t t" . "translate")
+    :desc "Switch translator" "s" #'gt-switch-translator
+    :desc "Dismiss overlays" "d" #'gt-delete-render-overlays
+    :desc "Translate" "t" #'gt-translate))
 
 ;; (setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
 ;; (require 'langtool)
@@ -501,3 +520,40 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
 
 (after! cc-mode
   (set-eglot-client! 'cc-mode '("clangd" "-j=3" "--clang-tidy")))
+
+(after! mu4e
+  (setq sendmail-program (executable-find "msmtp")
+        send-mail-function #'smtpmail-send-it
+        message-sendmail-f-is-evil t
+        message-sendmail-extra-arguments '("--read-envelope-from")
+        message-send-mail-function #'message-send-mail-with-sendmail)
+  ;; Where mail is stored
+  (setq mu4e-maildir "~/.mail/gmail")
+
+  ;; Tell mu4e how to fetch mail
+  (setq mu4e-get-mail-command "mbsync -Va"
+        mu4e-update-interval 60) ;; update every 1 min
+
+  ;; Basic account setup
+  (set-email-account! "gmail"
+    '((mu4e-sent-folder       . "/Sent")
+      (mu4e-drafts-folder     . "/Drafts")
+      (mu4e-trash-folder      . "/Trash")
+      (mu4e-refile-folder     . "/Archive")
+      (smtpmail-smtp-user     . "martbari.g@gmail.com")
+      (smtpmail-smtp-server   . "smtp.gmail.com")
+      (smtpmail-smtp-service  . 587)
+      (smtpmail-stream-type   . starttls)
+      (user-mail-address      . "martbari.g@gmail.com")
+      (mu4e-compose-signature . "\n--\nMartin Bari Garnier"))
+    t)
+
+  ;; Gmail performance tweaks
+  (setq mu4e-index-cleanup nil
+        mu4e-index-lazy-check t)
+  
+ (setq mu4e-bookmarks
+  '((:name "Unread messages" :query "flag:unread AND NOT flag:trashed" :key 117)
+    (:name "Today's messages" :query "date:today..now" :key 116)
+    (:name "Gmail No spam" :query "maildir:/gmail/INBOX AND NOT maildir:/gmail/[Gmail]/Spam" :key 119)
+    (:name "Last 7 days" :query "date:7d..now" :hide-unread t :key 112))))
