@@ -241,10 +241,22 @@ packages when appropriate. Answer clearly with clean LaTeX code. Keep responses 
 
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
 (setq! bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))
-(setq citar-bibliography '("~/zotero-lib/referenciator.bib"))
 (setq! bibtex-completion-library-path '("~/zotero-lib/referenciator.bib"))
-(setq! citar-library-paths '("~/zotero-lib/"))
-;; (setq! citar-file-parser-functions '("/mnt/c/Users/martb/Documents/zotero-lib/"))
+
+(after! citar
+(setq! citar-bibliography '("~/zotero-lib/referenciator.bib"))
+(setq! citar-file-open-functions (list (cons "html" #'citar-file-open-external)
+                                       (cons "pdf" #'citar-file-open-external)
+                                           (cons t #'find-file)))
+
+(setq! citar-library-paths '("/mnt/c/Users/martb/Documents/zotero-lib/"))
+;; (setq! citar-library-paths '("~/zotero-lib/"))
+
+  (defun my-citar-open-in-zotero ()
+    "Open current entry in Zotero instead of opening files."
+    (interactive)
+    (let ((citekey (citar-select-ref)))
+      (citar-open-entry-in-zotero citekey))))
 
 ;; The proper Doom way
 (setq-hook! 'markdown-mode-hook
@@ -545,7 +557,7 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
       (smtpmail-smtp-service  . 587)
       (smtpmail-stream-type   . starttls)
       (user-mail-address      . "martbari.g@gmail.com")
-      (mu4e-compose-signature . "\n--\nMartin Bari Garnier"))
+      (mu4e-compose-signature . "Martin Bari Garnier"))
     t)
 
   ;; Gmail performance tweaks
@@ -553,7 +565,7 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
         mu4e-index-lazy-check t)
   
  (setq mu4e-bookmarks
-  '((:name "Unread messages" :query "flag:unread AND NOT flag:trashed" :key 117)
-    (:name "Today's messages" :query "date:today..now" :key 116)
+  '((:name "Unread messages" :query "flag:unread AND NOT flag:trashed AND NOT maildir:/gmail/[Gmail]/Spam" :key 117)
+    (:name "Today's messages" :query "date:today..now AND NOT maildir:/gmail/[Gmail]/Spam" :key 116)
     (:name "Gmail No spam" :query "maildir:/gmail/INBOX AND NOT maildir:/gmail/[Gmail]/Spam" :key 119)
-    (:name "Last 7 days" :query "date:7d..now" :hide-unread t :key 112))))
+    (:name "Last 7 days" :query "date:7d..now AND NOT maildir:/gmail/[Gmail]/Spam" :hide-unread t :key 112))))
