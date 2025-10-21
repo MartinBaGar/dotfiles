@@ -74,6 +74,10 @@
 
   ;; Attach
   (setq org-attach-id-dir "~/org/.attach")
+
+  (org-link-set-parameters "zotero"
+  :follow (lambda (path) 
+              (browse-url (concat "zotero:" path))))
   )
 
 (use-package! org-transclusion
@@ -289,6 +293,22 @@ packages when appropriate. Answer clearly with clean LaTeX code. Keep responses 
     (interactive)
     (let ((citekey (citar-select-ref)))
       (citar-open-entry-in-zotero citekey))))
+
+(defun markdown-to-org-links ()
+  "Convert markdown links [text](url) to org links [[url][text]]
+Works on selected region if active, otherwise on whole buffer."
+  (interactive)
+  (save-excursion
+    (if (region-active-p)
+        (save-restriction
+          (narrow-to-region (region-beginning) (region-end))
+          (goto-char (point-min))
+          (while (re-search-forward "\\[\\([^]]+\\)\\](\\([^)]+\\))" nil t)
+            (replace-match "[[\\2][\\1]]")))
+      (progn
+        (goto-char (point-min))
+        (while (re-search-forward "\\[\\([^]]+\\)\\](\\([^)]+\\))" nil t)
+          (replace-match "[[\\2][\\1]]"))))))
 #+end_src
 
 * Markdown
