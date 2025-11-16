@@ -74,3 +74,4 @@
 (package! typst-preview :recipe (:host github :repo "havarddj/typst-preview.el"))
 (package! uv-mode :recipe (:host github :repo "z80dev/uv-mode"))
 (package! popper :recipe (:host github :repo "karthink/popper"))
+(package! org-tldraw.el :recipe (:local-repo "~/org-tldraw"))

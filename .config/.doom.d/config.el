@@ -356,7 +356,7 @@ Works on selected region if active, otherwise on whole buffer."
 ;; (require 'langtool)
 
 (use-package jinx
-  :hook (emacs-startup . global-jinx-mode)
+  ;; :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
          ("C-M-$" . jinx-languages)))
 
@@ -565,7 +565,9 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
   ;; Tell mu4e how to fetch mail
   (setq mu4e-get-mail-command "mbsync -Va"
         mu4e-update-interval 60) ;; update every 1 min
-
+  (setq mu4e-sent-messages-behavior 'delete)
+  (setq message-kill-buffer-on-exit t)
+  (setq mu4e-change-filenames-when-moving t)
   ;; Basic account setup
   (set-email-account! "gmail"
     '((mu4e-sent-folder       . "/Sent")
@@ -577,7 +579,8 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
       (smtpmail-smtp-service  . 587)
       (smtpmail-stream-type   . starttls)
       (user-mail-address      . "martbari.g@gmail.com")
-      (mu4e-compose-signature . "Martin Bari Garnier"))
+      ;; (mu4e-compose-signature . "Martin Bari Garnier")
+      )
     t)
 
   ;; Gmail performance tweaks
