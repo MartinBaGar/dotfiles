@@ -61,6 +61,8 @@
   (org-link-set-parameters "zotero"
   :follow (lambda (path) 
               (browse-url (concat "zotero:" path))))
+  (setq org-roam-directory "~/org/roam"
+      org-roam-db-location (expand-file-name "org-roam.db" org-roam-directory))
   )
 
 (use-package! org-transclusion
