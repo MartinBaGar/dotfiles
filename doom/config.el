@@ -20,6 +20,9 @@
       (yas-expand))))
 (add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
 
+(+global-word-wrap-mode +1)
+(add-hook 'writeroom-mode-hook #'+word-wrap-mode)
+
 ;; (setq doom-theme 'doom-gruvbox)
 ;; (setq doom-theme 'doom-feather-dark)
 (setq doom-theme 'doom-myfeather-dark)
@@ -30,10 +33,14 @@
                  :size 18))
 
 (add-to-list 'default-frame-alist '(undecorated . t))
-(add-to-list 'default-frame-alist '(alpha-background . 96))
+;; (add-to-list 'default-frame-alist '(alpha-background . 96))
 
 (setq display-line-numbers nil)
 (setq display-line-numbers-type nil)
+
+(after! dirvish
+  (setq dirvish-hide-details 't)
+  )
 
 (setq org-image-max-width 500)
 (after! org
@@ -412,111 +419,6 @@ Works on selected region if active, otherwise on whole buffer."
       :desc "Open file at point with default app"
       "x" #'my/xdg-open-path-at-point)
 
-(defun copy-image-to-system-clipboard (&optional force-prompt)
-  "Copy an image to the clipboard as image/png.
-- On Linux: uses `xclip`.
-- On WSL2 or Windows: uses `powershell.exe` to call .NET Clipboard APIs.
-If FORCE-PROMPT is non-nil, always prompt for image file."
-  (interactive "P")
-  (let* ((image (get-text-property (point) 'display))
-         (file
-          (cond
-           ;; Inline image at point (check for both :file and :data)
-           ((and (not force-prompt) (eq (car-safe image) 'image))
-            (let ((image-data (plist-get (cdr image) ':data))
-                  (image-file (plist-get (cdr image) ':file)))
-              (cond
-               ;; Handle inline image data
-               (image-data
-                (cons 'data image-data))
-               ;; Handle image file
-               (image-file
-                image-file)
-               (t nil))))
-           ;; Check if point is on a link to an image file
-           ((and (not force-prompt)
-                 (org-element-type-p (org-element-context) 'link))
-            (let ((link-path (org-element-property :path (org-element-context)))
-                  (attach-dir (org-attach-dir)))
-              (when (and link-path attach-dir)
-                (let ((full-path (expand-file-name link-path attach-dir)))
-                  (when (and (file-exists-p full-path)
-                             (image-type-from-file-name full-path))
-                    full-path)))))
-           ;; Prompted file from org-attach
-           (t
-            (let* ((attach-dir (or (org-attach-dir) (user-error "No attachment directory")))
-                   (selection (completing-read "Select image: " (org-attach-file-list attach-dir) nil t)))
-              (let* ((attach-dir (or (org-attach-dir) (user-error "No attachment directory")))
-                     (selection (completing-read "Select image: " (org-attach-file-list attach-dir) nil t)))
-                (selection (completing-read "Select image: " (org-attach-file-list attach-dir) nil t)))
-              (expand-file-name selection attach-dir)))))
-         (truename (and (stringp file) (file-truename file))))
-
-    ;; Handle inline image data case
-    (when (and (consp file) (eq (car file) 'data))
-      (cond
-       ;; WSL2 or Windows - need to save data to temp file first
-       ((or (eq system-type 'windows-nt)
-            (and (eq system-type 'gnu/linux)
-                 (string-match "Microsoft" (shell-command-to-string "uname -r"))))
-        (let ((temp-file (make-temp-file "emacs-image-" nil ".png")))
-          (with-temp-buffer
-            (insert (cdr file))
-            (write-region (point-min) (point-max) temp-file))
-          (let ((win-path
-                 (replace-regexp-in-string
-                  "/" "\\\\"
-                  (replace-regexp-in-string "^/mnt/\\([a-z]\\)/"
-                                            (lambda (m) (concat (upcase (match-string 1 m)) ":\\\\"))
-                                            (file-truename temp-file) t t))))
-            (start-process "powershell-copy-image" nil "powershell.exe" "-Command"
-                           (concat "[System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') | Out-Null; "
-                                   "[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null; "
-                                   "[System.Windows.Forms.Clipboard]::SetImage([System.Drawing.Image]::FromFile('"
-                                   win-path "'))"))
-            (message "Copied inline image data to Windows clipboard"))))
-       ;; Linux (X11) - can pipe data directly
-       ((executable-find "xclip")
-        (with-temp-buffer
-          (insert (cdr file))
-          (call-shell-region
-           (point-min) (point-max)
-           "xclip -i -selection clipboard -t image/png"))
-        (message "Copied inline image data to X11 clipboard"))
-       (t
-        (user-error "No supported clipboard mechanism found on this platform")))
-      (return))
-
-    ;; Handle file-based images
-    (unless (and truename (file-exists-p truename))
-      (user-error "Image file not found: %s" (or truename file)))
-
-    (cond
-     ;; WSL2 or Windows
-     ((or (eq system-type 'windows-nt)
-          (and (eq system-type 'gnu/linux)
-               (string-match "Microsoft" (shell-command-to-string "uname -r"))))
-      (let ((win-path
-             ;; Convert /mnt/c/... to C:\\... for PowerShell
-             (replace-regexp-in-string
-              "/" "\\\\"
-              (replace-regexp-in-string "^/mnt/\\([a-z]\\)/"
-                                        (lambda (m) (concat (upcase (match-string 1 m)) ":\\\\")) truename t t))))
-        (start-process "powershell-copy-image" nil "powershell.exe" "-Command"
-                       (concat "[System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') | Out-Null; "
-                               "[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null; "
-                               "[System.Windows.Forms.Clipboard]::SetImage([System.Drawing.Image]::FromFile('"
-                               win-path "'))"))
-        (message "Copied image to Windows clipboard: %s" win-path)))
-     ;; Linux (X11)
-     ((executable-find "xclip")
-      (start-process "xclip-proc" nil "xclip"
-                     "-i" "-selection" "clipboard" "-t" "image/png" "-quiet" truename)
-      (message "Copied image to X11 clipboard: %s" truename))
-     (t
-      (user-error "No supported clipboard mechanism found on this platform")))))
-
 (use-package blender
   :defer t
   :commands (blender-mode blender-start blender-run-current-buffer)
@@ -593,7 +495,6 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
     (:name "Gmail No spam" :query "maildir:/gmail/INBOX AND NOT maildir:/gmail/[Gmail]/Spam" :key 119)
     (:name "Last 7 days" :query "date:7d..now AND NOT maildir:/gmail/[Gmail]/Spam" :hide-unread t :key 112))))
 
-;; credit: yorickvP on Github
 (setq wl-copy-process nil)
 (defun wl-copy (text)
   (setq wl-copy-process (make-process :name "wl-copy"
@@ -609,3 +510,68 @@ If FORCE-PROMPT is non-nil, always prompt for image file."
       (shell-command-to-string "wl-paste -n | tr -d \r")))
 (setq interprogram-cut-function 'wl-copy)
 (setq interprogram-paste-function 'wl-paste)
+
+;; (defun toggle-named-frame (frame-name &rest frame-params)
+;;   "Toggle a frame with FRAME-NAME. Create if doesn't exist, delete if exists.
+;; When created, opens a buffer named FRAME-NAME in writeroom-mode.
+;; FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
+;;   (let ((target-frame (seq-find 
+;;                        (lambda (f) 
+;;                          (string= (frame-parameter f 'name) frame-name))
+;;                        (frame-list))))
+;;     (if target-frame
+;;         (delete-frame target-frame)
+;;       (let ((frame (make-frame (append `((name . ,frame-name)) frame-params))))
+;;         (with-selected-frame frame
+;;           (switch-to-buffer (get-buffer-create frame-name))
+;;           (writeroom-mode 1))
+;;         frame))))
+
+;; For niri to toggle a notepad
+(defun toggle-named-frame (frame-name &rest frame-params)
+  "Toggle a frame with FRAME-NAME. Create if doesn't exist, delete if exists.
+When created, opens a persistent Doom scratch buffer in writeroom-mode.
+FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
+  (let ((target-frame (seq-find 
+                       (lambda (f) 
+                         (string= (frame-parameter f 'name) frame-name))
+                       (frame-list))))
+    (if target-frame
+        (delete-frame target-frame)
+      (let ((frame (make-frame (append `((name . ,frame-name)) frame-params))))
+        (with-selected-frame frame
+          ;; Use existing scratch buffer or create/restore it
+          (let ((scratch-buf (doom-scratch-buffer 
+                             nil  ; DO restore from disk
+                             nil  ; use default mode
+                             default-directory
+                             frame-name)))
+            (switch-to-buffer scratch-buf)
+            (writeroom-mode 1)))
+        frame))))
+
+;; (defun toggle-named-frame (frame-name &rest frame-params)
+;;   "Toggle a frame with FRAME-NAME. Create if doesn't exist, delete if exists.
+;; When created, opens a persistent Doom scratch buffer in writeroom-mode.
+;; FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
+;;   (let ((target-frame (seq-find 
+;;                        (lambda (f) 
+;;                          (string= (frame-parameter f 'name) frame-name))
+;;                        (frame-list))))
+;;     (if target-frame
+;;         (delete-frame target-frame)
+;;       (let ((frame (make-frame (append `((name . ,frame-name)
+;;                                          (title . ,frame-name)) ; Explicitly set title too
+;;                                        frame-params))))
+;;         (with-selected-frame frame
+;;           ;; Set title again to ensure it's applied
+;;           (set-frame-parameter frame 'title frame-name)
+;;           ;; Use existing scratch buffer or create/restore it
+;;           (let ((scratch-buf (doom-scratch-buffer 
+;;                              nil  ; DO restore from disk
+;;                              nil  ; use default mode
+;;                              default-directory
+;;                              frame-name)))
+;;             (switch-to-buffer scratch-buf)
+;;             (writeroom-mode 1)))
+;;         frame))))
