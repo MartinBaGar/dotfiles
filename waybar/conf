@@ -1,0 +1,58 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 30,
+  "spacing": 4,
+  
+  "modules-left": ["niri/workspaces"],
+  
+  "niri/workspaces": {
+    "format": "{name}"
+  },
+  
+  "clock": {
+    "format": "{:%H:%M}",
+    "format-alt": "{:%Y-%m-%d}",
+    "tooltip-format": "<tt><small>{calendar}</small></tt>",
+    "calendar": {
+      "mode": "year",
+      "mode-mon-col": 3,
+      "weeks-pos": "right",
+      "on-scroll": 1,
+      "format": {
+        "months": "<span color='#ffead3'><b>{}</b></span>",
+        "days": "<span color='#ecc6d9'><b>{}</b></span>",
+        "weeks": "<span color='#99ffdd'><b>W{}</b></span>",
+        "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
+        "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
+      }
+    }
+  },
+  
+  "battery": {
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{capacity}% {icon}",
+    "format-charging": "{capacity}% ",
+    "format-plugged": "{capacity}% ",
+    "format-icons": ["", "", "", "", ""]
+  },
+  
+  "network": {
+    "format-wifi": "{essid} ",
+    "format-ethernet": "{ipaddr}/{cidr} ",
+    "format-disconnected": "Disconnected ⚠",
+    "tooltip-format": "{ifname} via {gwaddr}"
+  },
+  
+  "pulseaudio": {
+    "format": "{volume}% {icon}",
+    "format-muted": "🔇",
+    "format-icons": {
+      "default": ["", "", ""]
+    },
+    "on-click": "pavucontrol"
+  }
+}
