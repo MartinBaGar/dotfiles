@@ -82,8 +82,8 @@ input {
 // Find more information on the wiki:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Outputs
 // Remember to uncomment the node by removing "/-"!
-/-output "HDMI-A-1" {
-    position x=1600 y=0  // Monitor on the right
+output "HDMI-A-2" {
+    scale 1.1
 }
 
 /-output "LG Display 0x06E2 Unknown" {
@@ -274,9 +274,10 @@ overview {
 // which may be more convenient to use.
 // See the binds section below for more spawn examples.
 // This line starts waybar, a commonly used bar for Wayland compositors.
-spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
-spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
-spawn-at-startup "/usr/bin/kanshi"
+// spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
+// spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
+// spawn-at-startup "/usr/bin/kanshi"
+spawn-at-startup "waybar"
 environment {
   XDG_CURRENT_DESKTOP "niri"
   QT_QPA_PLATFORM "wayland"
@@ -373,6 +374,7 @@ window-rule {
 
 window-rule {
     match app-id="Caprine"
+    match app-id="Rocket.Chat"
     match title="Discord*"
     match title="KeePassXC"
     open-on-workspace "chat"
@@ -443,63 +445,33 @@ binds {
 
     // === Application Launchers ===
     Mod+T hotkey-overlay-title="Open Terminal" { spawn "kitty"; }
-    // Mod+Space hotkey-overlay-title="Application Launcher" {
-    //     spawn "dms" "ipc" "call" "spotlight" "toggle";
-    // }
     Mod+Space hotkey-overlay-title="Application Launcher" {
         spawn "fuzzel";
     }
 
-    Mod+O { spawn-sh "/home/mabagar/scripts/fuzzel-file-actions.sh"; }
+    // Mod+O { spawn-sh "~/Scripts/bash/fuzzel-file-actions.sh"; }
+    Mod+O { spawn-sh "/home/bari-garnier/Scripts/bash/fuzzel-file-actions.sh"; }
 
     Mod+E {spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main";}
 
-    Mod+V hotkey-overlay-title="Clipboard Manager" {
-        spawn "dms" "ipc" "call" "clipboard" "toggle";
-    }
-    Mod+M hotkey-overlay-title="Task Manager" {
-        spawn "dms" "ipc" "call" "processlist" "toggle";
-    }
-    Mod+Comma hotkey-overlay-title="Settings" {
-        spawn "dms" "ipc" "call" "settings" "toggle";
-    }
-    Mod+Y hotkey-overlay-title="Browse Wallpapers" {
-        spawn "dms" "ipc" "call" "dankdash" "wallpaper";
-    }
     Mod+N hotkey-overlay-title="Notification Center" { spawn "dms" "ipc" "call" "notifications" "toggle"; }
-    // Mod+Shift+N hotkey-overlay-title="Notepad" { spawn "dms" "ipc" "call" "notepad" "toggle"; }
-    // Mod+Shift+N { spawn-sh "emacsclient -n -e '(toggle-named-frame \"Doom Notes\")'"; }
     Mod+Shift+N { spawn-sh " emacsclient --alternate-editor= --reuse-frame -n --socket-name=utils -e '(toggle-named-frame \"Doom Notes\")' "; }
 
     // === Security ===
     Mod+Alt+L hotkey-overlay-title="Lock Screen" {
-        spawn "dms" "ipc" "call" "lock" "lock";
+        spawn "swaylock" "-f" "--color" "000000";
     }
     Mod+Shift+E { quit; }
-    Ctrl+Alt+Delete hotkey-overlay-title="Task Manager" {
-        spawn "dms" "ipc" "call" "processlist" "toggle";
-    }
 
     // === Audio Controls ===
     XF86AudioRaiseVolume allow-when-locked=true {
-        spawn "dms" "ipc" "call" "audio" "increment" "3";
+        spawn "pamixer" "--increase" "3";
     }
     XF86AudioLowerVolume allow-when-locked=true {
-        spawn "dms" "ipc" "call" "audio" "decrement" "3";
+        spawn "pamixer" "--decrease" "3";
     }
     XF86AudioMute allow-when-locked=true {
-        spawn "dms" "ipc" "call" "audio" "mute";
-    }
-    XF86AudioMicMute allow-when-locked=true {
-        spawn "dms" "ipc" "call" "audio" "micmute";
-    }
-
-    // === Brightness Controls ===
-    XF86MonBrightnessUp allow-when-locked=true {
-       spawn "dms" "ipc" "call" "brightness" "increment" "5" "";
-    }
-    XF86MonBrightnessDown allow-when-locked=true {
-       spawn "dms" "ipc" "call" "brightness" "decrement" "5" "";
+        spawn "pamixer" "--toggle-mute";
     }
 
     // === Window Management ===
@@ -650,13 +622,13 @@ binds {
 
     // MediaPlayer
     XF86AudioPrev allow-when-locked=true {
-     spawn "dms" "ipc" "call" "mpris" "previous";
+     spawn "playerctl" "previous";
     }
     XF86AudioNext allow-when-locked=true {
-     spawn "dms" "ipc" "call" "mpris" "next";
+     spawn "playerctl" "next";
     }
     XF86AudioPlay allow-when-locked=true {
-     spawn "dms" "ipc" "call" "mpris" "playPause";
+     spawn "playerctl" "play-pause";
     }
 }
 debug {
