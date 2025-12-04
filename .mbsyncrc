@@ -1,0 +1,44 @@
+# Gmail
+IMAPAccount gmail
+Host imap.gmail.com
+User martbari.g@gmail.com
+PassCmd "gpg --quiet --for-your-eyes-only --no-tty --decrypt ~/.authinfo.gpg | awk '/machine imap.gmail.com/ {print $6}'"
+TLSType IMAPS
+AuthMechs LOGIN
+
+IMAPStore gmail-remote
+Account gmail
+
+MaildirStore gmail-local
+Path ~/.mail/gmail/
+Inbox ~/.mail/gmail/INBOX
+SubFolders Verbatim
+
+Channel gmail
+Far :gmail-remote:
+Near :gmail-local:
+Patterns *
+Create Near
+SyncState *
+
+# Zmail
+# MaildirStore zmail-local
+# Path ~/.mail/zmail/
+# Inbox ~/.mail/zmail/INBOX
+
+# IMAPAccount zmail
+# Host zmail.ibpc.fr
+# User bari-garnier@ibpc.fr
+# Pass XXXXXXXXXXX
+# TLSType STARTTLS
+# AuthMechs LOGIN
+
+# IMAPStore zmail-remote
+# Account zmail
+
+# Channel zmail
+# Far :zmail-remote:
+# Near :zmail-local:
+# Patterns *
+# Create Near
+# SyncState *

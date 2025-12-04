@@ -1,0 +1,11 @@
+account gmail
+host smtp.gmail.com
+port 587
+from martbari.g@gmail.com
+user martbari.g@gmail.com
+auth on
+tls on
+tls_starttls on
+passwordeval "gpg --quiet --for-your-eyes-only --no-tty --decrypt ~/.authinfo.gpg | awk '/machine imap.gmail.com/ {print $6}'"
+logfile ~/.msmtp.log
+account default : gmail
