@@ -276,6 +276,7 @@ overview {
 // This line starts waybar, a commonly used bar for Wayland compositors.
 spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
 spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
+spawn-at-startup "waybar"
 spawn-at-startup "/usr/bin/kanshi"
 environment {
   XDG_CURRENT_DESKTOP "niri"
@@ -284,7 +285,6 @@ environment {
   QT_QPA_PLATFORMTHEME "gtk3"
   QT_QPA_PLATFORMTHEME_QT6 "gtk3"
   TERMINAL "kitty"
-  DMS_SCREENSHOT_EDITOR "satty"
 }
 hotkey-overlay {
     skip-at-startup
@@ -350,10 +350,6 @@ window-rule {
     open-floating false
 }
 window-rule {
-    match app-id=r#"^org\.wezfurlong\.wezterm$"#
-    match app-id="Alacritty"
-    match app-id="zen"
-    match app-id="com.mitchellh.ghostty"
     match app-id="kitty"
     draw-border-with-background false
 }
@@ -362,7 +358,6 @@ window-rule {
     opacity 0.9
 }
 window-rule {
-    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
     match app-id="zoom"
     open-floating true
 }
@@ -422,7 +417,17 @@ window-rule {
     match title="Emacs"
     exclude title="Doom Notes"
     match title="kitty"
+    exclude title="^btop$"
     open-on-workspace "code"
+}
+
+window-rule {
+    match app-id="btop-float"
+    open-floating true
+    open-maximized true
+    default-column-width { fixed 1200; }
+    default-window-height { fixed 810; }
+    geometry-corner-radius 0
 }
 
 // window-rule {
@@ -432,75 +437,76 @@ window-rule {
     // default-window-height { fixed 900; }
 // }
 
+recent-windows {
+    // off
+    debounce-ms 750
+
+    open-delay-ms 50
+
+    highlight {
+        active-color "#999999ff"
+        urgent-color "#ff9999ff"
+        padding 30
+        corner-radius 0
+    }
+
+    previews {
+        max-height 480
+        max-scale 0.5
+    }
+
+    binds {
+        Alt+Tab         { next-window; }
+        Alt+Shift+Tab   { previous-window; }
+        Alt+grave       { next-window     filter="app-id"; }
+        Alt+Shift+grave { previous-window filter="app-id"; }
+
+        Mod+Tab         { next-window; }
+        Mod+Shift+Tab   { previous-window; }
+        Mod+grave       { next-window     filter="app-id"; }
+        Mod+Shift+grave { previous-window filter="app-id"; }
+    }
+}
+
 binds {
     // === System & Overview ===
     Mod+D { spawn "niri" "msg" "action" "toggle-overview"; }
     Mod+Tab repeat=false { toggle-overview; }
     Mod+Shift+Colon { show-hotkey-overlay; }
-    Mod+P {
-        spawn "dms" "ipc" "call" "powermenu" "toggle";
-    }
 
     // === Application Launchers ===
     Mod+T hotkey-overlay-title="Open Terminal" { spawn "kitty"; }
-    // Mod+Space hotkey-overlay-title="Application Launcher" {
-    //     spawn "dms" "ipc" "call" "spotlight" "toggle";
-    // }
     Mod+Space hotkey-overlay-title="Application Launcher" {
         spawn "fuzzel";
     }
-
+    
     Mod+O { spawn-sh "/home/mabagar/scripts/fuzzel-file-actions.sh"; }
+    Mod+V { spawn-sh "/home/mabagar/scripts/fuzzel-clipboard.sh"; }
+    Mod+P { spawn-sh "/home/mabagar/scripts/fuzzel-powermenu.sh"; }
 
-    Mod+E {spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main";}
+    Mod+E { spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main"; }
 
-    Mod+V hotkey-overlay-title="Clipboard Manager" {
-        spawn "dms" "ipc" "call" "clipboard" "toggle";
-    }
-    Mod+M hotkey-overlay-title="Task Manager" {
-        spawn "dms" "ipc" "call" "processlist" "toggle";
-    }
-    Mod+Comma hotkey-overlay-title="Settings" {
-        spawn "dms" "ipc" "call" "settings" "toggle";
-    }
-    Mod+Y hotkey-overlay-title="Browse Wallpapers" {
-        spawn "dms" "ipc" "call" "dankdash" "wallpaper";
-    }
     Mod+N hotkey-overlay-title="Notification Center" { spawn "dms" "ipc" "call" "notifications" "toggle"; }
-    // Mod+Shift+N hotkey-overlay-title="Notepad" { spawn "dms" "ipc" "call" "notepad" "toggle"; }
-    // Mod+Shift+N { spawn-sh "emacsclient -n -e '(toggle-named-frame \"Doom Notes\")'"; }
     Mod+Shift+N { spawn-sh " emacsclient --alternate-editor= --reuse-frame -n --socket-name=utils -e '(toggle-named-frame \"Doom Notes\")' "; }
 
     // === Security ===
     Mod+Alt+L hotkey-overlay-title="Lock Screen" {
-        spawn "dms" "ipc" "call" "lock" "lock";
+        spawn "swaylock" "-l" "-c" "000000";
+    }
+    Ctrl+Alt+Delete hotkey-overlay-title="Task Manager" {
+        spawn "kitty" "-o" "window_padding_width=0" "--class" "btop-float" "btop" ;
     }
     Mod+Shift+E { quit; }
-    Ctrl+Alt+Delete hotkey-overlay-title="Task Manager" {
-        spawn "dms" "ipc" "call" "processlist" "toggle";
-    }
 
     // === Audio Controls ===
-    XF86AudioRaiseVolume allow-when-locked=true {
-        spawn "dms" "ipc" "call" "audio" "increment" "3";
-    }
-    XF86AudioLowerVolume allow-when-locked=true {
-        spawn "dms" "ipc" "call" "audio" "decrement" "3";
-    }
-    XF86AudioMute allow-when-locked=true {
-        spawn "dms" "ipc" "call" "audio" "mute";
-    }
-    XF86AudioMicMute allow-when-locked=true {
-        spawn "dms" "ipc" "call" "audio" "micmute";
-    }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.02+ -l 1.0"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.02-"; }
+    XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
 
     // === Brightness Controls ===
-    XF86MonBrightnessUp allow-when-locked=true {
-       spawn "dms" "ipc" "call" "brightness" "increment" "5" "";
-    }
-    XF86MonBrightnessDown allow-when-locked=true {
-       spawn "dms" "ipc" "call" "brightness" "decrement" "5" "";
-    }
+    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
 
     // === Window Management ===
     Mod+Q repeat=false { close-window; }
@@ -649,15 +655,9 @@ binds {
 
 
     // MediaPlayer
-    XF86AudioPrev allow-when-locked=true {
-     spawn "dms" "ipc" "call" "mpris" "previous";
-    }
-    XF86AudioNext allow-when-locked=true {
-     spawn "dms" "ipc" "call" "mpris" "next";
-    }
-    XF86AudioPlay allow-when-locked=true {
-     spawn "dms" "ipc" "call" "mpris" "playPause";
-    }
+    XF86AudioPlay        allow-when-locked=true { spawn-sh "playerctl play-pause"; }
+    XF86AudioPrev        allow-when-locked=true { spawn-sh "playerctl previous"; }
+    XF86AudioNext        allow-when-locked=true { spawn-sh "playerctl next"; }
 }
 debug {
     honor-xdg-activation-with-invalid-serial
