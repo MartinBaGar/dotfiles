@@ -3,7 +3,7 @@ IMAPAccount gmail
 Host imap.gmail.com
 User martbari.g@gmail.com
 PassCmd "gpg --quiet --for-your-eyes-only --no-tty --decrypt ~/.authinfo.gpg | awk '/machine imap.gmail.com/ {print $6}'"
-TLSType IMAPS
+SSLTYPE IMAPS
 AuthMechs LOGIN
 
 IMAPStore gmail-remote

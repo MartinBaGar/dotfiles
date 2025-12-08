@@ -260,8 +260,7 @@ packages when appropriate. Answer clearly with clean LaTeX code. Keep responses 
                                        (cons "pdf" #'citar-file-open-external)
                                            (cons t #'find-file)))
 
-(setq! citar-library-paths '("/mnt/c/Users/martb/Documents/zotero-lib/"))
-;; (setq! citar-library-paths '("~/zotero-lib/"))
+(setq! citar-library-paths '("~/zotero-lib/"))
 
   (defun my-citar-open-in-zotero ()
     "Open current entry in Zotero instead of opening files."
@@ -455,12 +454,15 @@ Works on selected region if active, otherwise on whole buffer."
 (after! cc-mode
   (set-eglot-client! 'cc-mode '("clangd" "-j=3" "--clang-tidy")))
 
+(add-to-list 'load-path "~/.local/share/emacs/site-lisp/mu4e")
+
 (after! mu4e
   (setq sendmail-program (executable-find "msmtp")
         send-mail-function #'smtpmail-send-it
         message-sendmail-f-is-evil t
         message-sendmail-extra-arguments '("--read-envelope-from")
         message-send-mail-function #'message-send-mail-with-sendmail)
+  
   ;; Where mail is stored
   (setq mu4e-maildir "~/.mail/gmail")
 

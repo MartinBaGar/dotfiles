@@ -245,19 +245,16 @@ layout {
 }
 
 workspace "navigation" {
-    open-on-output "HDMI-A-1"
+    open-on-output "HDMI-A-2"
     }
 workspace "code" {
-    open-on-output "HDMI-A-1"
+    open-on-output "HDMI-A-2"
     }
 workspace "chat" {
-    open-on-output "HDMI-A-1"
+    open-on-output "HDMI-A-2"
     }
 workspace "lecture" {
-    open-on-output "HDMI-A-1"
-    }
-workspace "gaming" {
-    open-on-output "HDMI-A-1"
+    open-on-output "HDMI-A-2"
     }
 
 layer-rule {
@@ -278,6 +275,7 @@ overview {
 // spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
 // spawn-at-startup "/usr/bin/kanshi"
 spawn-at-startup "waybar"
+spawn-at-startup "swaybg" "--i" "Images/Wallpapers/harambe_arms_crossed.jpg" "-m" "tile"
 environment {
   XDG_CURRENT_DESKTOP "niri"
   QT_QPA_PLATFORM "wayland"
@@ -397,9 +395,10 @@ window-rule {
 }
 
 window-rule {
+    match app-id="Zotero"
     match app-id="com.github.th_ch.youtube_music"
     open-maximized true
-    open-on-workspace "chat"
+    open-on-workspace "lecture"
 }
 
 window-rule {
@@ -630,6 +629,9 @@ binds {
     XF86AudioPlay allow-when-locked=true {
      spawn "playerctl" "play-pause";
     }
+
+    Alt+Up allow-when-locked=true { spawn "brightnessctl" "s" "+5%"; }
+    Alt+Down allow-when-locked=true { spawn "brightnessctl" "s" "5%-"; }
 }
 debug {
     honor-xdg-activation-with-invalid-serial
