@@ -26,7 +26,7 @@ IMAPAccount zmail
 Host zmail.ibpc.fr
 User bari-garnier@ibpc.fr
 PassCmd "gpg --quiet --for-your-eyes-only --no-tty --decrypt ~/.authinfo.gpg | awk '/machine zmail.ibpc.fr/ {print $6}'"
-SSLTYPE STARTTLS
+TLSType IMAPS
 AuthMechs LOGIN
 
 IMAPStore zmail-remote
