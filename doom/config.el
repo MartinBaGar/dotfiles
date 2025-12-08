@@ -260,8 +260,7 @@ packages when appropriate. Answer clearly with clean LaTeX code. Keep responses 
                                        (cons "pdf" #'citar-file-open-external)
                                            (cons t #'find-file)))
 
-(setq! citar-library-paths '("/mnt/c/Users/martb/Documents/zotero-lib/"))
-;; (setq! citar-library-paths '("~/zotero-lib/"))
+(setq! citar-library-paths '("~/zotero-lib/"))
 
   (defun my-citar-open-in-zotero ()
     "Open current entry in Zotero instead of opening files."
@@ -461,39 +460,79 @@ Works on selected region if active, otherwise on whole buffer."
         message-sendmail-f-is-evil t
         message-sendmail-extra-arguments '("--read-envelope-from")
         message-send-mail-function #'message-send-mail-with-sendmail)
-  ;; Where mail is stored
-  (setq mu4e-maildir "~/.mail/gmail")
-
+  
   ;; Tell mu4e how to fetch mail
   (setq mu4e-get-mail-command "mbsync -Va"
         mu4e-update-interval 60) ;; update every 1 min
   (setq mu4e-sent-messages-behavior 'delete)
   (setq message-kill-buffer-on-exit t)
   (setq mu4e-change-filenames-when-moving t)
-  ;; Basic account setup
+  
+  ;; Gmail account - USING ACTUAL FRENCH FOLDER NAMES
   (set-email-account! "gmail"
-    '((mu4e-sent-folder       . "/Sent")
-      (mu4e-drafts-folder     . "/Drafts")
-      (mu4e-trash-folder      . "/Trash")
-      (mu4e-refile-folder     . "/Archive")
+    '((mu4e-sent-folder       . "/gmail/[Gmail]/Messages envoy&AOk-s")  ; Sent in French
+      (mu4e-drafts-folder     . "/gmail/[Gmail]/Brouillons")            ; Drafts in French
+      (mu4e-trash-folder      . "/gmail/[Gmail]/Corbeille")             ; Trash in French
+      (mu4e-refile-folder     . "/gmail/[Gmail]/Tous les messages")     ; All Mail in French
       (smtpmail-smtp-user     . "martbari.g@gmail.com")
       (smtpmail-smtp-server   . "smtp.gmail.com")
       (smtpmail-smtp-service  . 587)
       (smtpmail-stream-type   . starttls)
-      (user-mail-address      . "martbari.g@gmail.com")
-      ;; (mu4e-compose-signature . "Martin Bari Garnier")
-      )
+      (user-mail-address      . "martbari.g@gmail.com"))
     t)
+    
+  ;; Zmail account - using actual folder names
+  (set-email-account! "zmail"
+    '((mu4e-sent-folder       . "/zmail/Sent")
+      (mu4e-drafts-folder     . "/zmail/Drafts")
+      (mu4e-trash-folder      . "/zmail/Trash")
+      (mu4e-refile-folder     . "/zmail/INBOX")
+      (smtpmail-smtp-user     . "bari-garnier@ibpc.fr")
+      (smtpmail-smtp-server   . "zmail.ibpc.fr")
+      (smtpmail-smtp-service  . 587)
+      (smtpmail-stream-type   . starttls)
+      (user-mail-address      . "bari-garnier@ibpc.fr"))
+    nil)
 
   ;; Gmail performance tweaks
   (setq mu4e-index-cleanup nil
         mu4e-index-lazy-check t)
   
- (setq mu4e-bookmarks
-  '((:name "Unread messages" :query "flag:unread AND NOT flag:trashed AND NOT maildir:/gmail/[Gmail]/Spam" :key 117)
-    (:name "Today's messages" :query "date:today..now AND NOT maildir:/gmail/[Gmail]/Spam" :key 116)
-    (:name "Gmail No spam" :query "maildir:/gmail/INBOX AND NOT maildir:/gmail/[Gmail]/Spam" :key 119)
-    (:name "Last 7 days" :query "date:7d..now AND NOT maildir:/gmail/[Gmail]/Spam" :hide-unread t :key 112))))
+    ;; Bookmarks
+  (setq mu4e-bookmarks
+    '(;; Universal
+      (:name "All Unread" 
+       :query "flag:unread AND NOT flag:trashed" 
+       :key 117)
+      ;; Gmail specific
+      (:name "Gmail Unread" 
+       :query "flag:unread AND maildir:/gmail/* AND NOT maildir:/gmail/[Gmail]/Spam" 
+       :key ?g)
+      (:name "Gmail Today" 
+       :query "date:today..now AND maildir:/gmail/* AND NOT maildir:/gmail/[Gmail]/Spam" 
+       :key ?G)
+      ;; Zmail specific (using capitalized folders)
+      (:name "Zmail Unread" 
+       :query "flag:unread AND maildir:/zmail/* AND NOT maildir:/zmail/Junk" 
+       :key ?z)
+      (:name "Zmail Today" 
+       :query "date:today..now AND maildir:/zmail/* AND NOT maildir:/zmail/Junk" 
+       :key ?Z)
+      ;; Other
+      (:name "Last 7 days" 
+       :query "date:7d..now" 
+       :hide-unread t 
+       :key 112))))
+  
+ ;; (setq mu4e-bookmarks
+ ;;  '((:name "Unread messages" :query "flag:unread AND NOT flag:trashed AND NOT maildir:/gmail/[Gmail]/Spam" :key 117)
+ ;;    (:name "Today's messages" :query "date:today..now AND NOT maildir:/gmail/[Gmail]/Spam" :key 116)
+ ;;    (:name "Gmail No spam" :query "maildir:/gmail/INBOX AND NOT maildir:/gmail/[Gmail]/Spam" :key 119)
+ ;;    (:name "Last 7 days" :query "date:7d..now AND NOT maildir:/gmail/[Gmail]/Spam" :hide-unread t :key 112))))
+
+(after! uv-mode
+  (add-hook 'python-mode-hook #'uv-mode-auto-activate-hook)
+  )
 
 (setq wl-copy-process nil)
 (defun wl-copy (text)
