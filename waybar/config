@@ -14,7 +14,7 @@
     "format": "{name}"
   },
   "niri/window": {
-  	"format": "{}",
+  	"format": "{title} - {app_id}",
     "max-length": 40,
   	"rewrite": {
   		"(.*) - Mozilla Firefox": "🌎 $1",
