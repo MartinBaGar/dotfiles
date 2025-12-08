@@ -417,7 +417,7 @@ window-rule {
     match title="Emacs"
     exclude title="Doom Notes"
     match title="kitty"
-    exclude title="^btop$"
+    exclude app-id="btop-float"
     open-on-workspace "code"
 }
 
