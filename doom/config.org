@@ -640,6 +640,29 @@ Works on selected region if active, otherwise on whole buffer."
 ;;         frame))))
 
 ;; For niri to toggle a notepad
+;; (defun toggle-named-frame (frame-name &rest frame-params)
+;;   "Toggle a frame with FRAME-NAME. Create if doesn't exist, delete if exists.
+;; When created, opens a persistent Doom scratch buffer in writeroom-mode.
+;; FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
+;;   (let ((target-frame (seq-find 
+;;                        (lambda (f) 
+;;                          (string= (frame-parameter f 'name) frame-name))
+;;                        (frame-list))))
+;;     (if target-frame
+;;         (delete-frame target-frame)
+;;       (let ((frame (make-frame (append `((name . ,frame-name)) frame-params))))
+;;         (with-selected-frame frame
+;;           ;; Use existing scratch buffer or create/restore it
+;;           (let ((scratch-buf (doom-scratch-buffer 
+;;                              nil  ; DO restore from disk
+;;                              nil  ; use default mode
+;;                              default-directory
+;;                              frame-name)))
+;;             (switch-to-buffer scratch-buf)
+;;             (writeroom-mode 1)))
+;;         frame))))
+
+;; For niri to toggle a notepad
 (defun toggle-named-frame (frame-name &rest frame-params)
   "Toggle a frame with FRAME-NAME. Create if doesn't exist, delete if exists.
 When created, opens a persistent Doom scratch buffer in writeroom-mode.
@@ -652,39 +675,24 @@ FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
         (delete-frame target-frame)
       (let ((frame (make-frame (append `((name . ,frame-name)) frame-params))))
         (with-selected-frame frame
-          ;; Use existing scratch buffer or create/restore it
-          (let ((scratch-buf (doom-scratch-buffer 
-                             nil  ; DO restore from disk
-                             nil  ; use default mode
-                             default-directory
-                             frame-name)))
+          (let ((scratch-buf (doom-scratch-buffer nil nil default-directory frame-name)))
             (switch-to-buffer scratch-buf)
             (writeroom-mode 1)))
         frame))))
 
-;; (defun toggle-named-frame (frame-name &rest frame-params)
-;;   "Toggle a frame with FRAME-NAME. Create if doesn't exist, delete if exists.
-;; When created, opens a persistent Doom scratch buffer in writeroom-mode.
-;; FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
-;;   (let ((target-frame (seq-find 
-;;                        (lambda (f) 
-;;                          (string= (frame-parameter f 'name) frame-name))
-;;                        (frame-list))))
-;;     (if target-frame
-;;         (delete-frame target-frame)
-;;       (let ((frame (make-frame (append `((name . ,frame-name)
-;;                                          (title . ,frame-name)) ; Explicitly set title too
-;;                                        frame-params))))
-;;         (with-selected-frame frame
-;;           ;; Set title again to ensure it's applied
-;;           (set-frame-parameter frame 'title frame-name)
-;;           ;; Use existing scratch buffer or create/restore it
-;;           (let ((scratch-buf (doom-scratch-buffer 
-;;                              nil  ; DO restore from disk
-;;                              nil  ; use default mode
-;;                              default-directory
-;;                              frame-name)))
-;;             (switch-to-buffer scratch-buf)
-;;             (writeroom-mode 1)))
-;;         frame))))
+;; For niri to toggle mu4e mail client
+(defun toggle-named-frame-mu4e (frame-name &rest frame-params)
+  "Toggle a frame with FRAME-NAME for mu4e. Create if doesn't exist, delete if exists.
+When created, launches mu4e.
+FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
+  (let ((target-frame (seq-find 
+                       (lambda (f) 
+                         (string= (frame-parameter f 'name) frame-name))
+                       (frame-list))))
+    (if target-frame
+        (delete-frame target-frame)
+      (let ((frame (make-frame (append `((name . ,frame-name)) frame-params))))
+        (with-selected-frame frame
+          (=mu4e))
+        frame))))
 #+end_src
