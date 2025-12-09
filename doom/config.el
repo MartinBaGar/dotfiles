@@ -284,6 +284,27 @@ Works on selected region if active, otherwise on whole buffer."
         (while (re-search-forward "\\[\\([^]]+\\)\\](\\([^)]+\\))" nil t)
           (replace-match "[[\\2][\\1]]"))))))
 
+(defun my/insert-zotero-notes ()
+  "Select a citation via Citar, fetch its notes via Python, and insert at point."
+  (interactive)
+  (let* ((selection (citar-select-ref))
+         (citation-key (if (listp selection) (car selection) selection)))
+    
+    (if (or (not citation-key) (string-empty-p citation-key))
+        (message "No reference selected.")
+      
+      (let* ((script-path (expand-file-name "/home/bari-garnier/scripts/python/zotero_content.py"))
+             (python-cmd "/home/bari-garnier/.venv/bin/python")
+             (cmd (format "%s \"%s\" \"%s\"" python-cmd script-path citation-key)))
+        
+        (message "Fetching notes for %s..." citation-key)
+        
+        (let ((output (shell-command-to-string cmd)))
+          (if (string-empty-p output)
+              (message "Script ran but returned no output.")
+            (insert output)
+            (message "Done.")))))))
+
 ;; The proper Doom way
 (setq-hook! 'markdown-mode-hook
   markdown-hide-markup t
