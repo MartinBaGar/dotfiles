@@ -1,4 +1,4 @@
-;;; doom-myoksolar-light-theme.el --- an OKLab variant of Solarized light -*- lexical-binding: t; no-byte-compile: t; -*-
+;;; doom-mynewoksolar-light-theme.el --- an OKLab variant of Solarized light -*- lexical-binding: t; no-byte-compile: t; -*-
 ;;
 ;; Added:
 ;; Author: logc <https://github.com/logc>
@@ -15,38 +15,38 @@
 ;;
 ;;; Variables
 
-(defgroup doom-myoksolar-light-theme nil
-  "Options for the `doom-myoksolar-light' theme."
+(defgroup doom-mynewoksolar-light-theme nil
+  "Options for the `doom-mynewoksolar-light' theme."
   :group 'doom-themes)
 
-(defcustom doom-myoksolar-light-brighter-modeline nil
+(defcustom doom-mynewoksolar-light-brighter-modeline nil
   "If non-nil, more vivid colors will be used to style the mode-line."
-  :group 'doom-myoksolar-light-theme
+  :group 'doom-mynewoksolar-light-theme
   :type 'boolean)
 
-(defcustom doom-myoksolar-light-brighter-comments nil
+(defcustom doom-mynewoksolar-light-brighter-comments nil
   "If non-nil, comments will be highlighted in more vivid colors."
-  :group 'doom-myoksolar-light-theme
+  :group 'doom-mynewoksolar-light-theme
   :type 'boolean)
 
-(defcustom doom-myoksolar-light-padded-modeline doom-themes-padded-modeline
+(defcustom doom-mynewoksolar-light-padded-modeline doom-themes-padded-modeline
   "If non-nil, adds a 4px padding to the mode-line.
 Can be an integer to determine the exact padding."
-  :group 'doom-myoksolar-light-theme
+  :group 'doom-mynewoksolar-light-theme
   :type '(choice integer boolean))
 
 
 ;;
 ;;; Theme definition
 
-(def-doom-theme doom-myoksolar-light
+(def-doom-theme doom-mynewoksolar-light
     "A light theme inspired by OKSolar."
-  :family 'doom-myoksolar
+  :family 'doom-mynewoksolar
   :background-mode 'light
 
   ;; name        default   256       16
   ((bg         '("#FBF7EF" "#FBF7EF" "white"        ))
-   (fg         '("#657377" "#657377" "black"        ))
+   (fg         '("#6E7B7F" "#6E7B7F" "black"        ))
 
    ;; These are off-color variants of bg/fg, used primarily for `solaire-mode',
    ;; but can also be useful as a basis for subtle highlights (e.g. for hl-line
@@ -65,9 +65,9 @@ Can be an integer to determine the exact padding."
    (base3      '("#FCF7E8" "#FCF7E8" "brightblack"  ))
    (base4      '("#8FAAAB" "#8FAAAB" "brightblack"  ))
    (base5      '("#98A8A8" "#98A8A8" "brightblack"  ))
-   (base6      '("#657377" "#657377" "brightblack"  ))
+   (base6      '("#6E7B7F" "#6E7B7F" "black"        ))
    (base7      '("#5B7279" "#5B7279" "brightblack"  ))
-   (base8      '("#657377" "#657377" "brightblack"  ))
+   (base8      '("#6E7B7F" "#6E7B7F" "black"        ))
 
    (grey       base4)
    (red        '("#F23749" "#ff6655" "red"          ))
@@ -87,7 +87,7 @@ Can be an integer to determine the exact padding."
    (vertical-bar   base4)
    (selection      dark-blue)
    (builtin        magenta)
-   (comments       (if doom-myoksolar-light-brighter-comments
+   (comments       (if doom-mynewoksolar-light-brighter-comments
                        (doom-lighten teal 0.25)
                      base6))
    (doc-comments   teal)
@@ -109,10 +109,10 @@ Can be an integer to determine the exact padding."
    (vc-deleted     red)
 
    ;; custom categories
-   (-modeline-bright doom-myoksolar-light-brighter-modeline)
+   (-modeline-bright doom-mynewoksolar-light-brighter-modeline)
    (-modeline-pad
-    (when doom-myoksolar-light-padded-modeline
-      (if (integerp doom-myoksolar-light-padded-modeline) doom-myoksolar-light-padded-modeline 4)))
+    (when doom-mynewoksolar-light-padded-modeline
+      (if (integerp doom-mynewoksolar-light-padded-modeline) doom-mynewoksolar-light-padded-modeline 4)))
 
    (modeline-fg     'unspecified)
    (modeline-fg-alt base6)
@@ -132,7 +132,7 @@ Can be an integer to determine the exact padding."
   ;;;; Base theme face overrides
   (((font-lock-comment-face &override)
     :slant 'italic
-    :background (if doom-myoksolar-light-brighter-comments
+    :background (if doom-mynewoksolar-light-brighter-comments
                     (doom-blend teal base0 0.07)
                   'unspecified))
    ((font-lock-type-face &override) :slant 'italic)
@@ -209,6 +209,7 @@ Can be an integer to determine the exact padding."
    (notmuch-message-summary-face :foreground teal)
    (notmuch-wash-cited-text :foreground base6)
    ;;;; Outlines
+   (org-document-title :foreground blue :weight 'bold)
    (outline-1 :height 1.4 :foreground blue :weight 'bold)
    (outline-2 :height 1.2 :foreground magenta :weight 'bold)
    (outline-3 :height 1.1 :foreground violet :weight 'bold)
@@ -223,4 +224,4 @@ Can be an integer to determine the exact padding."
   ;; ()
   )
 
-;;; doom-myoksolar-light-theme.el ends here
+;;; doom-mynewoksolar-light-theme.el ends here

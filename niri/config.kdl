@@ -256,6 +256,9 @@ workspace "chat" {
 workspace "lecture" {
     open-on-output "HDMI-A-2"
     }
+workspace "VMD" {
+    open-on-output "HDMI-A-2"
+    }
 
 layer-rule {
     match namespace="^quickshell$"
@@ -446,6 +449,32 @@ window-rule {
     geometry-corner-radius 0
 }
 
+// VMD windows
+window-rule {
+    // match title=r#"^VMD Display$"#
+    match title="^VMD.*Display.*"
+    default-column-width { proportion 0.6; }
+    default-floating-position x=0 y=0 relative-to="bottom-left"
+    open-on-workspace "VMD"
+}
+
+window-rule {
+    match title=r#"^VMD Main$"#
+    // match title="VMD Main"
+    default-column-width { proportion 0.4; }
+    open-on-workspace "VMD"
+    default-column-display "normal"
+}
+
+window-rule {
+    // match title="Colvars dashboard"
+    // match title="^VMD.*TkConsole$"
+    match title="VMD TkConsole"
+    default-column-width { proportion 0.4; }
+    open-on-workspace "VMD"
+    default-column-display "normal"
+}
+
 binds {
     // === System & Overview ===
     Mod+D { spawn "niri" "msg" "action" "toggle-overview"; }
@@ -545,18 +574,18 @@ binds {
     // === Workspace Navigation ===
     Mod+Page_Down      { focus-workspace-down; }
     Mod+Page_Up        { focus-workspace-up; }
-    Mod+U              { focus-workspace-down; }
-    Mod+I              { focus-workspace-up; }
+    // Mod+U              { focus-workspace-down; }
+    // Mod+I              { focus-workspace-up; }
     Mod+Ctrl+Down { move-column-to-workspace-down; }
     Mod+Ctrl+Up   { move-column-to-workspace-up; }
-    Mod+Ctrl+U         { move-column-to-workspace-down; }
-    Mod+Ctrl+I         { move-column-to-workspace-up; }
+    // Mod+Ctrl+U         { move-column-to-workspace-down; }
+    // Mod+Ctrl+I         { move-column-to-workspace-up; }
 
     // === Move Workspaces ===
     Mod+Shift+Page_Down { move-workspace-down; }
     Mod+Shift+Page_Up   { move-workspace-up; }
-    Mod+Shift+U         { move-workspace-down; }
-    Mod+Shift+I         { move-workspace-up; }
+    // Mod+Shift+U         { move-workspace-down; }
+    // Mod+Shift+I         { move-workspace-up; }
 
     // === Mouse Wheel Navigation ===
     Mod+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
@@ -579,7 +608,7 @@ binds {
     Mod+Eacute { focus-workspace "code"; }
     Mod+Quotedbl { focus-workspace "chat"; }
     Mod+Apostrophe { focus-workspace "lecture"; }
-    Mod+5 { focus-workspace 5; }
+    Mod+Agrave { focus-workspace "VMD"; }
     Mod+6 { focus-workspace 6; }
     Mod+7 { focus-workspace 7; }
     Mod+8 { focus-workspace 8; }
@@ -590,15 +619,15 @@ binds {
     Mod+Shift+Eacute { move-column-to-workspace "code"; }
     Mod+Shift+Quotedbl { move-column-to-workspace "chat"; }
     Mod+Shift+Apostrophe { move-column-to-workspace "lecture"; }
-    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+Agrave { move-column-to-workspace "VMD"; }
     Mod+Shift+6 { move-column-to-workspace 6; }
     Mod+Shift+7 { move-column-to-workspace 7; }
     Mod+Shift+8 { move-column-to-workspace 8; }
     Mod+Shift+9 { move-column-to-workspace 9; }
 
     // === Column Management ===
-    Mod+BracketLeft  { consume-or-expel-window-left; }
-    Mod+BracketRight { consume-or-expel-window-right; }
+    Mod+U  { consume-or-expel-window-left; }
+    Mod+I { consume-or-expel-window-right; }
     Mod+Period { expel-window-from-column; }
 
     // === Sizing & Layout ===
