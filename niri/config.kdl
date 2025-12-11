@@ -501,7 +501,8 @@ binds {
 
     // === Security ===
      Mod+Alt+L hotkey-overlay-title="Lock Screen" {
-        spawn "swaylock" "-l" "--color" "000000";
+        // spawn "swaylock" "-l" "--color" "000000";
+        spawn-sh "dunstctl set-paused true && swaylock -l --color 000000 && dunstctl set-paused false";
     }
     Ctrl+Alt+Delete hotkey-overlay-title="Task Manager" {
         spawn "kitty" "-o" "window_padding_width=0" "--class" "btop-float" "btop" ; }
@@ -524,7 +525,8 @@ binds {
     Mod+Shift+F { fullscreen-window; }
     Mod+Shift+T { toggle-window-floating; }
     Mod+Shift+V { switch-focus-between-floating-and-tiling; }
-    Mod+W { toggle-column-tabbed-display; }
+    // Mod+W { toggle-column-tabbed-display; }
+    Mod+W { spawn-sh "~/scripts/bash/reload_waybar.sh"; }
 
     // === Focus Navigation ===
     Mod+Left  { focus-column-left; }

@@ -73,6 +73,21 @@ window#waybar {
   color: #e5e7eb;
   transition: background 0.2s ease, box-shadow 0.15s ease;
 }
+#custom-dunst {
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0 4px;
+  padding: 6px 12px;
+
+  color: #e5e7eb;
+  transition: background 0.2s ease, box-shadow 0.15s ease;
+}
+#custom-dunst.enabled {
+    color: #a6e3a1;
+}
+
+#custom-dunst.disabled {
+    color: #f38ba8;
+}
 
 #clock:hover,
 #mpris:hover,

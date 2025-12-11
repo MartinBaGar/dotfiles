@@ -8,6 +8,7 @@
   "mpris",
   "pulseaudio",
   "clock",
+  "custom/dunst",
   "custom/power",
   ],
   "niri/workspaces": {
@@ -21,8 +22,14 @@
   		"(.*) - zsh": "> [$1]"
   	}
   },
+"custom/dunst": {
+    "exec": "~/scripts/bash/dunst.sh",
+    "return-type": "json",
+    "on-click": "dunstctl history-pop",
+    "on-click-right": "dunstctl set-paused toggle"
+},
  "custom/power": {
-    "format" : "  ⏻  ",
+    "format" : "⏻",
         "tooltip": false,
         "menu": "on-click",
         "menu-file": "~/.config/waybar/power_menu.xml",
