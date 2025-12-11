@@ -451,7 +451,6 @@ window-rule {
 
 // VMD windows
 window-rule {
-    // match title=r#"^VMD Display$"#
     match title="^VMD.*Display.*"
     default-column-width { proportion 0.6; }
     default-floating-position x=0 y=0 relative-to="bottom-left"
@@ -460,19 +459,23 @@ window-rule {
 
 window-rule {
     match title=r#"^VMD Main$"#
-    // match title="VMD Main"
     default-column-width { proportion 0.4; }
     open-on-workspace "VMD"
     default-column-display "normal"
 }
 
 window-rule {
-    // match title="Colvars dashboard"
-    // match title="^VMD.*TkConsole$"
     match title="VMD TkConsole"
     default-column-width { proportion 0.4; }
     open-on-workspace "VMD"
     default-column-display "normal"
+}
+// End of VMD
+
+window-rule {
+    match app-id="ferdium"
+    open-on-workspace "chat"
+    open-maximized true
 }
 
 binds {
