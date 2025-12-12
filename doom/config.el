@@ -43,9 +43,12 @@
   )
 
 (setq org-image-max-width 500)
+(setq +zen-text-scale 0.5)
+
 (after! org
   (add-hook! 'org-mode-hook #'org-modern-mode)
   (add-hook! 'org-mode-hook #'+org-pretty-mode)
+  (add-hook! 'org-mode-hook #'+zen/toggle)
 
   ;; TODOs
   (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
@@ -173,23 +176,22 @@
 (use-package! gptel
   :config
   ;; Register Mistral backend
-  (gptel-make-openai "Mistral"
-    :host "api.mistral.ai"
-    :endpoint "/v1/chat/completions"
-    :models '("mistral-small" "mistral-medium")
-    :key #'gptel-api-key-from-auth-source)
+(gptel-make-openai "Mistral"
+  :host "api.mistral.ai"
+  :endpoint "/v1/chat/completions"
+  :models '("mistral-small-latest" "mistral-large-latest" "codestral-latest" "ministral-8b-latest")
+  :key #'gptel-api-key-from-auth-source)
 
   ;; Groq offers an OpenAI compatible API
-    (gptel-make-openai "Groq"
-    :host "api.groq.com"
-    :endpoint "/openai/v1/chat/completions"
-    :stream nil
-    :key #'gptel-api-key-from-auth-source
-    :models '(llama-3.1-70b-versatile
-                llama-3.1-8b-instant
-                llama3-70b-8192
-                llama3-8b-8192
-                mixtral-8x7b-32768))
+    ;; (gptel-make-openai "Groq"
+    ;; :host "api.groq.com"
+    ;; :endpoint "/openai/v1/chat/completions"
+    ;; :stream nil
+    ;; :key #'gptel-api-key-from-auth-source
+    ;; :models '(llama-3.1-70b-versatile
+    ;;             llama-3.1-8b-instant
+    ;;             llama3-70b-8192
+    ;;             llama3-8b-8192))
 
    ;; OpenRouter offers an OpenAI compatible API
   (gptel-make-openai "OpenRouter"
@@ -197,10 +199,8 @@
   :endpoint "/api/v1/chat/completions"
   :stream t
   :key #'gptel-api-key-from-auth-source
-  :models '(deepseek/deepseek-r1:free
-            deepseek/deepseek-chat-v3-0324:free
-            google/gemini-2.5-pro-exp-03-25:free
-            google/gemma-3-27b-it:free))
+  :models '(openai/gpt-oss-120b:free
+            tngtech/deepseek-r1t2-chimera:free))
 
   ;; Llama.cpp offers an OpenAI compatible API
   (gptel-make-openai "llama-cpp"          ;Any name
@@ -218,7 +218,7 @@
 
   ;; Default model + backend
   (setq! gptel-backend (gptel-get-backend "Mistral"))
-  (setq! gptel-model 'mistral-small)
+  (setq! gptel-model 'mistral-small-latest)
   (setq! gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
   (setq! gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
   (setq! gptel-default-mode 'org-mode)
