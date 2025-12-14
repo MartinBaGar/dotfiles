@@ -677,6 +677,6 @@ binds {
      spawn "playerctl" "play-pause";
     }
 
-    Alt+Up allow-when-locked=true { spawn "brightnessctl" "s" "+5%"; }
-    Alt+Down allow-when-locked=true { spawn "brightnessctl" "s" "5%-"; }
+    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "s" "+10%"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "s" "10%-"; }
 }
