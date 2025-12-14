@@ -475,7 +475,7 @@ Works on selected region if active, otherwise on whole buffer."
 (after! cc-mode
   (set-eglot-client! 'cc-mode '("clangd" "-j=3" "--clang-tidy")))
 
-(add-to-list 'load-path "~/.local/share/emacs/site-lisp/mu4e")
+(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
 
 (after! mu4e
   (setq sendmail-program (executable-find "msmtp")
