@@ -9,6 +9,7 @@
   "pulseaudio",
   "clock",
   "custom/dunst",
+  "battery",
   "custom/power",
   ],
   "niri/workspaces": {
@@ -22,6 +23,18 @@
   		"(.*) - zsh": "> [$1]"
   	}
   },
+	"battery": {
+        	"states": {
+            		"warning": 30,
+            		"critical": 15
+        	},
+        	"format": "{icon} {capacity}%",
+        	"format-charging": " {capacity}%",
+        	"format-plugged": "{capacity}%",
+        	"format-alt": "{time} {icon}",
+        	"format-full": " {capacity}%",
+        	"format-icons": ["", "", ""]
+	},
 "custom/dunst": {
     "exec": "~/scripts/bash/dunst.sh",
     "return-type": "json",

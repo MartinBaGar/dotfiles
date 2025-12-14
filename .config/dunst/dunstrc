@@ -1,0 +1,125 @@
+# ==========================================================
+# DUNST THEME — Matched to your Waybar CSS
+# JetBrainsMono Nerd Font, soft translucent pills & accents
+# ==========================================================
+
+[global]
+    ### Geometry ###
+    width = 360
+    height = 300
+    origin = top-right
+    offset = 16x16
+    scale = 0
+
+    ### Shape ###
+    corner_radius = 16
+    transparency = 15
+    padding = 12
+    horizontal_padding = 14
+    gap_size = 8
+    frame_width = 1
+
+    ### Font ###
+    font = JetBrainsMono Nerd Font 10
+
+    ### Behavior ###
+    follow = keyboard
+    indicate_hidden = yes
+    shrink = yes
+    idle_threshold = 120
+    show_age_threshold = 60
+
+    ### Icons ###
+    icon_position = left
+    icon_path = /usr/share/icons/Adwaita/16x16/status
+    icon_size = 42
+    show_indicators = yes
+
+    ### Text ###
+    markup = full
+    alignment = left
+    word_wrap = yes
+    ellipsize = middle
+    line_height = 0
+    separator_height = 2
+
+    ### Mouse actions ###
+    mouse_left_click = do_action
+    mouse_middle_click = close_current
+    mouse_right_click = close_all
+
+    ### Default Colors ###
+    frame_color = "#2a2d3d"
+    separator_color = "frame"
+
+    # Waybar background: rgba(20,22,30,0.75)
+    background = "#14161ECC"
+    foreground = "#E5E7EB"
+
+
+# ==========================================================
+# Urgency levels
+# ==========================================================
+
+[urgency_low]
+    timeout = 4
+
+    background = "#14161ECC"
+    foreground = "#CDD6F4"
+    frame_color = "#3b3f54"
+
+
+[urgency_normal]
+    timeout = 6
+
+    background = "#14161ECC"
+    foreground = "#E5E7EB"
+    frame_color = "#7AA2F7"
+
+
+[urgency_critical]
+    timeout = 0
+
+    # Matches Waybar urgent (#f38ba8)
+    background = "#2A0F17EE"
+    foreground = "#F9A8D4"
+    frame_color = "#F38BA8"
+
+    # Slightly bold emphasis
+    format = "<b>%s</b>\n%b"
+
+
+# ==========================================================
+# Rules (optional accents like Waybar modules)
+# ==========================================================
+
+# Media / MPRIS-like notification accent
+[media]
+    appname = "mpd"
+    background = "#1E142BCC"
+    foreground = "#CBA6F7"
+    frame_color = "#CBA6F7"
+
+# Audio volume notifications
+[audio]
+    appname = "pavucontrol"
+    background = "#0F1828CC"
+    foreground = "#89B4FA"
+    frame_color = "#89B4FA"
+
+# Power / system commands
+[power]
+    appname = "systemctl"
+    background = "#2A0F17EE"
+    foreground = "#F38BA8"
+    frame_color = "#F38BA8"
+
+
+# ==========================================================
+# Stacking & Sorting
+# ==========================================================
+
+[stack]
+    stack_duplicates = true
+    hide_duplicate_count = false
+
