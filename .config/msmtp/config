@@ -19,3 +19,5 @@ tls on
 tls_starttls on
 passwordeval "gpg --quiet --for-your-eyes-only --no-tty --decrypt ~/.authinfo.gpg | awk '/machine zmail.ibpc.fr/ {print $6}'"
 logfile ~/.msmtp.logo
+
+account default : gmail
