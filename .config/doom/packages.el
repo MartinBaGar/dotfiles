@@ -73,6 +73,7 @@
 (package! typst-ts-mode :recipe (:host nil :repo "https://git.sr.ht/~meow_king/typst-ts-mode"))
 (package! typst-preview :recipe (:host github :repo "havarddj/typst-preview.el"))
 (package! uv-mode :recipe (:host github :repo "z80dev/uv-mode"))
+(package! whisper :recipe (:host github :repo "natrys/whisper.el"))
 (package! popper :recipe (:host github :repo "karthink/popper"))
 ;; (package! org-alert :recipe (:host github :repo "spegoraro/org-alert"))
                                         ; (package! org-tldraw.el :recipe (:local-repo "~/org-tldraw"))

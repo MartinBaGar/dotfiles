@@ -667,6 +667,7 @@ FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
         (with-selected-frame frame
           (let ((scratch-buf (doom-scratch-buffer nil nil default-directory frame-name)))
             (switch-to-buffer scratch-buf)
+            (org-mode)
             (writeroom-mode 1)))
         frame))))
 
