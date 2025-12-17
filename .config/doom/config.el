@@ -20,6 +20,47 @@
       (yas-expand))))
 (add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
 
+(after! emacs
+  ;; Enable indentation+completion using the TAB key
+  (setq tab-always-indent 'complete)
+
+  ;; Emacs 30+: Disable Ispell completion function
+  (setq text-mode-ispell-word-completion nil)
+
+  ;; Hide commands in M-x which don't apply to the current mode
+  (setq read-extended-command-predicate #'command-completion-default-include-p))
+
+;; (defun +my-setup-cape-dict-h ()
+;;   "Setup cape-dict for text modes, conditionally setting the dictionary file."
+;;   ;; 1. Ensure we only run this in text-mode derived buffers
+;;   (when (derived-mode-p 'text-mode)
+    
+;;     ;; 2. Enable cape-dict for this buffer (append to end of completion list)
+;;     ;;    We do this locally so it doesn't affect other buffers.
+;;     (add-hook 'completion-at-point-functions #'cape-dict 'append 'local)
+
+;;     ;; 3. Check if jinx-languages contains "fr"
+;;     (when (and (bound-and-true-p jinx-languages)
+;;                (string-match-p "fr" jinx-languages))
+;;       ;; If yes, override the dictionary file for this buffer only
+;;       (setq-local cape-dict-file "/usr/share/dict/french"))))
+
+
+(defun +my-setup-cape-dict-h ()
+  (when (derived-mode-p 'text-mode)
+    (add-hook 'completion-at-point-functions #'cape-dict 'append 'local)
+    
+    ;; Use the clean list we just generated
+    (when (and (bound-and-true-p jinx-languages)
+               (string-match-p "fr" jinx-languages))
+      (setq-local cape-dict-file "~/.config/aspell/dict-fr.txt")
+      (setq-local cape-dict-file "/usr/share/dict/words")
+      )))
+
+;; We use hack-local-variables-hook to ensure we run AFTER 
+;; .dir-locals.el or file-local variables have been applied.
+(add-hook! 'hack-local-variables-hook #'+my-setup-cape-dict-h)
+
 (+global-word-wrap-mode +1)
 (add-hook 'writeroom-mode-hook #'+word-wrap-mode)
 
