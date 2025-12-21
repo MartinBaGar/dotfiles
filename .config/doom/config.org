@@ -39,36 +39,17 @@
   ;; Hide commands in M-x which don't apply to the current mode
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
-;; (defun +my-setup-cape-dict-h ()
-;;   "Setup cape-dict for text modes, conditionally setting the dictionary file."
-;;   ;; 1. Ensure we only run this in text-mode derived buffers
-;;   (when (derived-mode-p 'text-mode)
-    
-;;     ;; 2. Enable cape-dict for this buffer (append to end of completion list)
-;;     ;;    We do this locally so it doesn't affect other buffers.
-;;     (add-hook 'completion-at-point-functions #'cape-dict 'append 'local)
-
-;;     ;; 3. Check if jinx-languages contains "fr"
-;;     (when (and (bound-and-true-p jinx-languages)
-;;                (string-match-p "fr" jinx-languages))
-;;       ;; If yes, override the dictionary file for this buffer only
-;;       (setq-local cape-dict-file "/usr/share/dict/french"))))
-
-
 (defun +my-setup-cape-dict-h ()
   (when (derived-mode-p 'text-mode)
     (add-hook 'completion-at-point-functions #'cape-dict 'append 'local)
     
     ;; Use the clean list we just generated
     (when (and (bound-and-true-p jinx-languages)
-               (string-match-p "fr" jinx-languages))
-      (setq-local cape-dict-file "~/.config/aspell/dict-fr.txt")
-      (setq-local cape-dict-file "/usr/share/dict/words")
-      )))
+               (string-match-p "fr" jinx-languages)
+               (not (string-match-p "dict-fr" cape-dict-file)))
+      (setq-local cape-dict-file "~/.config/emacs/dict-fr.txt"))))
 
-;; We use hack-local-variables-hook to ensure we run AFTER 
-;; .dir-locals.el or file-local variables have been applied.
-(add-hook! 'hack-local-variables-hook #'+my-setup-cape-dict-h)
+(add-hook! 'doom-switch-buffer-hook #'+my-setup-cape-dict-h)
 #+end_src
 ** Misc
 #+begin_src emacs-lisp
