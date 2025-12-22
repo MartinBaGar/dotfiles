@@ -505,7 +505,7 @@ binds {
         spawn-sh "dunstctl set-paused true && swaylock -l --color 000000 && dunstctl set-paused false";
     }
     Ctrl+Alt+Delete hotkey-overlay-title="Task Manager" {
-        spawn "kitty" "-o" "window_padding_width=0" "--class" "btop-float" "btop" ; }
+        spawn "kitty" "-o" "window_padding_width=0" "--class" "btop-float" "btop" "--preset" "1" ; }
     Mod+Shift+E { quit; }
 
     // === Audio Controls ===

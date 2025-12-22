@@ -576,6 +576,7 @@ Works on selected region if active, otherwise on whole buffer."
   :custom
   (typst-preview-browser "default")
   (typst-preview-open-browser-automatically t)
+  (typst-preview-executable "~/.config/emacs/.local/cache/.cache/lsp/tinymist/tinymist")
   (typst-preview-autostart t)
   (typst-preview-invert-colors "never"))
 
