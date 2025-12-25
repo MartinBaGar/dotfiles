@@ -82,7 +82,7 @@ input {
 // Find more information on the wiki:
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Outputs
 // Remember to uncomment the node by removing "/-"!
-output "HDMI-A-2" {
+/-output "HDMI-A-2" {
     scale 1.1
 }
 
@@ -245,19 +245,19 @@ layout {
 }
 
 workspace "navigation" {
-    open-on-output "HDMI-A-2"
+    open-on-output "HDMI-A-1"
     }
 workspace "code" {
-    open-on-output "HDMI-A-2"
+    open-on-output "HDMI-A-1"
     }
 workspace "chat" {
-    open-on-output "HDMI-A-2"
+    open-on-output "HDMI-A-1"
     }
 workspace "lecture" {
-    open-on-output "HDMI-A-2"
+    open-on-output "HDMI-A-1"
     }
 workspace "VMD" {
-    open-on-output "HDMI-A-2"
+    open-on-output "HDMI-A-1"
     }
 
 layer-rule {
@@ -275,7 +275,7 @@ overview {
 // see the binds section below for more spawn examples.
 // This line starts waybar, a commonly used bar for Wayland compositors.
 // spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
-// spawn-at-startup "/usr/bin/kanshi"
+spawn-at-startup "/usr/bin/kanshi"
 spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
 spawn-at-startup "waybar"
 spawn-at-startup "swaybg" "--i" "Images/Wallpapers/harambe_arms_crossed.jpg" "-m" "tile"
