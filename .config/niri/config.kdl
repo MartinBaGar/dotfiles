@@ -256,7 +256,7 @@ workspace "chat" {
 workspace "lecture" {
     open-on-output "HDMI-A-1"
     }
-workspace "VMD" {
+workspace "Visualisation" {
     open-on-output "HDMI-A-1"
     }
 
@@ -454,23 +454,29 @@ window-rule {
     match title="^VMD.*Display.*"
     default-column-width { proportion 0.6; }
     default-floating-position x=0 y=0 relative-to="bottom-left"
-    open-on-workspace "VMD"
+    open-on-workspace "Visualisation"
 }
 
 window-rule {
     match title=r#"^VMD Main$"#
     default-column-width { proportion 0.4; }
-    open-on-workspace "VMD"
     default-column-display "normal"
+    open-on-workspace "Visualisation"
 }
 
 window-rule {
     match title="VMD TkConsole"
     default-column-width { proportion 0.4; }
-    open-on-workspace "VMD"
     default-column-display "normal"
+    open-on-workspace "Visualisation"
 }
 // End of VMD
+
+window-rule {
+    match title="PyMOL"
+    open-maximized true
+    open-on-workspace "Visualisation"
+}
 
 window-rule {
     match app-id="ferdium"
@@ -613,7 +619,7 @@ binds {
     Mod+Eacute { focus-workspace "code"; }
     Mod+Quotedbl { focus-workspace "chat"; }
     Mod+Apostrophe { focus-workspace "lecture"; }
-    Mod+Agrave { focus-workspace "VMD"; }
+    Mod+Agrave { focus-workspace "Visualisation"; }
     Mod+6 { focus-workspace 6; }
     Mod+7 { focus-workspace 7; }
     Mod+8 { focus-workspace 8; }
@@ -624,7 +630,7 @@ binds {
     Mod+Shift+Eacute { move-column-to-workspace "code"; }
     Mod+Shift+Quotedbl { move-column-to-workspace "chat"; }
     Mod+Shift+Apostrophe { move-column-to-workspace "lecture"; }
-    Mod+Shift+Agrave { move-column-to-workspace "VMD"; }
+    Mod+Shift+Agrave { move-column-to-workspace "Visualisation"; }
     Mod+Shift+6 { move-column-to-workspace 6; }
     Mod+Shift+7 { move-column-to-workspace 7; }
     Mod+Shift+8 { move-column-to-workspace 8; }
