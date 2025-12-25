@@ -4,7 +4,7 @@ Documentation=info:emacs man:emacs(1) https://gnu.org/software/emacs/
 
 [Service]
 Type=notify
-# Environment="WAYLAND_DISPLAY=wayland-1"
+Environment="WAYLAND_DISPLAY=wayland-1"
 ExecStart=/data/bari-garnier/test/emacs/src/emacs --fg-daemon=utils
 
 # Emacs will exit with status 15 after having received SIGTERM, which
