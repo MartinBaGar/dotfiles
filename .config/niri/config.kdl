@@ -1,0 +1,691 @@
+// This config is in the KDL format: https://kdl.dev
+// "/-" comments out the following node.
+// Check the wiki for a full description of the configuration:
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Introduction
+config-notification {
+    disable-failed
+}
+
+gestures {
+    hot-corners {
+        off
+    }
+}
+
+// Input device configuration.
+// Find the full list of options on the wiki:
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Input
+input {
+    keyboard {
+        xkb {
+	    // layout "fr"
+        // You can set rules, model, layout, variant and options.
+        // For more information, see xkeyboard-config(7).
+
+        // For example:
+        // layout "us,ru"
+        // options "grp:win_space_toggle,compose:ralt,ctrl:nocaps"
+
+        // If this section is empty, niri will fetch xkb settings
+        // from org.freedesktop.locale1. You can control these using
+        // localectl set-x11-keymap.
+        }
+        numlock
+    }
+    // Next sections include libinput settings.
+    // Omitting settings disables them, or leaves them at their default values.
+    // All commented-out settings here are examples, not defaults.
+    touchpad {
+        // off
+        tap
+        // dwt
+        // dwtp
+        // drag false
+        // drag-lock
+        natural-scroll
+        // accel-speed 0.2
+        // accel-profile "flat"
+        // scroll-method "two-finger"
+        // disabled-on-external-mouse
+    }
+
+    mouse {
+        // off
+        // natural-scroll
+        // accel-speed 0.2
+        // accel-profile "flat"
+        // scroll-method "no-scroll"
+    }
+
+    trackpoint {
+        // off
+        // natural-scroll
+        // accel-speed 0.2
+        // accel-profile "flat"
+        // scroll-method "on-button-down"
+        // scroll-button 273
+        // scroll-button-lock
+        // middle-emulation
+    }
+
+    // Uncomment this to make the mouse warp to the center of newly focused windows.
+    // warp-mouse-to-focus
+
+    // Focus windows and outputs automatically when moving the mouse into them.
+    // Setting max-scroll-amount="0%" makes it work only on windows already fully on screen.
+    // focus-follows-mouse max-scroll-amount="0%"
+}
+
+// You can configure outputs by their name, which you can find
+// by running `niri msg outputs` while inside a niri instance.
+// The built-in laptop monitor is usually called "eDP-1".
+// Find more information on the wiki:
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Outputs
+// Remember to uncomment the node by removing "/-"!
+output "HDMI-A-2" {
+    scale 1.1
+}
+
+/-output "LG Display 0x06E2 Unknown" {
+    position x=0 y=0  // Monitor on the right
+    scale 1.5
+}
+
+// Settings that influence how windows are positioned and sized.
+// Find more information on the wiki:
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Layout
+layout {
+    // Set gaps around windows in logical pixels.
+    gaps 5
+    background-color "transparent"
+
+    // When to center a column when changing focus, options are:
+    // - "never", default behavior, focusing an off-screen column will keep at the left
+    //   or right edge of the screen.
+    // - "always", the focused column will always be centered.
+    // - "on-overflow", focusing a column will center it if it doesn't fit
+    //   together with the previously focused column.
+    center-focused-column "never"
+
+    // You can customize the widths that "switch-preset-column-width" (Mod+R) toggles between.
+    preset-column-widths {
+        // Proportion sets the width as a fraction of the output width, taking gaps into account.
+        // For example, you can perfectly fit four windows sized "proportion 0.25" on an output.
+        // The default preset widths are 1/3, 1/2 and 2/3 of the output.
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+
+        // Fixed sets the width in logical pixels exactly.
+        // fixed 1920
+    }
+
+    // You can also customize the heights that "switch-preset-window-height" (Mod+Shift+R) toggles between.
+    // preset-window-heights { }
+
+    // You can change the default width of the new windows.
+    default-column-width { proportion 0.5; }
+    // If you leave the brackets empty, the windows themselves will decide their initial width.
+    // default-column-width {}
+
+    // By default focus ring and border are rendered as a solid background rectangle
+    // behind windows. That is, they will show up through semitransparent windows.
+    // This is because windows using client-side decorations can have an arbitrary shape.
+    //
+    // If you don't like that, you should uncomment `prefer-no-csd` below.
+    // Niri will draw focus ring and border *around* windows that agree to omit their
+    // client-side decorations.
+    //
+    // Alternatively, you can override it with a window rule called
+    // `draw-border-with-background`.
+    focus-ring {
+        // Uncomment this line to disable the focus ring.
+        // off
+
+        // How many logical pixels the ring extends out from the windows.
+        width 2
+
+        // Colors can be set in a variety of ways:
+        // - CSS named colors: "red"
+        // - RGB hex: "#rgb", "#rgba", "#rrggbb", "#rrggbbaa"
+        // - CSS-like notation: "rgb(255, 127, 0)", rgba(), hsl() and a few others.
+
+        // Color of the ring on the active monitor.
+        active-color   "#808080"      // Medium gray
+
+        // Color of the ring on inactive monitors.
+        //
+        // The focus ring only draws around the active window, so the only place
+        // where you can see its inactive-color is on other monitors.
+        inactive-color "#505050"      // Dark gray
+
+        // You can also use gradients. They take precedence over solid colors.
+        // Gradients are rendered the same as CSS linear-gradient(angle, from, to).
+        // The angle is the same as in linear-gradient, and is optional,
+        // defaulting to 180 (top-to-bottom gradient).
+        // You can use any CSS linear-gradient tool on the web to set these up.
+        // Changing the color space is also supported, check the wiki for more info.
+        //
+        // active-gradient from="#80c8ff" to="#c7ff7f" angle=45
+
+        // You can also color the gradient relative to the entire view
+        // of the workspace, rather than relative to just the window itself.
+        // To do that, set relative-to="workspace-view".
+        //
+        // inactive-gradient from="#505050" to="#808080" angle=45 relative-to="workspace-view"
+    }
+
+    border {
+        // The settings are the same as for the focus ring.
+        // If you enable the border, you probably want to disable the focus ring.
+        off
+
+        width 4
+        active-color   "#707070"      // Neutral gray
+        inactive-color "#d0d0d0"      // Light gray
+
+        // Color of the border around windows that request your attention.
+        urgent-color   "#cc4444"      // Softer red
+
+        // Gradients can use a few different interpolation color spaces.
+        // For example, this is a pastel rainbow gradient via in="oklch longer hue".
+        //
+        // active-gradient from="#e5989b" to="#ffb4a2" angle=45 relative-to="workspace-view" in="oklch longer hue"
+
+        // inactive-gradient from="#505050" to="#808080" angle=45 relative-to="workspace-view"
+    }
+
+    shadow {
+        // Uncomment the next line to enable shadows.
+        // on
+
+        // By default, the shadow draws only around its window, and not behind it.
+        // Uncomment this setting to make the shadow draw behind its window.
+        //
+        // Note that niri has no way of knowing about the CSD window corner
+        // radius. It has to assume that windows have square corners, leading to
+        // shadow artifacts inside the CSD rounded corners. This setting fixes
+        // those artifacts.
+        //
+        // However, instead you may want to set prefer-no-csd and/or
+        // geometry-corner-radius. Then, niri will know the corner radius and
+        // draw the shadow correctly, without having to draw it behind the
+        // window. These will also remove client-side shadows if the window
+        // draws any.
+        //
+        // draw-behind-window true
+
+        // You can change how shadows look. The values below are in logical
+        // pixels and match the CSS box-shadow properties.
+
+        // Softness controls the shadow blur radius.
+        softness 30
+
+        // Spread expands the shadow.
+        spread 5
+
+        // Offset moves the shadow relative to the window.
+        offset x=0 y=5
+
+        // You can also change the shadow color and opacity.
+        color "#0007"
+    }
+
+    // Struts shrink the area occupied by windows, similarly to layer-shell panels.
+    // You can think of them as a kind of outer gaps. They are set in logical pixels.
+    // Left and right struts will cause the next window to the side to always be visible.
+    // Top and bottom struts will simply add outer gaps in addition to the area occupied by
+    // layer-shell panels and regular gaps.
+    struts {
+        // left 64
+        // right 64
+        // top 64
+        // bottom 64
+    }
+}
+
+workspace "navigation" {
+    open-on-output "HDMI-A-2"
+    }
+workspace "code" {
+    open-on-output "HDMI-A-2"
+    }
+workspace "chat" {
+    open-on-output "HDMI-A-2"
+    }
+workspace "lecture" {
+    open-on-output "HDMI-A-2"
+    }
+workspace "Visualisation" {
+    open-on-output "HDMI-A-2"
+    }
+
+layer-rule {
+    match namespace="^quickshell$"
+    place-within-backdrop true
+}
+overview {
+    workspace-shadow {
+        off
+    }
+}
+// Add lines like this to spawn processes at startup.
+// note that running niri as a session supports xdg-desktop-autostart,
+// which may be more convenient to use.
+// see the binds section below for more spawn examples.
+// This line starts waybar, a commonly used bar for Wayland compositors.
+// spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
+// spawn-at-startup "/usr/bin/kanshi"
+spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
+spawn-at-startup "waybar"
+spawn-at-startup "/usr/bin/kanshi"
+environment {
+  XDG_CURRENT_DESKTOP "niri"
+  QT_QPA_PLATFORM "wayland"
+  ELECTRON_OZONE_PLATFORM_HINT "auto"
+  QT_QPA_PLATFORMTHEME "gtk3"
+  QT_QPA_PLATFORMTHEME_QT6 "gtk3"
+  TERMINAL "kitty"
+}
+hotkey-overlay {
+    skip-at-startup
+}
+prefer-no-csd
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+animations {
+    workspace-switch {
+        spring damping-ratio=0.80 stiffness=523 epsilon=0.0001
+    }
+    window-open {
+        duration-ms 150
+        curve "ease-out-expo"
+    }
+    window-close {
+        duration-ms 150
+        curve "ease-out-quad"
+    }
+    horizontal-view-movement {
+        spring damping-ratio=0.85 stiffness=423 epsilon=0.0001
+    }
+    window-movement {
+        spring damping-ratio=0.75 stiffness=323 epsilon=0.0001
+    }
+    window-resize {
+        spring damping-ratio=0.85 stiffness=423 epsilon=0.0001
+    }
+    config-notification-open-close {
+        spring damping-ratio=0.65 stiffness=923 epsilon=0.001
+    }
+    screenshot-ui-open {
+        duration-ms 200
+        curve "ease-out-quad"
+    }
+    overview-open-close {
+        spring damping-ratio=0.85 stiffness=800 epsilon=0.0001
+    }
+}
+// Window rules let you adjust behavior for individual windows.
+// Find more information on the wiki:
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Window-Rules
+// by setting an empty default-column-width.
+window-rule {
+    match app-id=r#"^org\.gnome\."#
+    draw-border-with-background false
+    geometry-corner-radius 12
+    clip-to-geometry true
+}
+window-rule {
+    match app-id=r#"^gnome-control-center$"#
+    match app-id=r#"^pavucontrol$"#
+    match app-id=r#"^nm-connection-editor$"#
+    default-column-width { proportion 0.5; }
+    open-floating false
+}
+window-rule {
+    match app-id=r#"^gnome-calculator$"#
+    match app-id=r#"^galculator$"#
+    match app-id=r#"^blueman-manager$"#
+    match app-id=r#"^org\.gnome\.Nautilus$"#
+    match app-id=r#"^steam$"#
+    match app-id=r#"^xdg-desktop-portal$"#
+    open-floating false
+}
+window-rule {
+    match app-id="kitty"
+    draw-border-with-background false
+}
+window-rule {
+    match is-active=false
+    opacity 0.9
+}
+window-rule {
+    match app-id="zoom"
+    open-floating true
+}
+window-rule {
+    geometry-corner-radius 12
+    clip-to-geometry true
+}
+
+window-rule {
+    match app-id="Caprine"
+    match app-id="Rocket.Chat"
+    match title="Discord*"
+    match title="KeePassXC"
+    open-on-workspace "chat"
+}
+
+window-rule {
+    match title="Brave"
+    open-on-workspace "navigation"
+}
+
+window-rule {
+    match title="satty"
+    open-floating false
+    open-maximized true
+}
+
+window-rule {
+    match app-id="at.yrlf.wl_mirror"
+    open-fullscreen true
+}
+
+window-rule {
+    match app-id="Zotero"
+    match app-id="com.github.th_ch.youtube_music"
+    open-maximized true
+    open-on-workspace "lecture"
+}
+
+window-rule {
+    match title=r#"^Doom Notes$"#
+    open-floating true
+    default-floating-position x=0 y=0 relative-to="bottom-right"
+    default-column-width { proportion 0.4; }
+    default-window-height { proportion 1.0; }
+    border {
+        on
+        width 4
+    }
+    focus-ring {
+        off
+        width 0
+    }
+    geometry-corner-radius 0
+    opacity 1.0
+}
+
+window-rule {
+    match title=r#"^Doom Mails$"#
+    open-floating true
+    default-column-width { proportion 0.7; }
+    default-window-height { proportion 0.9; }
+    border {
+        on
+        width 4
+    }
+    focus-ring {
+        off
+        width 0
+    }
+    opacity 1.0
+}
+
+window-rule {
+    match title="Emacs"
+    exclude title="Doom Notes"
+    exclude title="Doom Mails"
+    match title="kitty"
+    exclude app-id=r#"^btop-float$"#
+    open-on-workspace "code"
+}
+
+window-rule {
+    match app-id="btop-float"
+    default-column-width { proportion 0.9; }
+    default-window-height { proportion 0.9; }
+    open-floating true
+    geometry-corner-radius 0
+}
+
+// window-rule {
+    // match title="Age of empires"
+    // default-floating-position x=4 y=4 relative-to="bottom-right"
+    // default-column-width { fixed 480; }
+    // default-window-height { fixed 900; }
+// }
+
+recent-windows {
+    // off
+    debounce-ms 750
+
+    open-delay-ms 50
+
+    highlight {
+        active-color "#999999ff"
+        urgent-color "#ff9999ff"
+        padding 30
+        corner-radius 0
+    }
+
+    previews {
+        max-height 480
+        max-scale 0.5
+    }
+
+    binds {
+        Alt+Tab         { next-window; }
+        Alt+Shift+Tab   { previous-window; }
+        Alt+grave       { next-window     filter="app-id"; }
+        Alt+Shift+grave { previous-window filter="app-id"; }
+
+        Mod+Tab         { next-window; }
+        Mod+Shift+Tab   { previous-window; }
+        Mod+grave       { next-window     filter="app-id"; }
+        Mod+Shift+grave { previous-window filter="app-id"; }
+    }
+}
+
+binds {
+    // === System & Overview ===
+    Mod+D { spawn "niri" "msg" "action" "toggle-overview"; }
+    Mod+Tab repeat=false { toggle-overview; }
+    Mod+Shift+Colon { show-hotkey-overlay; }
+
+    // === Application Launchers ===
+    Mod+T hotkey-overlay-title="Open Terminal" { spawn "kitty"; }
+    Mod+Space hotkey-overlay-title="Application Launcher" {
+        spawn "fuzzel";
+    }
+
+    Mod+O { spawn-sh "~/scripts/bash/fuzzel-file-actions.sh"; }
+    Mod+V { spawn-sh "~/scripts/bash/fuzzel-clipboard.sh"; }
+    Mod+P { spawn-sh "~/scripts/bash/fuzzel-powermenu.sh"; }
+
+    Mod+E { spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main"; }
+
+    Mod+N { spawn-sh " emacsclient --alternate-editor= --reuse-frame -n --socket-name=utils -e '(toggle-named-frame \"Doom Notes\")' "; }
+    Mod+M { spawn-sh " emacsclient --alternate-editor= --reuse-frame -n --socket-name=utils -e '(toggle-named-frame-mu4e \"Doom Mails\")' "; }
+
+    // === Security ===
+     Mod+Alt+L hotkey-overlay-title="Lock Screen" {
+        // spawn "swaylock" "-l" "--color" "000000";
+        spawn-sh "dunstctl set-paused true && swaylock -l --color 000000 && dunstctl set-paused false";
+    }
+    Ctrl+Alt+Delete hotkey-overlay-title="Task Manager" {
+        spawn "kitty" "-o" "window_padding_width=0" "--class" "btop-float" "btop" "--preset" "1" ; }
+    Mod+Shift+E { quit; }
+
+    // === Audio Controls ===
+    XF86AudioRaiseVolume allow-when-locked=true {
+        spawn "pamixer" "--increase" "3";
+    }
+    XF86AudioLowerVolume allow-when-locked=true {
+        spawn "pamixer" "--decrease" "3";
+    }
+    XF86AudioMute allow-when-locked=true {
+        spawn "pamixer" "--toggle-mute";
+    }
+
+    // === Window Management ===
+    Mod+Q repeat=false { close-window; }
+    Mod+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+    Mod+Shift+T { toggle-window-floating; }
+    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
+    // Mod+W { toggle-column-tabbed-display; }
+    Mod+W { spawn-sh "~/scripts/bash/reload_waybar.sh"; }
+
+    // === Focus Navigation ===
+    Mod+Left  { focus-column-left; }
+    Mod+Down  { focus-window-down; }
+    Mod+Up    { focus-window-up; }
+    Mod+Right { focus-column-right; }
+    Mod+H     { focus-column-left; }
+    Mod+J     { focus-window-down; }
+    Mod+K     { focus-window-up; }
+    Mod+L     { focus-column-right; }
+
+    // === Window Movement ===
+    Mod+Shift+Left  { move-column-left; }
+    Mod+Shift+Down  { move-window-down; }
+    Mod+Shift+Up    { move-window-up; }
+    Mod+Shift+Right { move-column-right; }
+    Mod+Shift+H     { move-column-left; }
+    Mod+Shift+J     { move-window-down; }
+    Mod+Shift+K     { move-window-up; }
+    Mod+Shift+L     { move-column-right; }
+
+    // === Column Navigation ===
+    Mod+Home { focus-column-first; }
+    Mod+End  { focus-column-last; }
+    Mod+Ctrl+Home { move-column-to-first; }
+    Mod+Ctrl+End  { move-column-to-last; }
+
+    Mod+Shift+M repeat=false { spawn-sh "wl-mirror $(niri msg --json focused-output | jq -r .name)"; }
+
+    // === Monitor Navigation ===
+    Mod+Ctrl+Left  { focus-monitor-left; }
+    //Mod+Ctrl+Down  { focus-monitor-down; }
+    //Mod+Ctrl+Up    { focus-monitor-up; }
+    Mod+Ctrl+Right { focus-monitor-right; }
+    Mod+Ctrl+H     { focus-monitor-left; }
+    Mod+Ctrl+J     { focus-monitor-down; }
+    Mod+Ctrl+K     { focus-monitor-up; }
+    Mod+Ctrl+L     { focus-monitor-right; }
+
+    // === Move to Monitor ===
+    Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
+    Mod+Shift+Ctrl+H     { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+J     { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+K     { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+L     { move-column-to-monitor-right; }
+
+    // === Workspace Navigation ===
+    Mod+Page_Down      { focus-workspace-down; }
+    Mod+Page_Up        { focus-workspace-up; }
+    // Mod+U              { focus-workspace-down; }
+    // Mod+I              { focus-workspace-up; }
+    Mod+Ctrl+Down { move-column-to-workspace-down; }
+    Mod+Ctrl+Up   { move-column-to-workspace-up; }
+    // Mod+Ctrl+U         { move-column-to-workspace-down; }
+    // Mod+Ctrl+I         { move-column-to-workspace-up; }
+
+    // === Move Workspaces ===
+    Mod+Shift+Page_Down { move-workspace-down; }
+    Mod+Shift+Page_Up   { move-workspace-up; }
+    // Mod+Shift+U         { move-workspace-down; }
+    // Mod+Shift+I         { move-workspace-up; }
+
+    // === Mouse Wheel Navigation ===
+    Mod+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
+    Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
+    Mod+Ctrl+WheelScrollUp   cooldown-ms=150 { move-column-to-workspace-up; }
+
+    Mod+WheelScrollRight      { focus-column-right; }
+    Mod+WheelScrollLeft       { focus-column-left; }
+    Mod+Ctrl+WheelScrollRight { move-column-right; }
+    Mod+Ctrl+WheelScrollLeft  { move-column-left; }
+
+    Mod+Shift+WheelScrollDown      { focus-column-right; }
+    Mod+Shift+WheelScrollUp        { focus-column-left; }
+    Mod+Ctrl+Shift+WheelScrollDown { move-column-right; }
+    Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
+
+    // === Numbered Workspaces ===
+    Mod+Ampersand { focus-workspace "navigation"; }
+    Mod+Eacute { focus-workspace "code"; }
+    Mod+Quotedbl { focus-workspace "chat"; }
+    Mod+Apostrophe { focus-workspace "lecture"; }
+    Mod+Agrave { focus-workspace "Visualisation"; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+
+    // === Move to Numbered Workspaces ===
+    Mod+Shift+Ampersand { move-column-to-workspace "navigation"; }
+    Mod+Shift+Eacute { move-column-to-workspace "code"; }
+    Mod+Shift+Quotedbl { move-column-to-workspace "chat"; }
+    Mod+Shift+Apostrophe { move-column-to-workspace "lecture"; }
+    Mod+Shift+Agrave { move-column-to-workspace "Visualisation"; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
+
+    // === Column Management ===
+    Mod+U  { consume-or-expel-window-left; }
+    Mod+I { consume-or-expel-window-right; }
+    Mod+Period { expel-window-from-column; }
+
+    // === Sizing & Layout ===
+    Mod+R { switch-preset-column-width; }
+    Mod+Shift+R { switch-preset-window-height; }
+    Mod+Ctrl+R { reset-window-height; }
+    Mod+Ctrl+F { expand-column-to-available-width; }
+    Mod+C { center-column; }
+    Mod+Ctrl+C { center-visible-columns; }
+
+    // === Manual Sizing ===
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+Equal { set-column-width "+10%"; }
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+
+    // === Screenshots ===
+
+    // We use \" inside the command to escape the quotes for slurp
+    Mod+Shift+S { spawn "bash" "-c" "grim -g \"$(slurp -d)\" - | satty -f -"; }
+
+    // 2. Full Screen -> Edit in Swappy (Replaces Ctrl+Print)
+    // Ctrl+Mod+Shift+S { screenshot-screen; }
+    // Ctrl+Mod+Shift+S { spawn "bash" "-c" "niri msg action screenshot-window -d false && wl-paste | satty -f -"; }
+    // Ctrl+Mod+Shift+S { spawn "zsh" "-c" "/home/mabagar/.local/bin/my_screenshot"; }
+    Ctrl+Mod+Shift+S { spawn "/home/mabagar/.local/bin/my_screenshot_screen"; }
+    Alt+Mod+Shift+S { spawn "/home/mabagar/.local/bin/my_screenshot_window"; }
+
+    // === System Controls ===
+    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+    Mod+Shift+P { power-off-monitors; }
+
+
+    // MediaPlayer
+    XF86AudioPrev allow-when-locked=true {
+     spawn "playerctl" "previous";
+    }
+    XF86AudioNext allow-when-locked=true {
+     spawn "playerctl" "next";
+    }
+    XF86AudioPlay allow-when-locked=true {
+     spawn "playerctl" "play-pause";
+    }
+
+    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "s" "+10%"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "s" "10%-"; }
+}

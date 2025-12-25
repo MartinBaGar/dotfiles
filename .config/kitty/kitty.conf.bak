@@ -1,31 +1,45 @@
-# Kitty configuration file
+# Font Configuration
+font_size 18.0
 
-# Use Zsh as the default shell
-shell /usr/bin/zsh
+# Window Configuration
+window_padding_width 12
+background_opacity 1.0
+background_blur 32
+hide_window_decorations yes
 
-# Cursor settings
-# cursor_shape beam
-# cursor_blink_rate 500
-# cursor_blink 1
+# Cursor Configuration
+cursor_shape block
+cursor_blink_interval 1
 
-# Font settings
-font_family Fira Code
-font_weight normal
-font_size 14.0
+# Scrollback
+scrollback_lines 3000
 
-# Window appearance
-background_opacity 0.9
-# background #1D0C00
-# theme MonaLisa
+# Terminal features
+copy_on_select yes
+strip_trailing_spaces smart
 
-# Tab bar visibility
-# hide_tab_bar always
+# Key bindings for common actions
+map ctrl+shift+n new_window
+map ctrl+t new_tab
+map ctrl+plus change_font_size all +1.0
+map ctrl+minus change_font_size all -1.0
+map ctrl+0 change_font_size all 0
 
-# Padding around the terminal
-# padding_left 18
-# padding_right 18
-# padding_top 12
-# padding_bottom 6
+# Tab configuration
+tab_bar_style powerline
+tab_bar_align left
 
-# Keybindings
-map alt+enter toggle_fullscreen
+# Shell integration
+shell_integration enabled
+
+# Dank color generation
+include dank-tabs.conf
+include dank-theme.conf
+
+
+# BEGIN_KITTY_FONTS
+font_family      family='DejaVuSansM Nerd Font Mono'
+bold_font        family='DejaVuSansM Nerd Font Mono' style=Bold
+italic_font      auto
+bold_italic_font auto
+# END_KITTY_FONTS

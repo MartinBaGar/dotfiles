@@ -1,0 +1,2 @@
+# blerc
+# set -o vi
