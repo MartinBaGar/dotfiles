@@ -275,7 +275,6 @@ overview {
 // see the binds section below for more spawn examples.
 // This line starts waybar, a commonly used bar for Wayland compositors.
 // spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
-// spawn-at-startup "/usr/bin/kanshi"
 spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
 spawn-at-startup "waybar"
 spawn-at-startup "/usr/bin/kanshi"
