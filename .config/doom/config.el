@@ -14,11 +14,11 @@
   (setq evil-escape-key-sequence "fd"))
 
 ;; https://github.com/joaotavora/yasnippet/issues/998
-(defun my-yas-try-expanding-auto-snippets ()
-  (when (and (boundp 'yas-minor-mode) yas-minor-mode)
-    (let ((yas-buffer-local-condition ''(require-snippet-condition . auto)))
-      (yas-expand))))
-(add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
+;; (defun my-yas-try-expanding-auto-snippets ()
+;;   (when (and (boundp 'yas-minor-mode) yas-minor-mode)
+;;     (let ((yas-buffer-local-condition ''(require-snippet-condition . auto)))
+;;       (yas-expand))))
+;; (add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
 
 (after! emacs
   ;; Enable indentation+completion using the TAB key
@@ -41,6 +41,43 @@
       (setq-local cape-dict-file "~/.config/emacs/dict-fr.txt"))))
 
 (add-hook! 'doom-switch-buffer-hook #'+my-setup-cape-dict-h)
+
+;; Configure Tempel
+(use-package tempel
+  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+         ("M-*" . tempel-insert))
+
+  :init
+
+  ;; Setup completion at point
+  (defun tempel-setup-capf ()
+    ;; Add the Tempel Capf to `completion-at-point-functions'.  `tempel-expand'
+    ;; only triggers on exact matches. We add `tempel-expand' *before* the main
+    ;; programming mode Capf, such that it will be tried first.
+    (setq-local completion-at-point-functions
+                (cons #'tempel-expand completion-at-point-functions))
+
+    ;; Alternatively use `tempel-complete' if you want to see all matches.  Use
+    ;; a trigger prefix character in order to prevent Tempel from triggering
+    ;; unexpectly.
+    ;; (setq-local corfu-auto-trigger "/"
+    ;;             completion-at-point-functions
+    ;;             (cons (cape-capf-trigger #'tempel-complete ?/)
+    ;;                   completion-at-point-functions))
+  )
+
+  (add-hook 'conf-mode-hook 'tempel-setup-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf)
+
+  ;; Optionally make the Tempel templates available to Abbrev,
+  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
+  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
+  ;; (global-tempel-abbrev-mode)
+)
+
+;; Optional: Add tempel-collection if you want ready-made templates.
+(use-package tempel-collection)
 
 (+global-word-wrap-mode +1)
 (add-hook 'writeroom-mode-hook #'+word-wrap-mode)
@@ -99,6 +136,10 @@
                '("a" "Appointment" entry (file+headline "~/org/agenda.org" "Inbox")
                  "* %?\n  SCHEDULED: %^T\n  %a" :prepend t))
   
+  )
+
+(after! org-modern
+    (setq org-modern-fold-stars '(("" . "") ("" . "") ("" . "") ("" . "") ("" . "")))
   )
 
   ;; 1. BASIC APPT SETUP
