@@ -245,19 +245,19 @@ layout {
 }
 
 workspace "navigation" {
-    open-on-output "HDMI-A-1"
+    open-on-output "HDMI-A-2"
     }
 workspace "code" {
-    open-on-output "HDMI-A-1"
+    open-on-output "HDMI-A-2"
     }
 workspace "chat" {
-    open-on-output "HDMI-A-1"
+    open-on-output "HDMI-A-2"
     }
 workspace "lecture" {
-    open-on-output "HDMI-A-1"
+    open-on-output "HDMI-A-2"
     }
 workspace "Visualisation" {
-    open-on-output "HDMI-A-1"
+    open-on-output "HDMI-A-2"
     }
 
 layer-rule {
