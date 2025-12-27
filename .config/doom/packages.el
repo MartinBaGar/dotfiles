@@ -75,5 +75,5 @@
 (package! uv-mode :recipe (:host github :repo "z80dev/uv-mode"))
 (package! whisper :recipe (:host github :repo "natrys/whisper.el"))
 (package! popper :recipe (:host github :repo "karthink/popper"))
-;; (package! org-alert :recipe (:host github :repo "spegoraro/org-alert"))
-                                        ; (package! org-tldraw.el :recipe (:local-repo "~/org-tldraw"))
+(package! tempel :recipe (:host github :repo "minad/tempel"))
+(package! tempel-collection :recipe (:host github :repo "Crandel/tempel-collection"))

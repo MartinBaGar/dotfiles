@@ -245,19 +245,19 @@ layout {
 }
 
 workspace "navigation" {
-    open-on-output "HDMI-A-2"
+    open-on-output "HDMI-A-1"
     }
 workspace "code" {
-    open-on-output "HDMI-A-2"
+    open-on-output "HDMI-A-1"
     }
 workspace "chat" {
-    open-on-output "HDMI-A-2"
+    open-on-output "HDMI-A-1"
     }
 workspace "lecture" {
-    open-on-output "HDMI-A-2"
+    open-on-output "HDMI-A-1"
     }
 workspace "Visualisation" {
-    open-on-output "HDMI-A-2"
+    open-on-output "HDMI-A-1"
     }
 
 layer-rule {
@@ -274,7 +274,6 @@ overview {
 // which may be more convenient to use.
 // see the binds section below for more spawn examples.
 // This line starts waybar, a commonly used bar for Wayland compositors.
-// spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
 spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
 spawn-at-startup "waybar"
 spawn-at-startup "/usr/bin/kanshi"
@@ -448,12 +447,9 @@ window-rule {
     geometry-corner-radius 0
 }
 
-// window-rule {
-    // match title="Age of empires"
-    // default-floating-position x=4 y=4 relative-to="bottom-right"
-    // default-column-width { fixed 480; }
-    // default-window-height { fixed 900; }
-// }
+window-rule {
+    match title="Age of empires"
+}
 
 recent-windows {
     // off

@@ -21,3 +21,8 @@ profile docked {
 profile undocked {
     output $laptop enable scale 1.2 position 0,0
 }
+
+profile gaming {
+    output $monitor enable scale 1.0 position 961,0 
+    output $laptop enable scale 2.0 position 0,0
+}

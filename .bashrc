@@ -42,7 +42,6 @@ fi
 ################
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
-. "$HOME/.cargo/env"
 
 #########################
 # ALIASES AND FUNCTIONS #
@@ -60,7 +59,8 @@ fi
 #########
 eval "$(zoxide init bash)"
 eval "$(starship init bash)"
-source -- ~/.local/share/blesh/ble.sh
+
+source /usr/share/blesh/ble.sh
 
 . "$HOME/.atuin/bin/env"
 
