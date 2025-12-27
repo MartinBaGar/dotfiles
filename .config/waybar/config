@@ -10,7 +10,6 @@
   "clock",
   "custom/dunst",
   "battery",
-  "custom/power",
   ],
   "niri/workspaces": {
     "format": "{name}"
@@ -29,11 +28,10 @@
             		"critical": 15
         	},
         	"format": "{icon} {capacity}%",
-        	"format-charging": " {capacity}%",
-        	"format-plugged": "{capacity}%",
+        	"format-charging": " {capacity}%",
         	"format-alt": "{time} {icon}",
-        	"format-full": " {capacity}%",
-        	"format-icons": ["", "", ""]
+            "format-full": "  100%",
+            "format-icons": ["  ", "  ", "  ", "  ", "  "] 
 	},
 "custom/dunst": {
     "exec": "~/scripts/bash/dunst.sh",
@@ -41,18 +39,6 @@
     "on-click": "dunstctl history-pop",
     "on-click-right": "dunstctl set-paused toggle"
 },
- "custom/power": {
-    "format" : "⏻",
-        "tooltip": false,
-        "menu": "on-click",
-        "menu-file": "~/.config/waybar/power_menu.xml",
-        "menu-actions": {
-            "lock": "swaylock -f --color 000000",
-            "suspend": "systemctl suspend",
-            "shutdown": "shutdown",
-            "reboot": "reboot",
-        },
-}, 
 "mpris": {
 	"format": "{player_icon} {dynamic}",
 	"format-paused": "{status_icon} <i>{dynamic}</i>",
@@ -85,11 +71,11 @@
   },
 "pulseaudio": {
     "format": "{volume}% {icon}",
-    "format-muted": "",
+    "format-muted": "x",
     "format-icons": {
         "headphone": "",
         "headset": "",
-        "default": ["", ""]
+        "default": ["", "", ""]
     },
     "scroll-step": 1,
     "on-click": "pavucontrol",

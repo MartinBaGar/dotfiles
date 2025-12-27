@@ -10,6 +10,7 @@
      "/home/bari-garnier/org/projects.org"
      "/home/bari-garnier/org/quicknote.org" "/home/bari-garnier/org/scratch.org"
      "/home/bari-garnier/org/todo.org"))
+ '(package-selected-packages '(eglot))
  '(smtpmail-smtp-server "zmail.ibpc.fr")
  '(smtpmail-smtp-service 587))
 (custom-set-faces
