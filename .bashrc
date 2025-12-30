@@ -42,17 +42,17 @@ fi
 ################
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
-# . "$HOME/.cargo/env"
+. "$HOME/.cargo/env"
 
 #########################
 # ALIASES AND FUNCTIONS #
 #########################
-if [ -f $HOME/.bash_aliases ]; then
-    . $HOME/.bash_aliases
+if [ -f "$HOME"/.bash_aliases ]; then
+    . "$HOME"/.bash_aliases
 fi
 
-if [ -f $HOME/.bash_functions ]; then
-    . $HOME/.bash_functions
+if [ -f "$HOME"/.bash_functions ]; then
+    . "$HOME"/.bash_functions
 fi
 
 #########
@@ -60,11 +60,8 @@ fi
 #########
 eval "$(zoxide init bash)"
 eval "$(starship init bash)"
-# source -- ~/.local/share/blesh/ble.sh
+source -- ~/.local/share/blesh/ble.sh
 
-. "$HOME/.atuin/bin/env"
-
-[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
 eval "$(atuin init bash)"
 
 export NVM_DIR="$HOME/.nvm"

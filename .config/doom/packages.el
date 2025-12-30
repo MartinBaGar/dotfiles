@@ -53,28 +53,29 @@
                                         ;            :repo "tecosaur/org-pandoc-import"
                                         ;            :files ("*.el" "filters" "preprocessors")))
 
+;; Org mode
 (package! org-modern)
-
+(package! org-transclusion)
 (package! savefold
   :recipe (:host github :repo "jcfk/savefold.el"))
 
+;; AI
 (package! gptel :recipe (:nonrecursive t))
+(package! whisper :recipe (:host github :repo "natrys/whisper.el"))
+(package! gptel-prompts :recipe (:host github :repo "jwiegley/gptel-prompts"))
 
-(package! org-transclusion)
-
-;; (package! projectile :disable t)
+;; Editor
+(package! jinx)
+(package! tempel :recipe (:host github :repo "minad/tempel"))
+(package! tempel-collection :recipe (:host github :repo "Crandel/tempel-collection"))
+(package! eglot-tempel :recipe (:host github :repo "fejfighter/eglot-tempel"))
 (package! gt)
 
-(package! jinx)
-
-                                        ; (package! quarto-mode :recipe (:host github :repo "quarto-dev/quarto-emacs"))
+;; Modes
+;; (package! quarto-mode :recipe (:host github :repo "quarto-dev/quarto-emacs"))
 (package! blender :recipe (:host github :repo "MartinBaGar/blender.el" :files ("*.el" "*.py")))
 (package! gdoc-handler :recipe (:host github :repo "MartinBaGar/gdoc-handler"))
 (package! typst-ts-mode :recipe (:host nil :repo "https://git.sr.ht/~meow_king/typst-ts-mode"))
 (package! typst-preview :recipe (:host github :repo "havarddj/typst-preview.el"))
 (package! uv-mode :recipe (:host github :repo "z80dev/uv-mode"))
-(package! whisper :recipe (:host github :repo "natrys/whisper.el"))
 (package! popper :recipe (:host github :repo "karthink/popper"))
-(package! tempel :recipe (:host github :repo "minad/tempel"))
-(package! tempel-collection :recipe (:host github :repo "Crandel/tempel-collection"))
-(package! eglot-tempel :recipe (:host github :repo "fejfighter/eglot-tempel"))
