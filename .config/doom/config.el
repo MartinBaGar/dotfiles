@@ -101,6 +101,21 @@
   (setq dirvish-hide-details 't)
   )
 
+;; Defined in ~/.config/emacs/lisp/doom.el
+(setq! dotfiles-dir
+  (let* ((homedir (getenv-internal "HOME"))
+         (dotdir (concat homedir "/dotfiles/")))
+    (expand-file-name dotdir)
+    ))
+
+(defun my/find-file-in-dotfiles ()
+  "Find a file under `dotfiles-dir', recursively."
+  (interactive) (doom-project-find-file dotfiles-dir))
+
+(map! :leader
+      (:prefix "f"
+      :desc "dotfiles" "." #'my/find-file-in-dotfiles))
+
 (setq org-image-max-width 500)
 (setq +zen-text-scale 0.5)
 
@@ -139,7 +154,7 @@
   )
 
 (after! org-modern
-    (setq org-modern-fold-stars '(("" . "") ("" . "") ("" . "") ("" . "") ("" . "")))
+    (setq org-modern-fold-stars '(("▸" . "▾")))
   )
 
   ;; 1. BASIC APPT SETUP
@@ -285,17 +300,6 @@
   :models '("mistral-small-latest" "mistral-large-latest" "codestral-latest" "ministral-8b-latest")
   :key #'gptel-api-key-from-auth-source)
 
-  ;; Groq offers an OpenAI compatible API
-    ;; (gptel-make-openai "Groq"
-    ;; :host "api.groq.com"
-    ;; :endpoint "/openai/v1/chat/completions"
-    ;; :stream nil
-    ;; :key #'gptel-api-key-from-auth-source
-    ;; :models '(llama-3.1-70b-versatile
-    ;;             llama-3.1-8b-instant
-    ;;             llama3-70b-8192
-    ;;             llama3-8b-8192))
-
    ;; OpenRouter offers an OpenAI compatible API
   (gptel-make-openai "OpenRouter"
   :host "openrouter.ai"
@@ -344,14 +348,17 @@
          :desc "Select a gptel buffer"   "b" #'gptel
          :desc "Send with options"   "l" #'gptel-scratch-from-minibuffer
          :desc "Show menu"           "m" #'gptel-menu))
+  )
 
-  ;; Add a new directive called ‘my-prompt’
-  (setf (alist-get 'md-expert gptel-directives)
-        "Act as an expert in molecular dynamics simulations. You have deep knowledge of theory, workflows, force fields, and major software.
-Answer my questions with technical accuracy and clarity. Focus on concepts, practical advice, and common pitfalls. Keep explanations concise but complete.")
-  (setf (alist-get 'LaTeX-assistant gptel-directives)
-        "Act as an expert in LaTeX document writing and formatting. You know best practices for structure, typography, equations, figures, tables, and citations. Be decisive about when to use built-in solutions vs. recommended packages, and suggest
-packages when appropriate. Answer clearly with clean LaTeX code. Keep responses concise, practical, and focused on document quality."))
+(use-package gptel-prompts
+  :after (gptel)
+  :demand t
+  :config
+  (setq gptel-prompts-directory "~/org/gptel_prompts")
+  (gptel-prompts-update)
+  ;; Ensure prompts are updated if prompt files change
+  (gptel-prompts-add-update-watchers)
+  )
 
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
 (setq! bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))
@@ -660,6 +667,9 @@ Works on selected region if active, otherwise on whole buffer."
 (after! uv-mode
   (add-hook 'python-mode-hook #'uv-mode-auto-activate-hook)
   )
+
+(after! python
+  (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server")))
 
 (setq wl-copy-process nil)
 (defun wl-copy (text)
