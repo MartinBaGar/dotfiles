@@ -77,3 +77,4 @@
 (package! popper :recipe (:host github :repo "karthink/popper"))
 (package! tempel :recipe (:host github :repo "minad/tempel"))
 (package! tempel-collection :recipe (:host github :repo "Crandel/tempel-collection"))
+(package! eglot-tempel :recipe (:host github :repo "fejfighter/eglot-tempel"))
