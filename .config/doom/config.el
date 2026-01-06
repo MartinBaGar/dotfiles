@@ -108,13 +108,20 @@
     (expand-file-name dotdir)
     ))
 
+(defun my/find-file-in-home ()
+  "Find a file under $HOME, starting in minibuffer."
+  (interactive)
+  (let ((default-directory (getenv-internal "HOME/")))
+    (call-interactively #'find-file)))
+
 (defun my/find-file-in-dotfiles ()
   "Find a file under `dotfiles-dir', recursively."
   (interactive) (doom-project-find-file dotfiles-dir))
 
 (map! :leader
       (:prefix "f"
-      :desc "dotfiles" "." #'my/find-file-in-dotfiles))
+      :desc "dotfiles" "." #'my/find-file-in-dotfiles
+      :desc "HOME" "H" #'my/find-file-in-home))
 
 (setq org-image-max-width 500)
 (setq +zen-text-scale 0.5)
