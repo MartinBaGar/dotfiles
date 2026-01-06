@@ -108,13 +108,20 @@
     (expand-file-name dotdir)
     ))
 
+(defun my/find-file-in-home ()
+  "Find a file under $HOME, starting in minibuffer."
+  (interactive)
+  (let ((default-directory (getenv-internal "HOME/")))
+    (call-interactively #'find-file)))
+
 (defun my/find-file-in-dotfiles ()
   "Find a file under `dotfiles-dir', recursively."
   (interactive) (doom-project-find-file dotfiles-dir))
 
 (map! :leader
       (:prefix "f"
-      :desc "dotfiles" "." #'my/find-file-in-dotfiles))
+      :desc "dotfiles" "." #'my/find-file-in-dotfiles
+      :desc "HOME" "H" #'my/find-file-in-home))
 
 (setq org-image-max-width 500)
 (setq +zen-text-scale 0.5)
@@ -554,9 +561,9 @@ Works on selected region if active, otherwise on whole buffer."
   :commands (blender-mode blender-start blender-run-current-buffer)
   :init
   :custom
-  (blender-executable "/mnt/c/Program Files/Blender Foundation/Blender 4.4/blender.exe")
-  (blender-addon-directory "C:\\Users\\martb\\Documents\\Blender\\my_addons")
-  (blender-external-python "/mnt/c/Users/martb/blender/Scripts/python.exe")
+  (blender-executable "blender")
+  (blender-addon-directory "")
+  (blender-external-python "/data/bari-garnier/blender/blender_env/bin/activate")
   )
 
 (use-package typst-preview

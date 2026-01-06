@@ -283,7 +283,7 @@ environment {
   XDG_CURRENT_DESKTOP "niri"
   QT_QPA_PLATFORM "wayland"
   ELECTRON_OZONE_PLATFORM_HINT "auto"
-  QT_QPA_PLATFORMTHEME "gtk3"
+  QT_QPA_PLATFORMTHEME "qt5ct"
   QT_QPA_PLATFORMTHEME_QT6 "gtk3"
   TERMINAL "kitty"
 }
@@ -473,9 +473,19 @@ window-rule {
 // End of VMD
 
 window-rule {
-    match title="PyMOL"
-    open-maximized true
+    match app-id="org.pymol.PyMOL" title="PyMOL"
+    default-column-width { proportion 0.7; }
+    default-column-display "normal"
     open-on-workspace "Visualisation"
+    geometry-corner-radius 0
+}
+
+window-rule {
+    match app-id="org.pymol.PyMOL" title="External GUI"
+    default-column-width { proportion 0.3; }
+    open-floating false
+    open-on-workspace "Visualisation"
+    geometry-corner-radius 0
 }
 
 window-rule {

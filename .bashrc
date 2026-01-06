@@ -42,6 +42,7 @@ fi
 ################
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
+export PATH="$HOME/.local/libreoffice/opt/libreoffice25.8/program:$PATH"
 . "$HOME/.cargo/env"
 
 #########################
