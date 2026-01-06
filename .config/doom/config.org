@@ -615,9 +615,9 @@ Works on selected region if active, otherwise on whole buffer."
   :commands (blender-mode blender-start blender-run-current-buffer)
   :init
   :custom
-  (blender-executable "/mnt/c/Program Files/Blender Foundation/Blender 4.4/blender.exe")
-  (blender-addon-directory "C:\\Users\\martb\\Documents\\Blender\\my_addons")
-  (blender-external-python "/mnt/c/Users/martb/blender/Scripts/python.exe")
+  (blender-executable "blender")
+  (blender-addon-directory "~/blender/my_addons/")
+  (blender-external-python "/home/mabagar/blender/blender/bin/python")
   )
 #+end_src
 ** Typst

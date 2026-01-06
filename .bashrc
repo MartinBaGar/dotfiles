@@ -57,10 +57,9 @@ fi
 #########
 # EVALS #
 #########
+source -- ~/.local/share/blesh/ble.sh
+. "$HOME/.atuin/bin/env"
+
 eval "$(zoxide init bash)"
 eval "$(starship init bash)"
 eval "$(atuin init bash)"
-
-source /usr/share/blesh/ble.sh
-
-. "$HOME/.atuin/bin/env"
