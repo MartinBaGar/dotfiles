@@ -510,9 +510,9 @@ binds {
         spawn "fuzzel";
     }
 
-    Mod+O { spawn-sh "~/scripts/bash/fuzzel-file-actions.sh"; }
-    Mod+V { spawn-sh "~/scripts/bash/fuzzel-clipboard.sh"; }
-    Mod+P { spawn-sh "~/scripts/bash/fuzzel-powermenu.sh"; }
+    Mod+Alt+O { spawn-sh "~/scripts/bash/fuzzel-file-actions.sh"; }
+    Mod+Alt+V { spawn-sh "~/scripts/bash/fuzzel-clipboard.sh"; }
+    Mod+Alt+P { spawn-sh "~/scripts/bash/fuzzel-powermenu.sh"; }
 
     Mod+E { spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main"; }
 
@@ -578,8 +578,8 @@ binds {
 
     // === Monitor Navigation ===
     Mod+Ctrl+Left  { focus-monitor-left; }
-    //Mod+Ctrl+Down  { focus-monitor-down; }
-    //Mod+Ctrl+Up    { focus-monitor-up; }
+    // Mod+Ctrl+Down  { focus-monitor-down; }
+    // Mod+Ctrl+Up    { focus-monitor-up; }
     Mod+Ctrl+Right { focus-monitor-right; }
     Mod+Ctrl+H     { focus-monitor-left; }
     Mod+Ctrl+J     { focus-monitor-down; }
@@ -599,8 +599,8 @@ binds {
     // === Workspace Navigation ===
     Mod+Page_Down      { focus-workspace-down; }
     Mod+Page_Up        { focus-workspace-up; }
-    // Mod+U              { focus-workspace-down; }
-    // Mod+I              { focus-workspace-up; }
+    Mod+U              { focus-workspace-down; }
+    Mod+I              { focus-workspace-up; }
     Mod+Ctrl+Down { move-column-to-workspace-down; }
     Mod+Ctrl+Up   { move-column-to-workspace-up; }
     // Mod+Ctrl+U         { move-column-to-workspace-down; }
@@ -651,8 +651,8 @@ binds {
     Mod+Shift+9 { move-column-to-workspace 9; }
 
     // === Column Management ===
-    Mod+U  { consume-or-expel-window-left; }
-    Mod+I { consume-or-expel-window-right; }
+    Mod+Y  { consume-or-expel-window-left; }
+    Mod+O { consume-or-expel-window-right; }
     Mod+Period { expel-window-from-column; }
 
     // === Sizing & Layout ===
@@ -675,15 +675,11 @@ binds {
     Mod+Shift+S { spawn "bash" "-c" "grim -g \"$(slurp -d)\" - | satty -f -"; }
 
     // 2. Full Screen -> Edit in Swappy (Replaces Ctrl+Print)
-    // Ctrl+Mod+Shift+S { screenshot-screen; }
-    // Ctrl+Mod+Shift+S { spawn "bash" "-c" "niri msg action screenshot-window -d false && wl-paste | satty -f -"; }
-    // Ctrl+Mod+Shift+S { spawn "zsh" "-c" "/home/mabagar/.local/bin/my_screenshot"; }
     Ctrl+Mod+Shift+S { spawn "/home/mabagar/.local/bin/my_screenshot_screen"; }
     Alt+Mod+Shift+S { spawn "/home/mabagar/.local/bin/my_screenshot_window"; }
 
     // === System Controls ===
     Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
-    Mod+Shift+P { power-off-monitors; }
 
 
     // MediaPlayer
