@@ -43,41 +43,22 @@
 (add-hook! 'doom-switch-buffer-hook #'+my-setup-cape-dict-h)
 
 ;; Configure Tempel
-(use-package tempel
-  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+(use-package! tempel
+  ;; "bind" maps keys. In Doom, we prefer map! but :bind works too.
+  :bind (("M-+" . tempel-complete)
          ("M-*" . tempel-insert))
-
   :init
-
-  ;; Setup completion at point
+  ;; Setup completion at point function
   (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'.  `tempel-expand'
-    ;; only triggers on exact matches. We add `tempel-expand' *before* the main
-    ;; programming mode Capf, such that it will be tried first.
     (setq-local completion-at-point-functions
-                (cons #'tempel-expand completion-at-point-functions))
+                (cons #'tempel-expand completion-at-point-functions)))
 
-    ;; Alternatively use `tempel-complete' if you want to see all matches.  Use
-    ;; a trigger prefix character in order to prevent Tempel from triggering
-    ;; unexpectly.
-    ;; (setq-local corfu-auto-trigger "/"
-    ;;             completion-at-point-functions
-    ;;             (cons (cape-capf-trigger #'tempel-complete ?/)
-    ;;                   completion-at-point-functions))
-  )
+  ;; Doom's cleaner way to add hooks to multiple modes
+  (add-hook! '(conf-mode-hook prog-mode-hook text-mode-hook)
+             #'tempel-setup-capf))
 
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
-
-  ;; Optionally make the Tempel templates available to Abbrev,
-  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  ;; (global-tempel-abbrev-mode)
-)
-
-;; Optional: Add tempel-collection if you want ready-made templates.
-(use-package tempel-collection)
+;; Load the collection of templates
+(use-package! tempel-collection)
 
 (+global-word-wrap-mode +1)
 (add-hook 'writeroom-mode-hook #'+word-wrap-mode)
@@ -148,7 +129,7 @@
 
   ;; Attach
   (setq org-attach-id-dir "~/org/.attach")
-  (setq org-agenda-files "~/org")
+  (setq org-agenda-files (list "~/org"))
 
   (org-link-set-parameters "zotero"
   :follow (lambda (path) 
@@ -357,7 +338,7 @@
          :desc "Show menu"           "m" #'gptel-menu))
   )
 
-(use-package gptel-prompts
+(use-package! gptel-prompts
   :after (gptel)
   :demand t
   :config
@@ -499,7 +480,7 @@ Works on selected region if active, otherwise on whole buffer."
 ;; (setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
 ;; (require 'langtool)
 
-(use-package jinx
+(use-package! jinx
   ;; :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
          ("C-M-$" . jinx-languages)))
@@ -556,7 +537,7 @@ Works on selected region if active, otherwise on whole buffer."
       :desc "Open file at point with default app"
       "x" #'my/xdg-open-path-at-point)
 
-(use-package blender
+(use-package! blender
   :defer t
   :commands (blender-mode blender-start blender-run-current-buffer)
   :init
@@ -566,7 +547,7 @@ Works on selected region if active, otherwise on whole buffer."
   (blender-external-python "/data/bari-garnier/blender/blender_env/bin/activate")
   )
 
-(use-package typst-preview
+(use-package! typst-preview
   :custom
   (typst-preview-browser "default")
   (typst-preview-open-browser-automatically t)
@@ -574,7 +555,7 @@ Works on selected region if active, otherwise on whole buffer."
   (typst-preview-autostart t)
   (typst-preview-invert-colors "never"))
 
-(use-package typst-ts-mode
+(use-package! typst-ts-mode
   :custom
   (typst-ts-watch-options "--open")
   (typst-ts-mode-grammar-location (expand-file-name "tree-sitter/libtree-sitter-typst.so" user-emacs-directory))
@@ -593,83 +574,77 @@ Works on selected region if active, otherwise on whole buffer."
 (after! cc-mode
   (set-eglot-client! 'cc-mode '("clangd" "-j=3" "--clang-tidy")))
 
-(add-to-list 'load-path "~/.local/share/emacs/site-lisp/mu4e")
+;; (add-to-list 'load-path "~/.local/share/emacs/site-lisp/mu4e")
 
-(after! mu4e
-  (setq sendmail-program (executable-find "msmtp")
-        send-mail-function #'smtpmail-send-it
-        message-sendmail-f-is-evil t
-        message-sendmail-extra-arguments '("--read-envelope-from")
-        message-send-mail-function #'message-send-mail-with-sendmail)
+;; (after! mu4e
+;;   (setq sendmail-program (executable-find "msmtp")
+;;         send-mail-function #'smtpmail-send-it
+;;         message-sendmail-f-is-evil t
+;;         message-sendmail-extra-arguments '("--read-envelope-from")
+;;         message-send-mail-function #'message-send-mail-with-sendmail)
   
-  ;; Tell mu4e how to fetch mail
-  (setq mu4e-get-mail-command "mbsync -Va"
-        mu4e-update-interval 60) ;; update every 1 min
-  (setq mu4e-sent-messages-behavior 'delete)
-  (setq message-kill-buffer-on-exit t)
-  (setq mu4e-change-filenames-when-moving t)
+;;   ;; Tell mu4e how to fetch mail
+;;   (setq mu4e-get-mail-command "mbsync -Va"
+;;         mu4e-update-interval 60) ;; update every 1 min
+;;   (setq mu4e-sent-messages-behavior 'delete)
+;;   (setq message-kill-buffer-on-exit t)
+;;   (setq mu4e-change-filenames-when-moving t)
   
-  ;; Gmail account - USING ACTUAL FRENCH FOLDER NAMES
-  (set-email-account! "gmail"
-    '((mu4e-sent-folder       . "/gmail/[Gmail]/Messages envoy&AOk-s")  ; Sent in French
-      (mu4e-drafts-folder     . "/gmail/[Gmail]/Brouillons")            ; Drafts in French
-      (mu4e-trash-folder      . "/gmail/[Gmail]/Corbeille")             ; Trash in French
-      (mu4e-refile-folder     . "/gmail/[Gmail]/Tous les messages")     ; All Mail in French
-      (smtpmail-smtp-user     . "martbari.g@gmail.com")
-      (smtpmail-smtp-server   . "smtp.gmail.com")
-      (smtpmail-smtp-service  . 587)
-      (smtpmail-stream-type   . starttls)
-      (user-mail-address      . "martbari.g@gmail.com"))
-    t)
+;;   ;; Gmail account - USING ACTUAL FRENCH FOLDER NAMES
+;;   (set-email-account! "gmail"
+;;     '((mu4e-sent-folder       . "/gmail/[Gmail]/Messages envoy&AOk-s")  ; Sent in French
+;;       (mu4e-drafts-folder     . "/gmail/[Gmail]/Brouillons")            ; Drafts in French
+;;       (mu4e-trash-folder      . "/gmail/[Gmail]/Corbeille")             ; Trash in French
+;;       (mu4e-refile-folder     . "/gmail/[Gmail]/Tous les messages")     ; All Mail in French
+;;       (smtpmail-smtp-user     . "martbari.g@gmail.com")
+;;       (smtpmail-smtp-server   . "smtp.gmail.com")
+;;       (smtpmail-smtp-service  . 587)
+;;       (smtpmail-stream-type   . starttls)
+;;       (user-mail-address      . "martbari.g@gmail.com"))
+;;     t)
     
-  ;; Zmail account - using actual folder names
-  (set-email-account! "zmail"
-    '((mu4e-sent-folder       . "/zmail/Sent")
-      (mu4e-drafts-folder     . "/zmail/Drafts")
-      (mu4e-trash-folder      . "/zmail/Trash")
-      (mu4e-refile-folder     . "/zmail/INBOX")
-      (smtpmail-smtp-user     . "bari-garnier@ibpc.fr")
-      (smtpmail-smtp-server   . "zmail.ibpc.fr")
-      (smtpmail-smtp-service  . 587)
-      (smtpmail-stream-type   . starttls)
-      (user-mail-address      . "bari-garnier@ibpc.fr"))
-    nil)
+;;   ;; Zmail account - using actual folder names
+;;   (set-email-account! "zmail"
+;;     '((mu4e-sent-folder       . "/zmail/Sent")
+;;       (mu4e-drafts-folder     . "/zmail/Drafts")
+;;       (mu4e-trash-folder      . "/zmail/Trash")
+;;       (mu4e-refile-folder     . "/zmail/INBOX")
+;;       (smtpmail-smtp-user     . "bari-garnier@ibpc.fr")
+;;       (smtpmail-smtp-server   . "zmail.ibpc.fr")
+;;       (smtpmail-smtp-service  . 587)
+;;       (smtpmail-stream-type   . starttls)
+;;       (user-mail-address      . "bari-garnier@ibpc.fr"))
+;;     nil)
 
-  ;; Gmail performance tweaks
-  (setq mu4e-index-cleanup nil
-        mu4e-index-lazy-check t)
+;;   ;; Gmail performance tweaks
+;;   (setq mu4e-index-cleanup nil
+;;         mu4e-index-lazy-check t)
   
-    ;; Bookmarks
-  (setq mu4e-bookmarks
-    '(;; Universal
-      (:name "All Unread" 
-       :query "flag:unread AND NOT flag:trashed" 
-       :key 117)
-      ;; Gmail specific
-      (:name "Gmail Unread" 
-       :query "flag:unread AND maildir:/gmail/* AND NOT maildir:/gmail/[Gmail]/Spam" 
-       :key ?g)
-      (:name "Gmail Today" 
-       :query "date:today..now AND maildir:/gmail/* AND NOT maildir:/gmail/[Gmail]/Spam" 
-       :key ?G)
-      ;; Zmail specific (using capitalized folders)
-      (:name "Zmail Unread" 
-       :query "flag:unread AND maildir:/zmail/* AND NOT maildir:/zmail/Junk" 
-       :key ?z)
-      (:name "Zmail Today" 
-       :query "date:today..now AND maildir:/zmail/* AND NOT maildir:/zmail/Junk" 
-       :key ?Z)
-      ;; Other
-      (:name "Last 7 days" 
-       :query "date:7d..now" 
-       :hide-unread t 
-       :key 112))))
-  
- ;; (setq mu4e-bookmarks
- ;;  '((:name "Unread messages" :query "flag:unread AND NOT flag:trashed AND NOT maildir:/gmail/[Gmail]/Spam" :key 117)
- ;;    (:name "Today's messages" :query "date:today..now AND NOT maildir:/gmail/[Gmail]/Spam" :key 116)
- ;;    (:name "Gmail No spam" :query "maildir:/gmail/INBOX AND NOT maildir:/gmail/[Gmail]/Spam" :key 119)
- ;;    (:name "Last 7 days" :query "date:7d..now AND NOT maildir:/gmail/[Gmail]/Spam" :hide-unread t :key 112))))
+;;     ;; Bookmarks
+;;   (setq mu4e-bookmarks
+;;     '(;; Universal
+;;       (:name "All Unread" 
+;;        :query "flag:unread AND NOT flag:trashed" 
+;;        :key 117)
+;;       ;; Gmail specific
+;;       (:name "Gmail Unread" 
+;;        :query "flag:unread AND maildir:/gmail/* AND NOT maildir:/gmail/[Gmail]/Spam" 
+;;        :key ?g)
+;;       (:name "Gmail Today" 
+;;        :query "date:today..now AND maildir:/gmail/* AND NOT maildir:/gmail/[Gmail]/Spam" 
+;;        :key ?G)
+;;       ;; Zmail specific (using capitalized folders)
+;;       (:name "Zmail Unread" 
+;;        :query "flag:unread AND maildir:/zmail/* AND NOT maildir:/zmail/Junk" 
+;;        :key ?z)
+;;       (:name "Zmail Today" 
+;;        :query "date:today..now AND maildir:/zmail/* AND NOT maildir:/zmail/Junk" 
+;;        :key ?Z)
+;;       ;; Other
+;;       (:name "Last 7 days" 
+;;        :query "date:7d..now" 
+;;        :hide-unread t 
+;;        :key 112))))
 
 (after! uv-mode
   (add-hook 'python-mode-hook #'uv-mode-auto-activate-hook)

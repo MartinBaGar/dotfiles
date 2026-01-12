@@ -368,10 +368,14 @@ window-rule {
 }
 
 window-rule {
-    match app-id="Caprine"
     match app-id="Rocket.Chat"
     match title="Discord*"
     match title="KeePassXC"
+    open-on-workspace "chat"
+}
+
+window-rule {
+    match app-id="thunderbird_thunderbird"
     open-on-workspace "chat"
 }
 
@@ -513,7 +517,8 @@ binds {
     Mod+E {spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main";}
 
     Mod+N { spawn-sh " emacsclient --alternate-editor= --reuse-frame -n --socket-name=utils -e '(toggle-named-frame \"Doom Notes\")' "; }
-    Mod+M { spawn-sh " emacsclient --alternate-editor= --reuse-frame -n --socket-name=utils -e '(toggle-named-frame-mu4e \"Doom Mails\")' "; }
+    // Mod+M { spawn-sh " emacsclient --alternate-editor= --reuse-frame -n --socket-name=utils -e '(toggle-named-frame-mu4e \"Doom Mails\")' "; }
+    Mod+M { spawn-sh "~/scripts/bash/mails.sh"; }
 
     // === Security ===
      Mod+Alt+L hotkey-overlay-title="Lock Screen" {
