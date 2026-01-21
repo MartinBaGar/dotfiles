@@ -43,8 +43,9 @@
 (add-hook! 'doom-switch-buffer-hook #'+my-setup-cape-dict-h)
 
 ;; Configure Tempel
-(use-package tempel
-  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+(use-package! tempel
+  ;; "bind" maps keys. In Doom, we prefer map! but :bind works too.
+  :bind (("M-+" . tempel-complete)
          ("M-*" . tempel-insert))
 
   :init
@@ -66,18 +67,12 @@
     ;;                   completion-at-point-functions))
   )
 
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
+  ;; Doom's cleaner way to add hooks to multiple modes
+  (add-hook! '(conf-mode-hook prog-mode-hook text-mode-hook)
+             #'tempel-setup-capf))
 
-  ;; Optionally make the Tempel templates available to Abbrev,
-  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  ;; (global-tempel-abbrev-mode)
-)
-
-;; Optional: Add tempel-collection if you want ready-made templates.
-(use-package tempel-collection)
+;; Load the collection of templates
+(use-package! tempel-collection)
 
 (+global-word-wrap-mode +1)
 (add-hook 'writeroom-mode-hook #'+word-wrap-mode)
@@ -357,7 +352,7 @@
          :desc "Show menu"           "m" #'gptel-menu))
   )
 
-(use-package gptel-prompts
+(use-package! gptel-prompts
   :after (gptel)
   :demand t
   :config
@@ -499,7 +494,7 @@ Works on selected region if active, otherwise on whole buffer."
 ;; (setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
 ;; (require 'langtool)
 
-(use-package jinx
+(use-package! jinx
   ;; :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
          ("C-M-$" . jinx-languages)))
@@ -556,7 +551,7 @@ Works on selected region if active, otherwise on whole buffer."
       :desc "Open file at point with default app"
       "x" #'my/xdg-open-path-at-point)
 
-(use-package blender
+(use-package! blender
   :defer t
   :commands (blender-mode blender-start blender-run-current-buffer)
   :init
@@ -566,7 +561,7 @@ Works on selected region if active, otherwise on whole buffer."
   (blender-external-python "/home/mabagar/blender/blender/bin/python")
   )
 
-(use-package typst-preview
+(use-package! typst-preview
   :custom
   (typst-preview-browser "default")
   (typst-preview-open-browser-automatically t)
@@ -574,7 +569,7 @@ Works on selected region if active, otherwise on whole buffer."
   (typst-preview-autostart t)
   (typst-preview-invert-colors "never"))
 
-(use-package typst-ts-mode
+(use-package! typst-ts-mode
   :custom
   (typst-ts-watch-options "--open")
   (typst-ts-mode-grammar-location (expand-file-name "tree-sitter/libtree-sitter-typst.so" user-emacs-directory))
