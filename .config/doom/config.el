@@ -332,7 +332,7 @@
 
   ;; Default model + backend
   (setq! gptel-backend (gptel-get-backend "Mistral"))
-  (setq! gptel-model 'mistral-small-latest)
+  (setq! gptel-model 'mistral-large-latest)
   (setq! gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
   (setq! gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
   (setq! gptel-default-mode 'org-mode)
@@ -593,84 +593,6 @@ Works on selected region if active, otherwise on whole buffer."
 (after! cc-mode
   (set-eglot-client! 'cc-mode '("clangd" "-j=3" "--clang-tidy")))
 
-(add-to-list 'load-path "~/.local/share/emacs/site-lisp/mu4e")
-
-(after! mu4e
-  (setq sendmail-program (executable-find "msmtp")
-        send-mail-function #'smtpmail-send-it
-        message-sendmail-f-is-evil t
-        message-sendmail-extra-arguments '("--read-envelope-from")
-        message-send-mail-function #'message-send-mail-with-sendmail)
-  
-  ;; Tell mu4e how to fetch mail
-  (setq mu4e-get-mail-command "mbsync -Va"
-        mu4e-update-interval 60) ;; update every 1 min
-  (setq mu4e-sent-messages-behavior 'delete)
-  (setq message-kill-buffer-on-exit t)
-  (setq mu4e-change-filenames-when-moving t)
-  
-  ;; Gmail account - USING ACTUAL FRENCH FOLDER NAMES
-  (set-email-account! "gmail"
-    '((mu4e-sent-folder       . "/gmail/[Gmail]/Messages envoy&AOk-s")  ; Sent in French
-      (mu4e-drafts-folder     . "/gmail/[Gmail]/Brouillons")            ; Drafts in French
-      (mu4e-trash-folder      . "/gmail/[Gmail]/Corbeille")             ; Trash in French
-      (mu4e-refile-folder     . "/gmail/[Gmail]/Tous les messages")     ; All Mail in French
-      (smtpmail-smtp-user     . "martbari.g@gmail.com")
-      (smtpmail-smtp-server   . "smtp.gmail.com")
-      (smtpmail-smtp-service  . 587)
-      (smtpmail-stream-type   . starttls)
-      (user-mail-address      . "martbari.g@gmail.com"))
-    t)
-    
-  ;; Zmail account - using actual folder names
-  (set-email-account! "zmail"
-    '((mu4e-sent-folder       . "/zmail/Sent")
-      (mu4e-drafts-folder     . "/zmail/Drafts")
-      (mu4e-trash-folder      . "/zmail/Trash")
-      (mu4e-refile-folder     . "/zmail/INBOX")
-      (smtpmail-smtp-user     . "bari-garnier@ibpc.fr")
-      (smtpmail-smtp-server   . "zmail.ibpc.fr")
-      (smtpmail-smtp-service  . 587)
-      (smtpmail-stream-type   . starttls)
-      (user-mail-address      . "bari-garnier@ibpc.fr"))
-    nil)
-
-  ;; Gmail performance tweaks
-  (setq mu4e-index-cleanup nil
-        mu4e-index-lazy-check t)
-  
-    ;; Bookmarks
-  (setq mu4e-bookmarks
-    '(;; Universal
-      (:name "All Unread" 
-       :query "flag:unread AND NOT flag:trashed" 
-       :key 117)
-      ;; Gmail specific
-      (:name "Gmail Unread" 
-       :query "flag:unread AND maildir:/gmail/* AND NOT maildir:/gmail/[Gmail]/Spam" 
-       :key ?g)
-      (:name "Gmail Today" 
-       :query "date:today..now AND maildir:/gmail/* AND NOT maildir:/gmail/[Gmail]/Spam" 
-       :key ?G)
-      ;; Zmail specific (using capitalized folders)
-      (:name "Zmail Unread" 
-       :query "flag:unread AND maildir:/zmail/* AND NOT maildir:/zmail/Junk" 
-       :key ?z)
-      (:name "Zmail Today" 
-       :query "date:today..now AND maildir:/zmail/* AND NOT maildir:/zmail/Junk" 
-       :key ?Z)
-      ;; Other
-      (:name "Last 7 days" 
-       :query "date:7d..now" 
-       :hide-unread t 
-       :key 112))))
-  
- ;; (setq mu4e-bookmarks
- ;;  '((:name "Unread messages" :query "flag:unread AND NOT flag:trashed AND NOT maildir:/gmail/[Gmail]/Spam" :key 117)
- ;;    (:name "Today's messages" :query "date:today..now AND NOT maildir:/gmail/[Gmail]/Spam" :key 116)
- ;;    (:name "Gmail No spam" :query "maildir:/gmail/INBOX AND NOT maildir:/gmail/[Gmail]/Spam" :key 119)
- ;;    (:name "Last 7 days" :query "date:7d..now AND NOT maildir:/gmail/[Gmail]/Spam" :hide-unread t :key 112))))
-
 (after! uv-mode
   (add-hook 'python-mode-hook #'uv-mode-auto-activate-hook)
   )
@@ -694,45 +616,6 @@ Works on selected region if active, otherwise on whole buffer."
 (setq interprogram-cut-function 'wl-copy)
 (setq interprogram-paste-function 'wl-paste)
 
-;; (defun toggle-named-frame (frame-name &rest frame-params)
-;;   "Toggle a frame with FRAME-NAME. Create if doesn't exist, delete if exists.
-;; When created, opens a buffer named FRAME-NAME in writeroom-mode.
-;; FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
-;;   (let ((target-frame (seq-find 
-;;                        (lambda (f) 
-;;                          (string= (frame-parameter f 'name) frame-name))
-;;                        (frame-list))))
-;;     (if target-frame
-;;         (delete-frame target-frame)
-;;       (let ((frame (make-frame (append `((name . ,frame-name)) frame-params))))
-;;         (with-selected-frame frame
-;;           (switch-to-buffer (get-buffer-create frame-name))
-;;           (writeroom-mode 1))
-;;         frame))))
-
-;; For niri to toggle a notepad
-;; (defun toggle-named-frame (frame-name &rest frame-params)
-;;   "Toggle a frame with FRAME-NAME. Create if doesn't exist, delete if exists.
-;; When created, opens a persistent Doom scratch buffer in writeroom-mode.
-;; FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
-;;   (let ((target-frame (seq-find 
-;;                        (lambda (f) 
-;;                          (string= (frame-parameter f 'name) frame-name))
-;;                        (frame-list))))
-;;     (if target-frame
-;;         (delete-frame target-frame)
-;;       (let ((frame (make-frame (append `((name . ,frame-name)) frame-params))))
-;;         (with-selected-frame frame
-;;           ;; Use existing scratch buffer or create/restore it
-;;           (let ((scratch-buf (doom-scratch-buffer 
-;;                              nil  ; DO restore from disk
-;;                              nil  ; use default mode
-;;                              default-directory
-;;                              frame-name)))
-;;             (switch-to-buffer scratch-buf)
-;;             (writeroom-mode 1)))
-;;         frame))))
-
 ;; For niri to toggle a notepad
 (defun toggle-named-frame (frame-name &rest frame-params)
   "Toggle a frame with FRAME-NAME. Create if doesn't exist, delete if exists.
@@ -750,20 +633,4 @@ FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
             (switch-to-buffer scratch-buf)
             (org-mode)
             (writeroom-mode 1)))
-        frame))))
-
-;; For niri to toggle mu4e mail client
-(defun toggle-named-frame-mu4e (frame-name &rest frame-params)
-  "Toggle a frame with FRAME-NAME for mu4e. Create if doesn't exist, delete if exists.
-When created, launches mu4e.
-FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
-  (let ((target-frame (seq-find 
-                       (lambda (f) 
-                         (string= (frame-parameter f 'name) frame-name))
-                       (frame-list))))
-    (if target-frame
-        (delete-frame target-frame)
-      (let ((frame (make-frame (append `((name . ,frame-name)) frame-params))))
-        (with-selected-frame frame
-          (=mu4e))
         frame))))

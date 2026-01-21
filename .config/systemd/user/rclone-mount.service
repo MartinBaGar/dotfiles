@@ -1,0 +1,32 @@
+[Unit]
+Description=Rclone Google Drive Mount
+# Wait for internet connection
+After=network-online.target
+Wants=network-online.target
+# Check if the mount directory exists
+AssertPathIsDirectory=%h/GoogleDrive
+
+[Service]
+Type=notify
+
+# --- THE MOUNT COMMAND ---
+# %h automatically creates the path to your home directory (/home/mabagar)
+ExecStart=/usr/bin/rclone mount GoogleDrive: %h/GoogleDrive \
+    --vfs-cache-mode full \
+    --vfs-cache-max-size 10G \
+    --vfs-cache-max-age 24h \
+    --dir-cache-time 1000h \
+    --poll-interval 15s \
+    --umask 022 \
+    --log-file %h/logs/rclone-mount.log \
+    --log-level INFO
+
+# Unmount command when the service stops
+ExecStop=/bin/fusermount3 -u %h/GoogleDrive
+
+# Restart automatically if it crashes
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target

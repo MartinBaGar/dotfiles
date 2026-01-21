@@ -6,6 +6,10 @@ output "LG Display 0x06E2 Unknown" {
     alias $laptop
 }
 
+output "Virtual-1" {
+    alias $tablet
+}
+
 # Position must be :
 # 1st_laptop-logical-positoion / scale + 1
 # example for :
@@ -13,9 +17,13 @@ output "LG Display 0x06E2 Unknown" {
 # right - 1920x1080, scale 1.1
 # position = 1920 / 1.3 + 1
 # position = 1477
+# output $tablet enable mode 2560x1600@60 scale 2.0 position 3026,0
+# output $tablet enable mode 2560x1600@60 scale 2.0 position 3026,0
+# output $tablet disable mode 2560x1600@60 scale 2.0 position 3026,0
+
 profile docked {
-    output $monitor enable scale 1.1 position 1281,0 
-    output $laptop enable scale 1.5 position 0,0
+    output $monitor enable mode 1920x1080@119.879 scale 1.1 position 1281,0 
+    output $laptop enable mode 1920x1080@165.004 scale 1.5 position 0,0
 }
 
 profile undocked {
@@ -25,4 +33,9 @@ profile undocked {
 profile gaming {
     output $monitor enable scale 1.0 position 1281,0 
     output $laptop enable scale 1.5 position 0,0
+}
+
+profile tablet {
+    output $monitor enable scale 1.5
+    output $laptop disable
 }

@@ -467,6 +467,12 @@ window-rule {
     geometry-corner-radius 0
 }
 
+window-rule {
+    match app-id="guitarpro.exe"
+    open-floating false
+    geometry-corner-radius 0
+}
+
 recent-windows {
     // off
     debounce-ms 750
