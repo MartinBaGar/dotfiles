@@ -77,5 +77,4 @@
 (package! gdoc-handler :recipe (:host github :repo "MartinBaGar/gdoc-handler"))
 (package! typst-ts-mode :recipe (:host nil :repo "https://git.sr.ht/~meow_king/typst-ts-mode"))
 (package! typst-preview :recipe (:host github :repo "havarddj/typst-preview.el"))
-(package! uv-mode :recipe (:host github :repo "z80dev/uv-mode"))
 (package! popper :recipe (:host github :repo "karthink/popper"))

@@ -38,7 +38,7 @@
     (when (and (bound-and-true-p jinx-languages)
                (string-match-p "fr" jinx-languages)
                (not (string-match-p "dict-fr" cape-dict-file)))
-      (setq-local cape-dict-file "~/.config/emacs/dict-fr.txt"))))
+      (setq-local cape-dict-file "~/.config/aspell/dict-fr.txt"))))
 
 (add-hook! 'doom-switch-buffer-hook #'+my-setup-cape-dict-h)
 
@@ -49,12 +49,8 @@
          ("M-*" . tempel-insert))
 
   :init
-
-  ;; Setup completion at point
+  ;; Setup completion at point function
   (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'.  `tempel-expand'
-    ;; only triggers on exact matches. We add `tempel-expand' *before* the main
-    ;; programming mode Capf, such that it will be tried first.
     (setq-local completion-at-point-functions
                 (cons #'tempel-expand completion-at-point-functions))
 
@@ -76,6 +72,8 @@
 
 (+global-word-wrap-mode +1)
 (add-hook 'writeroom-mode-hook #'+word-wrap-mode)
+
+(add-to-list 'auto-mode-alist '("\\.pdb\\'" . fundamental-mode))
 
 ;; (setq doom-theme 'doom-gruvbox)
 ;; (setq doom-theme 'doom-feather-dark)
@@ -587,10 +585,6 @@ Works on selected region if active, otherwise on whole buffer."
 
 (after! cc-mode
   (set-eglot-client! 'cc-mode '("clangd" "-j=3" "--clang-tidy")))
-
-(after! uv-mode
-  (add-hook 'python-mode-hook #'uv-mode-auto-activate-hook)
-  )
 
 (after! python
   (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server")))

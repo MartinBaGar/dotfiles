@@ -292,7 +292,7 @@ prefer-no-csd
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 animations {
     workspace-switch {
-        spring damping-ratio=0.80 stiffness=523 epsilon=0.0001
+        spring damping-ratio=0.90 stiffness=523 epsilon=0.0001
     }
     window-open {
         duration-ms 150
@@ -366,10 +366,14 @@ window-rule {
 }
 
 window-rule {
-    match app-id="Caprine"
     match app-id="Rocket.Chat"
     match title="Discord*"
     match title="KeePassXC"
+    open-on-workspace "chat"
+}
+
+window-rule {
+    match app-id="thunderbird_thunderbird"
     open-on-workspace "chat"
 }
 
@@ -510,7 +514,7 @@ binds {
     Mod+Tab repeat=false { toggle-overview; }
     Mod+Shift+Colon { show-hotkey-overlay; }
 
-    // === Application Launchers ===
+    // === Application Launchers / Scripts execution ===
     Mod+T hotkey-overlay-title="Open Terminal" { spawn "kitty"; }
     Mod+Space hotkey-overlay-title="Application Launcher" {
         spawn "fuzzel";
@@ -519,11 +523,12 @@ binds {
     Mod+Alt+O { spawn-sh "~/scripts/bash/fuzzel-file-actions.sh"; }
     Mod+Alt+V { spawn-sh "~/scripts/bash/fuzzel-clipboard.sh"; }
     Mod+Alt+P { spawn-sh "~/scripts/bash/fuzzel-powermenu.sh"; }
+    Mod+Alt+W { spawn-sh "~/scripts/bash/reload_waybar.sh"; }
 
     Mod+E { spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main"; }
 
     Mod+N { spawn-sh " emacsclient --alternate-editor= --reuse-frame -n --socket-name=utils -e '(toggle-named-frame \"Doom Notes\")' "; }
-    Mod+M { spawn-sh " emacsclient --alternate-editor= --reuse-frame -n --socket-name=utils -e '(toggle-named-frame-mu4e \"Doom Mails\")' "; }
+    Mod+M { spawn-sh "~/scripts/bash/mails.sh"; }
 
     // === Security ===
      Mod+Alt+L hotkey-overlay-title="Lock Screen" {
@@ -551,8 +556,7 @@ binds {
     Mod+Shift+F { fullscreen-window; }
     Mod+Shift+T { toggle-window-floating; }
     Mod+Shift+V { switch-focus-between-floating-and-tiling; }
-    // Mod+W { toggle-column-tabbed-display; }
-    Mod+W { spawn-sh "~/scripts/bash/reload_waybar.sh"; }
+    Mod+W { toggle-column-tabbed-display; }
 
     // === Focus Navigation ===
     Mod+Left  { focus-column-left; }
