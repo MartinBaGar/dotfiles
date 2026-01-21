@@ -284,7 +284,7 @@ environment {
   QT_QPA_PLATFORM "wayland"
   ELECTRON_OZONE_PLATFORM_HINT "auto"
   QT_QPA_PLATFORMTHEME "qt5ct"
-  QT_QPA_PLATFORMTHEME_QT6 "gtk3"
+  // QT_QPA_PLATFORMTHEME_QT6 "gtk3"
   TERMINAL "kitty"
 }
 hotkey-overlay {
@@ -504,7 +504,7 @@ binds {
     Mod+Tab repeat=false { toggle-overview; }
     Mod+Shift+Colon { show-hotkey-overlay; }
 
-    // === Application Launchers ===
+    // === Application Launchers / Scripts execution ===
     Mod+T hotkey-overlay-title="Open Terminal" { spawn "kitty"; }
     Mod+Space hotkey-overlay-title="Application Launcher" {
         spawn "fuzzel";
@@ -513,11 +513,11 @@ binds {
     Mod+Alt+O { spawn-sh "~/scripts/bash/fuzzel-file-actions.sh"; }
     Mod+Alt+V { spawn-sh "~/scripts/bash/fuzzel-clipboard.sh"; }
     Mod+Alt+P { spawn-sh "~/scripts/bash/fuzzel-powermenu.sh"; }
+    Mod+Alt+W { spawn-sh "~/scripts/bash/reload_waybar.sh"; }
 
     Mod+E {spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main";}
 
     Mod+N { spawn-sh " emacsclient --alternate-editor= --reuse-frame -n --socket-name=utils -e '(toggle-named-frame \"Doom Notes\")' "; }
-    // Mod+M { spawn-sh " emacsclient --alternate-editor= --reuse-frame -n --socket-name=utils -e '(toggle-named-frame-mu4e \"Doom Mails\")' "; }
     Mod+M { spawn-sh "~/scripts/bash/mails.sh"; }
 
     // === Security ===
@@ -546,8 +546,7 @@ binds {
     Mod+Shift+F { fullscreen-window; }
     Mod+Shift+T { toggle-window-floating; }
     Mod+Shift+V { switch-focus-between-floating-and-tiling; }
-    // Mod+W { toggle-column-tabbed-display; }
-    Mod+W { spawn-sh "~/scripts/bash/reload_waybar.sh"; }
+    Mod+W { toggle-column-tabbed-display; }
 
     // === Focus Navigation ===
     Mod+Left  { focus-column-left; }
