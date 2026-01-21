@@ -349,7 +349,7 @@
 
   ;; Default model + backend
   (setq! gptel-backend (gptel-get-backend "Mistral"))
-  (setq! gptel-model 'mistral-small-latest)
+  (setq! gptel-model 'mistral-large-latest)
   (setq! gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
   (setq! gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
   (setq! gptel-default-mode 'org-mode)
