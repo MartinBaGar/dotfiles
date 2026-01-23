@@ -1,3 +1,4 @@
 set internal_gui_mode, 2
 set mouse_grid, off
 set internal_feedback, 0
+set display_scale_factor, 2

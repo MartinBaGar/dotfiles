@@ -292,7 +292,7 @@ prefer-no-csd
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 animations {
     workspace-switch {
-        spring damping-ratio=0.90 stiffness=523 epsilon=0.0001
+        // spring damping-ratio=0.90 stiffness=523 epsilon=0.0001
     }
     window-open {
         duration-ms 150
@@ -639,22 +639,22 @@ binds {
     Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
 
     // === Numbered Workspaces ===
-    Mod+Ampersand { focus-workspace "navigation"; }
-    Mod+Eacute { focus-workspace "code"; }
-    Mod+Quotedbl { focus-workspace "chat"; }
-    Mod+Apostrophe { focus-workspace "lecture"; }
-    Mod+Agrave { focus-workspace "Visualisation"; }
+    Mod+1 { focus-workspace "navigation"; }
+    Mod+2 { focus-workspace "code"; }
+    Mod+3 { focus-workspace "chat"; }
+    Mod+4 { focus-workspace "lecture"; }
+    Mod+5 { focus-workspace "Visualisation"; }
     Mod+6 { focus-workspace 6; }
     Mod+7 { focus-workspace 7; }
     Mod+8 { focus-workspace 8; }
     Mod+9 { focus-workspace 9; }
 
     // === Move to Numbered Workspaces ===
-    Mod+Shift+Ampersand { move-column-to-workspace "navigation"; }
-    Mod+Shift+Eacute { move-column-to-workspace "code"; }
-    Mod+Shift+Quotedbl { move-column-to-workspace "chat"; }
-    Mod+Shift+Apostrophe { move-column-to-workspace "lecture"; }
-    Mod+Shift+Agrave { move-column-to-workspace "Visualisation"; }
+    Mod+Shift+1 { move-column-to-workspace "navigation"; }
+    Mod+Shift+2 { move-column-to-workspace "code"; }
+    Mod+Shift+3 { move-column-to-workspace "chat"; }
+    Mod+Shift+4 { move-column-to-workspace "lecture"; }
+    Mod+Shift+5 { move-column-to-workspace "Visualisation"; }
     Mod+Shift+6 { move-column-to-workspace 6; }
     Mod+Shift+7 { move-column-to-workspace 7; }
     Mod+Shift+8 { move-column-to-workspace 8; }
