@@ -79,6 +79,7 @@
 * Modes
 #+begin_src emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.pdb\\'" . fundamental-mode))
+(add-to-list 'auto-mode-alist '("\\.pml\\'" . python-mode))
 #+end_src
 * Aesthetic
 *** Theme & Fonts

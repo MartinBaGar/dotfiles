@@ -64,6 +64,7 @@
 (add-hook 'writeroom-mode-hook #'+word-wrap-mode)
 
 (add-to-list 'auto-mode-alist '("\\.pdb\\'" . fundamental-mode))
+(add-to-list 'auto-mode-alist '("\\.pml\\'" . python-mode))
 
 ;; (setq doom-theme 'doom-gruvbox)
 ;; (setq doom-theme 'doom-feather-dark)
