@@ -357,6 +357,12 @@
   ;; Ensure prompts are updated if prompt files change
   (gptel-prompts-add-update-watchers)
   )
+
+(use-package! gptel-commit
+  :ensure t
+  :after (gptel magit)
+  :custom
+  (gptel-commit-stream t))
 #+end_src
 
 * Bibliography

@@ -325,6 +325,12 @@
   (gptel-prompts-add-update-watchers)
   )
 
+(use-package! gptel-commit
+  :ensure t
+  :after (gptel magit)
+  :custom
+  (gptel-commit-stream t))
+
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
 (setq! bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))
 (setq! bibtex-completion-library-path '("~/zotero-lib/referenciator.bib"))
