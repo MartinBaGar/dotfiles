@@ -154,42 +154,7 @@
   )
 
 (after! org-modern
-    (setq org-modern-fold-stars '(("▸" . "▾")))
-  )
-
-  ;; 1. BASIC APPT SETUP
-  (setq appt-time-msg-list nil)    ;; Reset the list on startup
-  (setq appt-display-interval 5)   ;; Check every 5 minutes
-  (setq appt-message-warning-time 15) ;; Warn 15 minutes before
-  (setq appt-display-mode-line t)  ;; Show timer in mode-line
-  
-  ;; 2. SYNC AGENDA TO APPT
-  ;; This ensures that whenever you build your agenda, the appointments
-  ;; are copied over to the notification system.
-  (defun my-org-agenda-to-appt ()
-    (interactive)
-    (setq appt-time-msg-list nil)
-    (org-agenda-to-appt))
-  
-  ;; Update appointments when agenda is built
-  (add-hook 'org-agenda-finalize-hook 'my-org-agenda-to-appt)
-  
-  ;; Optional: Automatically refresh agenda every 5 mins (to capture new items)
-  (run-at-time "00:00" 300 'my-org-agenda-to-appt)
-  
-  ;; 3. DESKTOP NOTIFICATION FUNCTION
-  ;; This smart function detects your OS and sends the correct system alert.
-  (defun my-appt-send-notification (min-to-app new-time msg)
-    (let ((title "Org Agenda Reminder")
-          (body (format "In %s minutes:\n%s" min-to-app msg)))
-      (cond
-       ((executable-find "notify-send")
-        (call-process "notify-send" nil 0 nil "-u" "critical" title body)))))
-  
-  ;; 4. OVERRIDE DEFAULT BEHAVIOR
-  ;; Tell appt to use our custom function instead of just printing to the buffer
-  (setq appt-disp-window-function 'my-appt-send-notification)
-  (setq appt-delete-window-function (lambda () t))
+    (setq org-modern-fold-stars '(("▸" . "▾"))))
 
 (use-package! org-transclusion
   :after org
@@ -587,7 +552,8 @@ Works on selected region if active, otherwise on whole buffer."
   (set-eglot-client! 'cc-mode '("clangd" "-j=3" "--clang-tidy")))
 
 (after! python
-  (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server")))
+  (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server"))
+  (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
 
 (setq wl-copy-process nil)
 (defun wl-copy (text)
