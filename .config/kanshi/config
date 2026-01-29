@@ -1,4 +1,4 @@
-output "Lenovo Group Limited P27QD-40 VNAC7V6Z" {
+output "Lenovo Group Limited T32h-30 V30FX99P" {
     alias $monitor
 }
 
