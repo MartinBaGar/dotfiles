@@ -1,27 +1,38 @@
 {
+  // Layout
   "layer": "top",
   "position": "top",
+  "reload_style_on_change": true,
   "spacing": 4,
-  "modules-left": ["niri/workspaces"],
-  "modules-center": ["niri/window"],
+  "modules-left": [
+    "niri/workspaces",
+    "niri/window",
+    "niri/language"
+  ],
+  "modules-center": [
+    "clock"
+  ],
   "modules-right": [
   "mpris",
   "pulseaudio",
-  "clock",
   "custom/dunst",
   "battery",
   ],
+  // Widgets config
   "niri/workspaces": {
-    "format": "{name}"
+    "format": "{name}",
   },
   "niri/window": {
-  	"format": "{title} - {app_id}",
-    "max-length": 40,
+  	"format": "{title}",
+    "max-length": 20,
   	"rewrite": {
-  		"(.*) - Mozilla Firefox": "🌎 $1",
   		"(.*) - zsh": "> [$1]"
-  	}
-  },
+        }
+    },
+    "niri/language": {
+        "format": "    {short}",
+        "on-click": "bash /home/bari-garnier/scripts/bash/niri_switch_layout.sh"
+    },
 	"battery": {
         	"states": {
             		"warning": 30,
@@ -41,6 +52,8 @@
 },
 "mpris": {
 	"format": "{player_icon} {dynamic}",
+    "dynamic-len": 60,
+    "ellipsis": "…",
 	"format-paused": "{status_icon} <i>{dynamic}</i>",
 	"player-icons": {
 		"default": "▶",
@@ -49,7 +62,7 @@
 	"status-icons": {
 		"paused": "⏸"
 	},
-	// "ignored-players": ["firefox"]
+	
 },
   "clock": {
     "format": "{:%H:%M}",
@@ -68,17 +81,17 @@
         "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
       }
     }
-  },
-"pulseaudio": {
-    "format": "{volume}% {icon}",
-    "format-muted": "x",
-    "format-icons": {
-        "headphone": "",
-        "headset": "",
-        "default": ["", "", ""]
     },
-    "scroll-step": 1,
-    "on-click": "pavucontrol",
-    "ignored-sinks": ["Easy Effects Sink"]
-}
+    "pulseaudio": {
+        "format": "{volume}% {icon}",
+        "format-muted": "x",
+        "format-icons": {
+            "headphone": "",
+            "headset": "",
+            "default": ["", "", ""]
+        },
+        "scroll-step": 1,
+        "on-click": "pavucontrol",
+        "ignored-sinks": ["Easy Effects Sink"]
+    }
 }

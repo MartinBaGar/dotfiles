@@ -1,0 +1,20 @@
+[config]
+version_check = false
+fallback_color = "#ffbf9b"
+caching = false
+expr_prefix = "{{"
+expr_postfix = "}}"
+block_prefix = "<*"
+block_postfix = "*>"
+
+[templates.waybar]
+input_path = '~/.config/matugen/templates/waybar.css'
+output_path = '~/.config/waybar/style.css'
+
+[templates.qtct]
+input_path = '~/.config/matugen/templates/qtct-colors.conf'
+output_path = '~/.config/qt5ct/colors/qtct-colors.conf'
+
+# [templates.qtct]
+# input_path = '~/.config/matugen/templates/qtct-colors.conf'
+# output_path = '~/.config/qt5ct/colors/qtct-colors.conf'
