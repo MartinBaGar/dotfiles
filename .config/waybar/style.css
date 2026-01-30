@@ -9,8 +9,8 @@
 #window,
 #workspaces button,
 window#waybar {
-    background-color: #fdf9ec;
-    color: #1c1c14;
+    background-color: #1a1111;
+    color: #f0dede;
 }
 
 /* ---------- Workspaces ---------- */
@@ -36,8 +36,8 @@ window#waybar {
 }
 
 #workspaces button.active {
-  background-color: #1c1c14;
-  color: #fdf9ec;
+  background-color: #f0dede;
+  color: #1a1111;
   border: 0px;
 }
 

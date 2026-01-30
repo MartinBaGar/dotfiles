@@ -276,11 +276,13 @@ overview {
 // This line starts waybar, a commonly used bar for Wayland compositors.
 spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
 spawn-at-startup "waybar"
+spawn-at-startup "swaybg" "--i" "~/Pictures/Wallpapers/chilling_chimp.jpg" "-m" "tile"
 spawn-at-startup "/usr/bin/kanshi"
 environment {
   XDG_CURRENT_DESKTOP "niri"
   QT_QPA_PLATFORM "wayland"
   ELECTRON_OZONE_PLATFORM_HINT "auto"
+  SAL_USE_VCLPLUGIN "qt5"
   QT_QPA_PLATFORMTHEME "qt5ct"
   QT_QPA_PLATFORMTHEME_QT6 "gtk3"
   QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
@@ -385,9 +387,9 @@ window-rule {
 }
 
 window-rule {
+    match app-id="com.gabm.satty"
     match title="satty"
-    open-floating false
-    open-maximized true
+    open-floating true
 }
 
 window-rule {
@@ -625,22 +627,22 @@ binds {
     Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
 
     // === Numbered Workspaces ===
-    Mod+1 { focus-workspace "navigation"; }
-    Mod+2 { focus-workspace "code"; }
-    Mod+3 { focus-workspace "chat"; }
-    Mod+4 { focus-workspace "lecture"; }
-    Mod+5 { focus-workspace "Visualisation"; }
+    Mod+Ampersand { focus-workspace "navigation"; }
+    Mod+Eacute { focus-workspace "code"; }
+    Mod+Quotedbl { focus-workspace "chat"; }
+    Mod+Apostrophe { focus-workspace "lecture"; }
+    Mod+Agrave { focus-workspace "Visualisation"; }
     // Mod+6 { focus-workspace 6; }
     // Mod+7 { focus-workspace 7; }
     // Mod+8 { focus-workspace 8; }
     // Mod+9 { focus-workspace 9; }
 
     // === Move to Numbered Workspaces ===
-    Mod+Shift+1 { move-column-to-workspace "navigation"; }
-    Mod+Shift+2 { move-column-to-workspace "code"; }
-    Mod+Shift+3 { move-column-to-workspace "chat"; }
-    Mod+Shift+4 { move-column-to-workspace "lecture"; }
-    Mod+Shift+5 { move-column-to-workspace "Visualisation"; }
+    Mod+Shift+Ampersand { move-column-to-workspace "navigation"; }
+    Mod+Shift+Eacute { move-column-to-workspace "code"; }
+    Mod+Shift+Quotedbl { move-column-to-workspace "chat"; }
+    Mod+Shift+Apostrophe { move-column-to-workspace "lecture"; }
+    Mod+Shift+Agrave { move-column-to-workspace "Visualisation"; }
     // Mod+Shift+6 { move-column-to-workspace 6; }
     // Mod+Shift+7 { move-column-to-workspace 7; }
     // Mod+Shift+8 { move-column-to-workspace 8; }

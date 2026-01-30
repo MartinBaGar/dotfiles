@@ -404,28 +404,18 @@ Works on selected region if active, otherwise on whole buffer."
   '(markdown-header-face-5 :height 1.1 :foreground "#b48ead" :weight bold :inherit markdown-header-face)
   '(markdown-header-face-6 :height 1.05 :foreground "#5e81ac" :weight semi-bold :inherit markdown-header-face))
 
-(map! :leader
-      (:prefix ("p" . "project.el") ; Use a different prefix like "P" instead of "p"
-       :desc "Find file in project"           "f" #'project-find-file
-       :desc "Find external file"             "F" #'project-or-external-find-file
-       :desc "Switch to project buffer"       "b" #'project-switch-to-buffer
-       :desc "Run shell in project"           "s" #'project-shell
-       :desc "Find directory in project"      "d" #'project-find-dir
-       :desc "Open project dired"             "D" #'project-dired
-       :desc "Open project vc-dir"            "v" #'project-vc-dir
-       :desc "Compile project"                "c" #'project-compile
-       :desc "Run eshell in project"          "e" #'project-eshell
-       :desc "Kill project buffers"           "k" #'project-kill-buffers
-       :desc "Switch project"                 "p" #'project-switch-project
-       :desc "Find regexp in project"         "g" #'project-find-regexp
-       :desc "Find external regexp"           "G" #'project-or-external-find-regexp
-       :desc "Replace regexp in project"      "r" #'project-query-replace-regexp
-       :desc "Run command in project"         "x" #'project-execute-extended-command
-       :desc "Run any project command"        "o" #'project-any-command
-       :desc "List project buffers"           "l" #'project-list-buffers
-       :desc "Save project buffers"           "S" #'project-save-some-buffers
-       :desc "Run shell command in project"   "!" #'project-shell-command
-       :desc "Async shell command in project" "&" #'project-async-shell-command))
+(setq! magit-repository-directories 
+      (mapcar (lambda (dir) (cons dir 0)) 
+              projectile-known-projects))
+
+(setq! magit-repolist-columns
+      '(("Name"    25 magit-repolist-column-ident                  ())
+        ("Flags"    5 magit-repolist-column-flags                  ())
+        ("Branch"  15 magit-repolist-column-branch                 ())
+        ("↓"        3 magit-repolist-column-unpulled-from-upstream ((:right-align t) (:sort <)))
+        ("↑"        3 magit-repolist-column-unpushed-to-upstream   ((:right-align t) (:sort <)))
+        
+        ("Path"    99 magit-repolist-column-path                   ())))
 
 (use-package! gt
   :config
