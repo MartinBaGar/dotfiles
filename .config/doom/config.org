@@ -18,7 +18,6 @@
 (after! evil-escape
   (setq evil-escape-key-sequence "fd"))
 #+end_src
-
 * Editor
 ** Completion
 #+begin_src emacs-lisp
@@ -233,7 +232,6 @@
       (setq org-download-timestamp "%Y%m%d_%H%M%S")
       )))
 #+end_src
-
 * Vterm
 #+begin_src emacs-lisp
 (defun vterm-dired-other-window ()
@@ -250,7 +248,6 @@
       (:prefix-map ("d" . "dired")
        :desc "Dired vterm-cwd in new win" "v" #'vterm-dired-other-window))
 #+end_src
-
 * Layout
 
 #+begin_src emacs-lisp
@@ -285,7 +282,6 @@
       (:prefix-map ("t" . "toggle")
        :desc "Toggle window split" "W" #'toggle-window-split))
 #+end_src
-
 * LLM
 
 #+begin_src emacs-lisp
@@ -364,7 +360,6 @@
   :custom
   (gptel-commit-stream t))
 #+end_src
-
 * Bibliography
 
 #+begin_src emacs-lisp
@@ -423,7 +418,6 @@ Works on selected region if active, otherwise on whole buffer."
             (insert output)
             (message "Done.")))))))
 #+end_src
-
 * Markdown
 #+begin_src emacs-lisp
 ;; The proper Doom way
@@ -444,7 +438,6 @@ Works on selected region if active, otherwise on whole buffer."
   '(markdown-header-face-5 :height 1.1 :foreground "#b48ead" :weight bold :inherit markdown-header-face)
   '(markdown-header-face-6 :height 1.05 :foreground "#5e81ac" :weight semi-bold :inherit markdown-header-face))
 #+end_src
-
 * Projects
 #+begin_src emacs-lisp
 (setq! magit-repository-directories 
@@ -460,9 +453,7 @@ Works on selected region if active, otherwise on whole buffer."
         
         ("Path"    99 magit-repolist-column-path                   ())))
 #+end_src
-
 * Language
-
 ** Translation
 #+begin_src emacs-lisp
 (use-package! gt
@@ -500,7 +491,6 @@ Works on selected region if active, otherwise on whole buffer."
 #+end_src
 
 ** Grammar
-
 #+begin_src emacs-lisp
 ;; (setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
 ;; (require 'langtool)
@@ -539,7 +529,6 @@ Works on selected region if active, otherwise on whole buffer."
      typst-ts-markup-quote-face typst-ts-markup-url-face typst-ts-math-indicator-face)))
 #+end_src
 * Default-Apps
-
 #+begin_src emacs-lisp
 (defun my/vscode-open-path-at-point ()
   "Open the file at point with VS Code."

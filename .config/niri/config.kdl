@@ -76,12 +76,6 @@ input {
     // focus-follows-mouse max-scroll-amount="0%"
 }
 
-// You can configure outputs by their name, which you can find
-// by running `niri msg outputs` while inside a niri instance.
-// The built-in laptop monitor is usually called "eDP-1".
-// Find more information on the wiki:
-// https://github.com/YaLTeR/niri/wiki/Configuration:-Outputs
-// Remember to uncomment the node by removing "/-"!
 output "HDMI-A-2" {
     scale 1.1
 }
@@ -91,9 +85,6 @@ output "HDMI-A-2" {
     scale 1.5
 }
 
-// Settings that influence how windows are positioned and sized.
-// Find more information on the wiki:
-// https://github.com/YaLTeR/niri/wiki/Configuration:-Layout
 layout {
     // Set gaps around windows in logical pixels.
     gaps 0
@@ -122,11 +113,6 @@ layout {
 
     // You can also customize the heights that "switch-preset-window-height" (Mod+Shift+R) toggles between.
     // preset-window-heights { }
-
-    // You can change the default width of the new windows.
-    default-column-width { proportion 0.5; }
-    // If you leave the brackets empty, the windows themselves will decide their initial width.
-    // default-column-width {}
 
     // By default focus ring and border are rendered as a solid background rectangle
     // behind windows. That is, they will show up through semitransparent windows.
@@ -260,23 +246,13 @@ workspace "Visualisation" {
     open-on-output "HDMI-A-1"
     }
 
-layer-rule {
-    match namespace="^quickshell$"
-    place-within-backdrop true
-}
 overview {
     workspace-shadow {
         off
     }
 }
-// Add lines like this to spawn processes at startup.
-// note that running niri as a session supports xdg-desktop-autostart,
-// which may be more convenient to use.
-// see the binds section below for more spawn examples.
-// This line starts waybar, a commonly used bar for Wayland compositors.
 spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
 spawn-at-startup "waybar"
-spawn-at-startup "swaybg" "--i" "~/Pictures/Wallpapers/chilling_chimp.jpg" "-m" "tile"
 spawn-at-startup "/usr/bin/kanshi"
 environment {
   XDG_CURRENT_DESKTOP "niri"
@@ -291,6 +267,7 @@ environment {
 hotkey-overlay {
     skip-at-startup
 }
+
 prefer-no-csd
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 animations {
@@ -512,6 +489,7 @@ binds {
     Mod+Alt+W { spawn-sh "~/scripts/bash/reload_waybar.sh"; }
     Mod+Alt+K { spawn "niri" "msg" "action" "switch-layout" "next"; }
     Mod+Alt+T { spawn-sh "~/scripts/bash/niri_switch_theme.sh"; }
+    Mod+Alt+D { spawn-sh "~/.local/bin/waypaper"; }
 
     Mod+E {spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main";}
 
