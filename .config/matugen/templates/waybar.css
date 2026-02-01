@@ -1,69 +1,53 @@
 /* ---------- Global ---------- */
 * {
-  border: none;
-  /* border-radius: 9px; */
+  margin: 1px 2px;
   font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", sans-serif;
   font-size: 13px;
   min-height: 0;
 }
 
+#window,
+#workspaces button,
 window#waybar {
-    background: {{colors.source_color.default.hex}};
-    color: {{colors.background.default.hex}};
+    background-color: {{ colors.background.default.hex }};
+    color: {{ colors.on_background.default.hex }};
 }
 
 /* ---------- Workspaces ---------- */
 #workspaces {
-  background: transparent;
-  border-color: {{colors.background.default.hex}};
-  padding: 4px 6px;
 }
 
+#mpris,
+#pulseaudio,
+#custom-dunst,
+#mpris:hover,
+#battery,
+#pulseaudio:hover,
+#language,
+#window,
 #workspaces button {
-  margin: 0 3px;
   padding: 4px 12px;
-  color: {{colors.background.default.hex}};
-  border: 1px solid {{colors.background.default.hex}};
+  border: 1px solid;
   border-radius: 4px; 
-  transition: all 0.2s ease;
   font-weight: 600;
 }
 
 #workspaces button:hover {
-  background-color: rgba(255, 255, 255, 0.18);
 }
 
 #workspaces button.active {
-  background-color: {{colors.background.default.hex}};
-  color: {{colors.source_color.default.hex}};
+  background-color: {{ colors.on_background.default.hex }};
+  color: {{ colors.background.default.hex }};
+  border: 0px;
+}
+
+#workspaces button.empty {
   border: 0px;
 }
 
 /* ---------- Window Title ---------- */
-#mpris,
-#pulseaudio,
-#custom-dunst,
-#language,
 #window {
-  background: {{colors.source_color.default.hex}};
-  color: {{colors.background.default.hex}};
-  padding: 0px 12px;
-  margin: 4px 0px;
-  border-radius: 4px; /* Adjust to match workspaces */
-}
-
-window#waybar.empty #window {
-}
-
-/* ---------- Shared Module Pill ---------- */
-#mpris,
-#pulseaudio,
-#custom-dunst,
-
-#clock:hover,
-#mpris:hover,
-#pulseaudio:hover {
-  background-color: rgba(255, 255, 255, 0.18);
+  font-weight: 400;
 }
 
 /* ---------- Clock ---------- */
@@ -71,6 +55,9 @@ window#waybar.empty #window {
   font-weight: 800;
   letter-spacing: 1px;
   font-size: 25px;
+  padding: 0;
+  border: 0;
+  border-radius: 0; 
 }
 
 /* ---------- Media Player ---------- */
@@ -80,27 +67,15 @@ window#waybar.empty #window {
 
 /* ---------- Audio ---------- */
 
-/* #pulseaudio { */
-/*   color: #89b4fa; */
-/* } */
-
-/* #pulseaudio.muted { */
-/*   color: #f38ba8; */
-/* } */
 
 /* ---------- Tooltips ---------- */
 tooltip {
-  background: rgba(17, 17, 27, 0.95);
   border-radius: 12px;
   padding: 10px;
-  border: 1px solid rgba(255,255,255,0.05);
 }
 
-tooltip label {
-  color: #e5e7eb;
-}
 
 #language {
-  background: rgba(255, 255, 255, 0.08);
-  color: {{colors.background.default.hex}};
+  border: 1px solid;
+  border-radius: 4px; 
 }

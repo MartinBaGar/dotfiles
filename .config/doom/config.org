@@ -18,7 +18,6 @@
 (after! evil-escape
   (setq evil-escape-key-sequence "fd"))
 #+end_src
-
 * Editor
 ** Completion
 #+begin_src emacs-lisp
@@ -224,7 +223,6 @@
       (setq org-download-timestamp "%Y%m%d_%H%M%S")
       )))
 #+end_src
-
 * Vterm
 #+begin_src emacs-lisp
 (defun vterm-dired-other-window ()
@@ -241,7 +239,6 @@
       (:prefix-map ("d" . "dired")
        :desc "Dired vterm-cwd in new win" "v" #'vterm-dired-other-window))
 #+end_src
-
 * Layout
 
 #+begin_src emacs-lisp
@@ -276,7 +273,6 @@
       (:prefix-map ("t" . "toggle")
        :desc "Toggle window split" "W" #'toggle-window-split))
 #+end_src
-
 * LLM
 
 #+begin_src emacs-lisp
@@ -348,8 +344,13 @@
   ;; Ensure prompts are updated if prompt files change
   (gptel-prompts-add-update-watchers)
   )
-#+end_src
 
+(use-package! gptel-commit
+  :ensure t
+  :after (gptel magit)
+  :custom
+  (gptel-commit-stream t))
+#+end_src
 * Bibliography
 
 #+begin_src emacs-lisp
@@ -408,7 +409,6 @@ Works on selected region if active, otherwise on whole buffer."
             (insert output)
             (message "Done.")))))))
 #+end_src
-
 * Markdown
 #+begin_src emacs-lisp
 ;; The proper Doom way
@@ -429,35 +429,22 @@ Works on selected region if active, otherwise on whole buffer."
   '(markdown-header-face-5 :height 1.1 :foreground "#b48ead" :weight bold :inherit markdown-header-face)
   '(markdown-header-face-6 :height 1.05 :foreground "#5e81ac" :weight semi-bold :inherit markdown-header-face))
 #+end_src
-
 * Projects
 #+begin_src emacs-lisp
-(map! :leader
-      (:prefix ("p" . "project.el") ; Use a different prefix like "P" instead of "p"
-       :desc "Find file in project"           "f" #'project-find-file
-       :desc "Find external file"             "F" #'project-or-external-find-file
-       :desc "Switch to project buffer"       "b" #'project-switch-to-buffer
-       :desc "Run shell in project"           "s" #'project-shell
-       :desc "Find directory in project"      "d" #'project-find-dir
-       :desc "Open project dired"             "D" #'project-dired
-       :desc "Open project vc-dir"            "v" #'project-vc-dir
-       :desc "Compile project"                "c" #'project-compile
-       :desc "Run eshell in project"          "e" #'project-eshell
-       :desc "Kill project buffers"           "k" #'project-kill-buffers
-       :desc "Switch project"                 "p" #'project-switch-project
-       :desc "Find regexp in project"         "g" #'project-find-regexp
-       :desc "Find external regexp"           "G" #'project-or-external-find-regexp
-       :desc "Replace regexp in project"      "r" #'project-query-replace-regexp
-       :desc "Run command in project"         "x" #'project-execute-extended-command
-       :desc "Run any project command"        "o" #'project-any-command
-       :desc "List project buffers"           "l" #'project-list-buffers
-       :desc "Save project buffers"           "S" #'project-save-some-buffers
-       :desc "Run shell command in project"   "!" #'project-shell-command
-       :desc "Async shell command in project" "&" #'project-async-shell-command))
+(setq! magit-repository-directories 
+      (mapcar (lambda (dir) (cons dir 0)) 
+              projectile-known-projects))
+
+(setq! magit-repolist-columns
+      '(("Name"    25 magit-repolist-column-ident                  ())
+        ("Flags"    5 magit-repolist-column-flags                  ())
+        ("Branch"  15 magit-repolist-column-branch                 ())
+        ("↓"        3 magit-repolist-column-unpulled-from-upstream ((:right-align t) (:sort <)))
+        ("↑"        3 magit-repolist-column-unpushed-to-upstream   ((:right-align t) (:sort <)))
+        
+        ("Path"    99 magit-repolist-column-path                   ())))
 #+end_src
-
 * Language
-
 ** Translation
 #+begin_src emacs-lisp
 (use-package! gt
@@ -495,7 +482,6 @@ Works on selected region if active, otherwise on whole buffer."
 #+end_src
 
 ** Grammar
-
 #+begin_src emacs-lisp
 ;; (setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
 ;; (require 'langtool)
@@ -534,7 +520,6 @@ Works on selected region if active, otherwise on whole buffer."
      typst-ts-markup-quote-face typst-ts-markup-url-face typst-ts-math-indicator-face)))
 #+end_src
 * Default-Apps
-
 #+begin_src emacs-lisp
 (defun my/vscode-open-path-at-point ()
   "Open the file at point with VS Code."

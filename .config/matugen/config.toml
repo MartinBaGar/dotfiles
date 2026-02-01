@@ -7,14 +7,18 @@ expr_postfix = "}}"
 block_prefix = "<*"
 block_postfix = "*>"
 
-# [templates.waybar-layout]
-# input_path = '~/.config/matugen/templates/waybar-layout.css'
-# output_path = '~/.config/waybar/colors-layout.css'
-
-# [templates.waybar-theme]
-# input_path = '~/.config/matugen/templates/waybar-theme.css'
-# output_path = '~/.config/waybar/colors-theme.css'
-
 [templates.waybar]
 input_path = '~/.config/matugen/templates/waybar.css'
 output_path = '~/.config/waybar/style.css'
+
+[templates.qtct]
+input_path = '~/.config/matugen/templates/qtct-colors.conf'
+output_path = '~/.config/qt5ct/colors/qtct-colors.conf'
+
+[templates.gtk3]
+input_path = '~/.config/matugen/templates/gtk-colors.css'
+output_path = '~/.config/gtk-3.0/gtk-colors.css'
+
+[templates.gtk4]
+input_path = '~/.config/matugen/templates/gtk-colors.css'
+output_path = '~/.config/gtk-4.0/gtk-colors.css'
