@@ -76,7 +76,7 @@ input {
     // focus-follows-mouse max-scroll-amount="0%"
 }
 
-output "HDMI-A-2" {
+/-output "HDMI-A-2" {
     scale 1.1
 }
 
@@ -253,7 +253,7 @@ overview {
 }
 spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
 spawn-at-startup "waybar"
-spawn-at-startup "/usr/bin/kanshi"
+spawn-at-startup "kanshi"
 environment {
   XDG_CURRENT_DESKTOP "niri"
   QT_QPA_PLATFORM "wayland"

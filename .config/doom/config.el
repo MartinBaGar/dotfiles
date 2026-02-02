@@ -395,9 +395,17 @@ Works on selected region if active, otherwise on whole buffer."
   '(markdown-header-face-5 :height 1.1 :foreground "#b48ead" :weight bold :inherit markdown-header-face)
   '(markdown-header-face-6 :height 1.05 :foreground "#5e81ac" :weight semi-bold :inherit markdown-header-face))
 
-(setq! magit-repository-directories 
-      (mapcar (lambda (dir) (cons dir 0)) 
-              projectile-known-projects))
+(after! projectile
+  (setq! magit-repository-directories
+         (mapcar (lambda (dir) (cons dir 0))
+                 projectile-known-projects)))
+
+(defun my/update-magit-repos ()
+  "Update magit-repository-directories from projectile-known-projects."
+  (interactive)
+  (setq magit-repository-directories
+        (mapcar (lambda (dir) (cons dir 0))
+                projectile-known-projects)))
 
 (setq! magit-repolist-columns
       '(("Name"    25 magit-repolist-column-ident                  ())
@@ -405,8 +413,12 @@ Works on selected region if active, otherwise on whole buffer."
         ("Branch"  15 magit-repolist-column-branch                 ())
         ("↓"        3 magit-repolist-column-unpulled-from-upstream ((:right-align t) (:sort <)))
         ("↑"        3 magit-repolist-column-unpushed-to-upstream   ((:right-align t) (:sort <)))
-        
         ("Path"    99 magit-repolist-column-path                   ())))
+
+
+(map! :leader
+      (:prefix "g l"
+      :desc "update" "u" #'my/update-magit-repos))
 
 (use-package! gt
   :config
