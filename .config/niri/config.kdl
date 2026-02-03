@@ -18,13 +18,13 @@ gestures {
 input {
     keyboard {
         xkb {
-	    // layout "us"
+	    layout "us,fr"
         // You can set rules, model, layout, variant and options.
         // For more information, see xkeyboard-config(7).
 
         // For example:
         // layout "us,ru"
- // options "grp:win_space_toggle,compose:ralt,ctrl:nocaps"
+        // options "grp:win_space_toggle,compose:ralt,ctrl:nocaps"
 
         // If this section is empty, niri will fetch xkb settings
         // from org.freedesktop.locale1. You can control these using
@@ -96,7 +96,7 @@ input {
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Layout
 layout {
     // Set gaps around windows in logical pixels.
-    gaps 5
+    gaps 0
     background-color "transparent"
 
     // When to center a column when changing focus, options are:
@@ -140,10 +140,10 @@ layout {
     // `draw-border-with-background`.
     focus-ring {
         // Uncomment this line to disable the focus ring.
-        // off
+        off
 
         // How many logical pixels the ring extends out from the windows.
-        width 2
+        width 4
 
         // Colors can be set in a variety of ways:
         // - CSS named colors: "red"
@@ -151,7 +151,8 @@ layout {
         // - CSS-like notation: "rgb(255, 127, 0)", rgba(), hsl() and a few others.
 
         // Color of the ring on the active monitor.
-        active-color   "#808080"      // Medium gray
+        // active-color   "#808080"      // Medium gray
+        active-color   "#FFFFFF"      // Medium gray
 
         // Color of the ring on inactive monitors.
         //
@@ -180,9 +181,9 @@ layout {
         // If you enable the border, you probably want to disable the focus ring.
         off
 
-        width 4
-        active-color   "#707070"      // Neutral gray
-        inactive-color "#d0d0d0"      // Light gray
+        width 2
+        inactive-color   "#707070"      // Neutral gray
+        active-color "#d0d0d0"      // Light gray
 
         // Color of the border around windows that request your attention.
         urgent-color   "#cc4444"      // Softer red
@@ -256,7 +257,7 @@ workspace "chat" {
 workspace "lecture" {
     open-on-output "HDMI-A-2"
     }
-workspace "Visualisation" {
+workspace "visualisation" {
     open-on-output "HDMI-A-2"
     }
 
@@ -285,6 +286,7 @@ environment {
   ELECTRON_OZONE_PLATFORM_HINT "auto"
   QT_QPA_PLATFORMTHEME "qt5ct"
   QT_QPA_PLATFORMTHEME_QT6 "gtk3"
+  QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
   TERMINAL "kitty"
 }
 hotkey-overlay {
@@ -293,6 +295,7 @@ hotkey-overlay {
 prefer-no-csd
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 animations {
+    off
     workspace-switch {
         spring damping-ratio=0.90 stiffness=523 epsilon=0.0001
     }
@@ -330,8 +333,7 @@ animations {
 // by setting an empty default-column-width.
 window-rule {
     match app-id=r#"^org\.gnome\."#
-    draw-border-with-background false
-    geometry-corner-radius 12
+    geometry-corner-radius 0
     clip-to-geometry true
 }
 window-rule {
@@ -356,15 +358,16 @@ window-rule {
 }
 window-rule {
     match is-active=false
-    opacity 0.9
+    opacity 0.8
 }
 window-rule {
     match app-id="zoom"
     open-floating true
 }
 window-rule {
-    geometry-corner-radius 12
+    geometry-corner-radius 0
     clip-to-geometry true
+    draw-border-with-background true
 }
 
 window-rule {
@@ -416,30 +419,12 @@ window-rule {
         off
         width 0
     }
-    geometry-corner-radius 0
-    opacity 1.0
-}
-
-window-rule {
-    match title=r#"^Doom Mails$"#
-    open-floating true
-    default-column-width { proportion 0.7; }
-    default-window-height { proportion 0.9; }
-    border {
-        on
-        width 4
-    }
-    focus-ring {
-        off
-        width 0
-    }
     opacity 1.0
 }
 
 window-rule {
     match title="Emacs"
     exclude title="Doom Notes"
-    exclude title="Doom Mails"
     match title="kitty"
     exclude app-id=r#"^btop-float$"#
     open-on-workspace "code"
@@ -514,6 +499,8 @@ binds {
     Mod+Alt+V { spawn-sh "~/scripts/bash/fuzzel-clipboard.sh"; }
     Mod+Alt+P { spawn-sh "~/scripts/bash/fuzzel-powermenu.sh"; }
     Mod+Alt+W { spawn-sh "~/scripts/bash/reload_waybar.sh"; }
+    Mod+Alt+K { spawn "niri" "msg" "action" "switch-layout" "next"; }
+    Mod+Alt+T { spawn-sh "~/scripts/bash/niri_switch_theme.sh"; }
 
     Mod+E {spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main";}
 
@@ -634,10 +621,10 @@ binds {
     Mod+3 { focus-workspace "chat"; }
     Mod+4 { focus-workspace "lecture"; }
     Mod+5 { focus-workspace "Visualisation"; }
-    Mod+6 { focus-workspace 6; }
-    Mod+7 { focus-workspace 7; }
-    Mod+8 { focus-workspace 8; }
-    Mod+9 { focus-workspace 9; }
+    // Mod+6 { focus-workspace 6; }
+    // Mod+7 { focus-workspace 7; }
+    // Mod+8 { focus-workspace 8; }
+    // Mod+9 { focus-workspace 9; }
 
     // === Move to Numbered Workspaces ===
     Mod+Shift+1 { move-column-to-workspace "navigation"; }
@@ -645,10 +632,10 @@ binds {
     Mod+Shift+3 { move-column-to-workspace "chat"; }
     Mod+Shift+4 { move-column-to-workspace "lecture"; }
     Mod+Shift+5 { move-column-to-workspace "Visualisation"; }
-    Mod+Shift+6 { move-column-to-workspace 6; }
-    Mod+Shift+7 { move-column-to-workspace 7; }
-    Mod+Shift+8 { move-column-to-workspace 8; }
-    Mod+Shift+9 { move-column-to-workspace 9; }
+    // Mod+Shift+6 { move-column-to-workspace 6; }
+    // Mod+Shift+7 { move-column-to-workspace 7; }
+    // Mod+Shift+8 { move-column-to-workspace 8; }
+    // Mod+Shift+9 { move-column-to-workspace 9; }
 
     // === Column Management ===
     Mod+Y  { consume-or-expel-window-left; }

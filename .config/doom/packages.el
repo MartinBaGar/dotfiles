@@ -63,6 +63,7 @@
 (package! gptel :recipe (:nonrecursive t))
 (package! whisper :recipe (:host github :repo "natrys/whisper.el"))
 (package! gptel-prompts :recipe (:host github :repo "jwiegley/gptel-prompts"))
+(package! gptel-commit :recipe (:host github :repo "lakkiy/gptel-commit"))
 
 ;; Editor
 (package! jinx)
