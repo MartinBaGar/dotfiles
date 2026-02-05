@@ -440,9 +440,17 @@ Works on selected region if active, otherwise on whole buffer."
 #+end_src
 * Projects
 #+begin_src emacs-lisp
-(setq! magit-repository-directories 
-      (mapcar (lambda (dir) (cons dir 0)) 
-              projectile-known-projects))
+(after! projectile
+  (setq! magit-repository-directories
+         (mapcar (lambda (dir) (cons dir 0))
+                 projectile-known-projects)))
+
+(defun my/update-magit-repos ()
+  "Update magit-repository-directories from projectile-known-projects."
+  (interactive)
+  (setq magit-repository-directories
+        (mapcar (lambda (dir) (cons dir 0))
+                projectile-known-projects)))
 
 (setq! magit-repolist-columns
       '(("Name"    25 magit-repolist-column-ident                  ())
@@ -450,8 +458,12 @@ Works on selected region if active, otherwise on whole buffer."
         ("Branch"  15 magit-repolist-column-branch                 ())
         ("↓"        3 magit-repolist-column-unpulled-from-upstream ((:right-align t) (:sort <)))
         ("↑"        3 magit-repolist-column-unpushed-to-upstream   ((:right-align t) (:sort <)))
-        
         ("Path"    99 magit-repolist-column-path                   ())))
+
+
+(map! :leader
+      (:prefix "g l"
+      :desc "update" "u" #'my/update-magit-repos))
 #+end_src
 * Language
 ** Translation
@@ -566,8 +578,8 @@ Works on selected region if active, otherwise on whole buffer."
   :init
   :custom
   (blender-executable "blender")
-  (blender-addon-directory "~/blender/my_addons/")
-  (blender-external-python "/home/mabagar/blender/blender/bin/python")
+  (blender-addon-directory "")
+  (blender-external-python "/data/bari-garnier/blender/blender_env/bin/activate")
   )
 #+end_src
 ** Typst

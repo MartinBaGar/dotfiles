@@ -1,7 +1,6 @@
 /* ---------- Global ---------- */
 * {
-  margin: 1px 2px;
-  font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", sans-serif;
+  margin: 0;
   font-size: 13px;
   min-height: 0;
 }
@@ -9,40 +8,34 @@
 #window,
 #workspaces button,
 window#waybar {
-    background-color: #1a1111;
-    color: #f0dede;
+  background-color: #1a1111;
+  color: #f0dede;
 }
 
-/* ---------- Workspaces ---------- */
-#workspaces {
-}
-
+/* ---------- Common Button Styling ---------- */
 #mpris,
 #pulseaudio,
 #custom-dunst,
-#mpris:hover,
 #battery,
-#pulseaudio:hover,
 #language,
 #window,
 #workspaces button {
+  margin: 1px 2px;
   padding: 4px 12px;
   border: 1px solid;
-  border-radius: 4px; 
+  border-radius: 4px;
   font-weight: 600;
 }
 
-#workspaces button:hover {
-}
-
+/* ---------- Workspaces ---------- */
 #workspaces button.active {
   background-color: #f0dede;
   color: #1a1111;
-  border: 0px;
+  border: 0;
 }
 
 #workspaces button.empty {
-  border: 0px;
+  border: 0;
 }
 
 /* ---------- Window Title ---------- */
@@ -57,7 +50,7 @@ window#waybar {
   font-size: 25px;
   padding: 0;
   border: 0;
-  border-radius: 0; 
+  border-radius: 0;
 }
 
 /* ---------- Media Player ---------- */
@@ -65,17 +58,13 @@ window#waybar {
   opacity: 0.65;
 }
 
-/* ---------- Audio ---------- */
-
-
 /* ---------- Tooltips ---------- */
 tooltip {
   border-radius: 12px;
   padding: 10px;
 }
 
-
+/* ---------- Language ---------- */
 #language {
-  border: 1px solid;
-  border-radius: 4px; 
+    font-size: 15px;
 }

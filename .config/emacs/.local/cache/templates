@@ -1,0 +1,10 @@
+;; ~/.config/emacs/templates
+
+text-mode
+
+(calc (p "Formula: " formula noinsert) (format "%s" (calc-eval formula)))
+
+;; Local Variables:
+;; mode: lisp-data
+;; outline-regexp: "[a-z]"
+;; End:

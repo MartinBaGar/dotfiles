@@ -3,10 +3,8 @@
   "layer": "top",
   "position": "top",
   "reload_style_on_change": true,
-  "spacing": 4,
   "modules-left": [
     "niri/workspaces",
-    "niri/window",
     "niri/language"
   ],
   "modules-center": [
@@ -22,13 +20,6 @@
   "niri/workspaces": {
     "format": "{name}",
   },
-  "niri/window": {
-  	"format": "{title}",
-    "max-length": 20,
-  	"rewrite": {
-  		"(.*) - zsh": "> [$1]"
-        }
-    },
     "niri/language": {
         "format": "    {short}",
         "on-click": "bash /home/bari-garnier/scripts/bash/niri_switch_layout.sh"
