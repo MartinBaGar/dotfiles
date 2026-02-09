@@ -3,6 +3,7 @@
 text-mode
 
 (calc (p "Formula: " formula noinsert) (format "%s" (calc-eval formula)))
+;; (calc (p "Formula: " formula noinsert) (format "%s" (calc-eval formula)) q)
 
 ;; Local Variables:
 ;; mode: lisp-data
