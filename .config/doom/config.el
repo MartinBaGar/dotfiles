@@ -548,6 +548,9 @@ Works on selected region if active, otherwise on whole buffer."
   :config
   (keymap-set typst-ts-mode-map "C-c C-c" #'typst-ts-tmenu))
 
+(use-package! org-typst
+  :after org)
+
 (after! eglot
   (after! typst-ts-mode
     (add-to-list 'eglot-server-programs

@@ -56,8 +56,9 @@
 ;; Org mode
 (package! org-modern)
 (package! org-transclusion)
-(package! savefold
-  :recipe (:host github :repo "jcfk/savefold.el"))
+(package! savefold :recipe (:host github :repo "jcfk/savefold.el"))
+(package! org-typst :recipe (:host github :repo "MartinBaGar/org-typst"))
+(package! ox-typst)
 
 ;; AI
 (package! gptel :recipe (:nonrecursive t))

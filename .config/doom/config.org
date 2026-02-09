@@ -599,6 +599,9 @@ Works on selected region if active, otherwise on whole buffer."
   (typst-ts-mode-enable-raw-blocks-highlight t)
   :config
   (keymap-set typst-ts-mode-map "C-c C-c" #'typst-ts-tmenu))
+
+(use-package! org-typst
+  :after org)
 #+end_src
 
 * LSP / Formater
