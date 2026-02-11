@@ -72,6 +72,7 @@
 (package! tempel-collection :recipe (:host github :repo "Crandel/tempel-collection"))
 (package! eglot-tempel :recipe (:host github :repo "fejfighter/eglot-tempel"))
 (package! gt)
+(package! magit-todos)
 
 ;; Modes
 ;; (package! quarto-mode :recipe (:host github :repo "quarto-dev/quarto-emacs"))

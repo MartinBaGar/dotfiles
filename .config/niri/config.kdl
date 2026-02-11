@@ -239,6 +239,19 @@ workspace "lecture" {
     }
 workspace "visualisation" {
     open-on-output "HDMI-A-2"
+    layout {
+        gaps 0
+        struts {
+            left 0
+            right 0
+            bottom 0
+            top -4
+        }
+    preset-column-widths {
+        proportion 0.7
+        proportion 0.3
+    }
+    }
     }
 
 overview {
@@ -430,6 +443,7 @@ window-rule {
     open-on-workspace "Visualisation"
 }
 // End of VMD
+
 
 window-rule {
     match app-id="org.pymol.PyMOL" title="PyMOL"

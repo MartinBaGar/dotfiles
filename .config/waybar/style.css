@@ -12,26 +12,21 @@ window#waybar {
   color: #f0dede;
 }
 
-/* ---------- Common Styling (Colors/Borders) ---------- */
+/* ---------- Common Button Styling ---------- */
 #mpris,
 #pulseaudio,
 #custom-dunst,
 #battery,
 #language,
+#window,
+#clock,
 #workspaces button {
   margin: 1px 2px;
-  padding: 0px 10px; 
+  padding: 4px 12px;
   border: 1px solid;
   border-radius: 4px;
   font-weight: 600;
   background: alpha(#1a1111, 0.9);
-  min-height: 0;
-}
-
-#mpris,
-#pulseaudio,
-#custom-dunst {
-  margin: 2px 2px;
 }
 
 /* ---------- Workspaces ---------- */
@@ -50,16 +45,13 @@ window#waybar {
   font-weight: 400;
 }
 
-/* ---------- Clock (Keep it Big) ---------- */
+/* ---------- Clock ---------- */
 #clock {
   font-weight: 800;
   letter-spacing: 1px;
-  font-size: 25px; /* Your requested size */
-  padding: 0px 6px;
+  font-size: 25px;
+    padding: 0px 12px;
   background: alpha(#1a1111, 0.9);
-  margin: 0; 
-  border: 1px solid;
-  border-radius: 4px;
 }
 
 /* ---------- Media Player ---------- */
