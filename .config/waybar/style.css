@@ -8,31 +8,36 @@
 #window,
 #workspaces button,
 window#waybar {
-  background: alpha(#fdf9ec, 0.0);
-  color: #1c1c14;
+  background: alpha(#1a1111, 0.0);
+  color: #f0dede;
 }
 
-/* ---------- Common Button Styling ---------- */
+/* ---------- Common Styling (Colors/Borders) ---------- */
 #mpris,
 #pulseaudio,
 #custom-dunst,
 #battery,
 #language,
-#window,
-#clock,
 #workspaces button {
   margin: 1px 2px;
-  padding: 4px 12px;
+  padding: 0px 10px; 
   border: 1px solid;
   border-radius: 4px;
   font-weight: 600;
-  background: alpha(#fdf9ec, 0.9);
+  background: alpha(#1a1111, 0.9);
+  min-height: 0;
+}
+
+#mpris,
+#pulseaudio,
+#custom-dunst {
+  margin: 2px 2px;
 }
 
 /* ---------- Workspaces ---------- */
 #workspaces button.active {
-  background-color: #1c1c14;
-  color: #fdf9ec;
+  background-color: #f0dede;
+  color: #1a1111;
   border: 0;
 }
 
@@ -45,13 +50,16 @@ window#waybar {
   font-weight: 400;
 }
 
-/* ---------- Clock ---------- */
+/* ---------- Clock (Keep it Big) ---------- */
 #clock {
   font-weight: 800;
   letter-spacing: 1px;
-  font-size: 25px;
-    padding: 0px 12px;
-  background: alpha(#fdf9ec, 0.9);
+  font-size: 25px; /* Your requested size */
+  padding: 0px 6px;
+  background: alpha(#1a1111, 0.9);
+  margin: 0; 
+  border: 1px solid;
+  border-radius: 4px;
 }
 
 /* ---------- Media Player ---------- */

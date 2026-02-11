@@ -41,14 +41,13 @@
         "on-click-right": "dunstctl set-paused toggle"
     },
     "mpris": {
-        "format": "{player_icon} {dynamic}",
+        "format": "{player_icon} {artist} - {title}",
         "format-paused": "{status_icon} <i>{dynamic}</i>",
         "player-icons": {
-            "default": "▶",
-            "mpv": "🎵"
+            "default": "▶ ",
         },
         "status-icons": {
-            "paused": "⏸"
+            "paused": "⏸ "
         },
     },
     "clock": {
