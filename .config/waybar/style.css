@@ -1,6 +1,6 @@
 /* ---------- Global ---------- */
 * {
-  margin: 0;
+  margin: 2px 2px 2px 2px;
   font-size: 13px;
   min-height: 0;
 }
@@ -8,8 +8,8 @@
 #window,
 #workspaces button,
 window#waybar {
-  background-color: #1a1111;
-  color: #f0dede;
+  background: alpha(#fdf9ec, 0.0);
+  color: #1c1c14;
 }
 
 /* ---------- Common Button Styling ---------- */
@@ -19,18 +19,20 @@ window#waybar {
 #battery,
 #language,
 #window,
+#clock,
 #workspaces button {
   margin: 1px 2px;
   padding: 4px 12px;
   border: 1px solid;
   border-radius: 4px;
   font-weight: 600;
+  background: alpha(#fdf9ec, 0.9);
 }
 
 /* ---------- Workspaces ---------- */
 #workspaces button.active {
-  background-color: #f0dede;
-  color: #1a1111;
+  background-color: #1c1c14;
+  color: #fdf9ec;
   border: 0;
 }
 
@@ -48,9 +50,8 @@ window#waybar {
   font-weight: 800;
   letter-spacing: 1px;
   font-size: 25px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
+    padding: 0px 12px;
+  background: alpha(#fdf9ec, 0.9);
 }
 
 /* ---------- Media Player ---------- */
