@@ -72,6 +72,7 @@
 (package! tempel-collection :recipe (:host github :repo "Crandel/tempel-collection"))
 (package! eglot-tempel :recipe (:host github :repo "fejfighter/eglot-tempel"))
 (package! gt)
+(package! magit-todos)
 
 ;; Modes
 ;; (package! quarto-mode :recipe (:host github :repo "quarto-dev/quarto-emacs"))
@@ -80,3 +81,5 @@
 (package! typst-ts-mode :recipe (:host nil :repo "https://git.sr.ht/~meow_king/typst-ts-mode"))
 (package! typst-preview :recipe (:host github :repo "havarddj/typst-preview.el"))
 (package! popper :recipe (:host github :repo "karthink/popper"))
+(package! code-cells :recipe (:host github :repo "astoff/code-cells.el"))
+(package! emacs-jupyter :recipe (:host github :repo "emacs-jupyter/jupyter"))

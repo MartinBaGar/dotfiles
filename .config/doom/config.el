@@ -386,23 +386,24 @@ Works on selected region if active, otherwise on whole buffer."
             (insert output)
             (message "Done.")))))))
 
-;; The proper Doom way
-(setq-hook! 'markdown-mode-hook
-  markdown-hide-markup t
-  markdown-fontify-code-blocks-natively t
-  markdown-hide-urls t
-  markdown-italic-underscore t
-  markdown-asymmetric-header t
-  markdown-gfm-additional-languages '("sh" "json" "elisp"))
+(after! markdown-mode
+  (setq-hook! 'markdown-mode-hook
+    markdown-hide-markup t
+    markdown-hide-urls t
+    markdown-italic-underscore t
+    markdown-fontify-code-blocks-natively t
+    markdown-gfm-additional-languages '("sh" "json" "elisp")
+    markdown-asymmetric-header t)
+  (add-hook! 'markdown-mode-hook #'writeroom-mode))
 
 (custom-set-faces!
-  '(markdown-header-delimiter-face :foreground "#616161" :height 0.9)
-  '(markdown-header-face-1 :height 1.6 :foreground "#A3BE8C" :weight extra-bold :inherit markdown-header-face)
-  '(markdown-header-face-2 :height 1.4 :foreground "#EBCB8B" :weight extra-bold :inherit markdown-header-face)
-  '(markdown-header-face-3 :height 1.2 :foreground "#D08770" :weight extra-bold :inherit markdown-header-face)
-  '(markdown-header-face-4 :height 1.15 :foreground "#BF616A" :weight bold :inherit markdown-header-face)
-  '(markdown-header-face-5 :height 1.1 :foreground "#b48ead" :weight bold :inherit markdown-header-face)
-  '(markdown-header-face-6 :height 1.05 :foreground "#5e81ac" :weight semi-bold :inherit markdown-header-face))
+  '(markdown-header-delimiter-face :height 0.9)
+  '(markdown-header-face-1 :height 1.6 :weight extra-bold :inherit markdown-header-face)
+  '(markdown-header-face-2 :height 1.4 :weight extra-bold :inherit markdown-header-face)
+  '(markdown-header-face-3 :height 1.2 :weight extra-bold :inherit markdown-header-face)
+  '(markdown-header-face-4 :height 1.15 :weight bold :inherit markdown-header-face)
+  '(markdown-header-face-5 :height 1.1 :weight bold :inherit markdown-header-face)
+  '(markdown-header-face-6 :height 1.05 :weight semi-bold :inherit markdown-header-face))
 
 (after! projectile
   (setq! magit-repository-directories

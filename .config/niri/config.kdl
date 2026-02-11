@@ -87,7 +87,14 @@ output "HDMI-A-2" {
 
 layout {
     // Set gaps around windows in logical pixels.
-    gaps 0
+    gaps 6
+    struts {
+        left 6
+        right 6
+        top -6
+        bottom 0
+    }
+
     background-color "transparent"
 
     // When to center a column when changing focus, options are:
@@ -216,18 +223,6 @@ layout {
         // You can also change the shadow color and opacity.
         color "#0007"
     }
-
-    // Struts shrink the area occupied by windows, similarly to layer-shell panels.
-    // You can think of them as a kind of outer gaps. They are set in logical pixels.
-    // Left and right struts will cause the next window to the side to always be visible.
-    // Top and bottom struts will simply add outer gaps in addition to the area occupied by
-    // layer-shell panels and regular gaps.
-    struts {
-        // left 64
-        // right 64
-        // top 64
-        // bottom 64
-    }
 }
 
 workspace "navigation" {
@@ -242,6 +237,20 @@ workspace "chat" {
 workspace "lecture" {
     open-on-output "HDMI-A-1"
     }
+workspace "visualisation" {
+    open-on-output "HDMI-A-2"
+    layout {
+        gaps 0
+        struts {
+            left 0
+            right 0
+            bottom 0
+            top -4
+        }
+    preset-column-widths {
+        proportion 0.7
+        proportion 0.3
+    }}
 workspace "Visualisation" {
     open-on-output "HDMI-A-1"
     }
@@ -267,7 +276,6 @@ environment {
 hotkey-overlay {
     skip-at-startup
 }
-
 prefer-no-csd
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 animations {
