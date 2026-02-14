@@ -42,7 +42,7 @@ fi
 ################
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
-export GTK_THEME="Adwaita:dark"
+# export GTK_THEME="Adwaita:dark"
 
 #########################
 # ALIASES AND FUNCTIONS #
@@ -70,3 +70,4 @@ export NVM_DIR="$HOME/.config/nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
+. "/home/mabagar/.deno/env"
