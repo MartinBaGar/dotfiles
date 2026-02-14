@@ -478,7 +478,7 @@ binds {
     Mod+Space hotkey-overlay-title="Application Launcher" {
         spawn "fuzzel";
     }
-
+    Mod+Alt+Space { spawn-sh "~/scripts/bash/niri-window-switcher.sh"; }
     Mod+Alt+O { spawn-sh "~/scripts/bash/fuzzel-file-actions.sh"; }
     Mod+Alt+V { spawn-sh "~/scripts/bash/fuzzel-clipboard.sh"; }
     Mod+Alt+P { spawn-sh "~/scripts/bash/fuzzel-powermenu.sh"; }

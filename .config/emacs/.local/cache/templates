@@ -5,7 +5,18 @@ text-mode
 (calc (p "Formula: " formula noinsert) (format "%s" (calc-eval formula)))
 ;; (calc (p "Formula: " formula noinsert) (format "%s" (calc-eval formula)) q)
 
-;; Local Variables:
+;; MD related
+(AA "All-Atom")
+(CG "Coarse-Grain")
+(ff (p "Formula: " formula noinsert)
+    (if (string-empty-p formula)
+        "force-field"
+      "Force-field"))
+
+(mc (case 2 "monte-carlo"))    ;; mc → monte-carlo, MC → Monte-Carlo
+(ml (case 2 "machine-learning")) 
+(dm (p "Formula: " formula noinsert) (sc "dark-matter") q)
+(en (p "Formula: " formula noinsert) (sc "entropy") q);; Local Variables:
 ;; mode: lisp-data
 ;; outline-regexp: "[a-z]"
 ;; End:

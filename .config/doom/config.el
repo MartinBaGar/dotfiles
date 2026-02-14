@@ -53,9 +53,21 @@
     (setq-local completion-at-point-functions
                 (cons #'tempel-expand completion-at-point-functions)))
 
+  (defun tempel-smart-case (elt fields)
+    (pcase elt
+      (`(sc ,word) ; "sc" for Smart Case
+       (let ((val (cdr (assoc 'formula fields))))
+         (if (and val (not (string= "" val)))
+             (capitalize word)
+           word)))))
+  
+  (add-to-list 'tempel-user-elements #'tempel-smart-case)
+  
   ;; Doom's cleaner way to add hooks to multiple modes
   (add-hook! '(conf-mode-hook prog-mode-hook text-mode-hook)
-             #'tempel-setup-capf))
+             #'tempel-setup-capf)
+  )
+  
 
 ;; Load the collection of templates
 (use-package! tempel-collection)
@@ -388,13 +400,12 @@ Works on selected region if active, otherwise on whole buffer."
   (add-hook! 'markdown-mode-hook #'writeroom-mode))
 
 (custom-set-faces!
-  '(markdown-header-delimiter-face :height 0.9)
-  '(markdown-header-face-1 :height 1.6 :weight extra-bold :inherit markdown-header-face)
-  '(markdown-header-face-2 :height 1.4 :weight extra-bold :inherit markdown-header-face)
-  '(markdown-header-face-3 :height 1.2 :weight extra-bold :inherit markdown-header-face)
-  '(markdown-header-face-4 :height 1.15 :weight bold :inherit markdown-header-face)
-  '(markdown-header-face-5 :height 1.1 :weight bold :inherit markdown-header-face)
-  '(markdown-header-face-6 :height 1.05 :weight semi-bold :inherit markdown-header-face))
+  '(markdown-header-face-1 :inherit outline-1)
+  '(markdown-header-face-2 :inherit outline-2)
+  '(markdown-header-face-3 :inherit outline-3)
+  '(markdown-header-face-4 :inherit outline-4)
+  '(markdown-header-face-5 :inherit outline-5)
+  '(markdown-header-face-3 :inherit outline-6))
 
 (after! projectile
   (setq! magit-repository-directories
