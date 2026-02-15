@@ -83,4 +83,10 @@
 (package! typst-preview :recipe (:host github :repo "havarddj/typst-preview.el"))
 (package! popper :recipe (:host github :repo "karthink/popper"))
 (package! code-cells :recipe (:host github :repo "astoff/code-cells.el"))
+;; 
+;; Hard dependencies for jupyter
+(package! zmq)
+(package! websocket)
+(package! simple-httpd)
+;; The jupyter package itself
 (package! emacs-jupyter :recipe (:host github :repo "emacs-jupyter/jupyter"))

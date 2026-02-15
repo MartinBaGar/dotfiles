@@ -53,22 +53,28 @@
   (defun tempel-setup-capf ()
     (setq-local completion-at-point-functions
                 (cons #'tempel-expand completion-at-point-functions))
-
-    ;; Alternatively use `tempel-complete' if you want to see all matches.  Use
-    ;; a trigger prefix character in order to prevent Tempel from triggering
-    ;; unexpectly.
-    ;; (setq-local corfu-auto-trigger "/"
-    ;;             completion-at-point-functions
-    ;;             (cons (cape-capf-trigger #'tempel-complete ?/)
-    ;;                   completion-at-point-functions))
   )
 
-  ;; Doom's cleaner way to add hooks to multiple modes
   (add-hook! '(conf-mode-hook prog-mode-hook text-mode-hook)
              #'tempel-setup-capf))
 
+(defun tempel-case-match (elt fields)
+  (pcase elt
+    (`(c ,text)
+     (let ((at-start (save-excursion
+                       (skip-chars-backward " \t")
+                       (or (bobp)
+                           (bolp)
+                           (memq (char-before) '(?. ?? ?!))
+                           (looking-back "^\\s-*[*\\-]+" (line-beginning-position))))))
+       (if (and at-start (> (length text) 0))
+           (concat (upcase (substring text 0 1)) (substring text 1))
+         text)))))
+
 ;; Load the collection of templates
 (use-package! tempel-collection)
+
+(add-to-list 'tempel-user-elements #'tempel-case-match)
 
 (+global-word-wrap-mode +1)
 (add-hook 'writeroom-mode-hook #'+word-wrap-mode)

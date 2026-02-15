@@ -63,28 +63,35 @@
   (defun tempel-setup-capf ()
     (setq-local completion-at-point-functions
                 (cons #'tempel-expand completion-at-point-functions))
-
-    ;; Alternatively use `tempel-complete' if you want to see all matches.  Use
-    ;; a trigger prefix character in order to prevent Tempel from triggering
-    ;; unexpectly.
-    ;; (setq-local corfu-auto-trigger "/"
-    ;;             completion-at-point-functions
-    ;;             (cons (cape-capf-trigger #'tempel-complete ?/)
-    ;;                   completion-at-point-functions))
   )
 
-  ;; Doom's cleaner way to add hooks to multiple modes
   (add-hook! '(conf-mode-hook prog-mode-hook text-mode-hook)
              #'tempel-setup-capf))
 
+(defun tempel-case-match (elt fields)
+  (pcase elt
+    (`(c ,text)
+     (let ((at-start (save-excursion
+                       (skip-chars-backward " \t")
+                       (or (bobp)
+                           (bolp)
+                           (memq (char-before) '(?. ?? ?!))
+                           (looking-back "^\\s-*[*\\-]+" (line-beginning-position))))))
+       (if (and at-start (> (length text) 0))
+           (concat (upcase (substring text 0 1)) (substring text 1))
+         text)))))
+
 ;; Load the collection of templates
 (use-package! tempel-collection)
+
+(add-to-list 'tempel-user-elements #'tempel-case-match)
 #+end_src
 ** Misc
 #+begin_src emacs-lisp
 (+global-word-wrap-mode +1)
 (add-hook 'writeroom-mode-hook #'+word-wrap-mode)
 #+end_src
+
 * Modes
 #+begin_src emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.pdb\\'" . fundamental-mode))
@@ -249,7 +256,6 @@
        :desc "Dired vterm-cwd in new win" "v" #'vterm-dired-other-window))
 #+end_src
 * Layout
-
 #+begin_src emacs-lisp
 (defun toggle-window-split ()
   "Toggle between horizontal and vertical split with two windows."
@@ -283,7 +289,6 @@
        :desc "Toggle window split" "W" #'toggle-window-split))
 #+end_src
 * LLM
-
 #+begin_src emacs-lisp
 (use-package! gptel
   :config
@@ -361,7 +366,6 @@
   (gptel-commit-stream t))
 #+end_src
 * Bibliography
-
 #+begin_src emacs-lisp
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
 (setq! bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))
