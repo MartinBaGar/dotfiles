@@ -53,24 +53,26 @@
     (setq-local completion-at-point-functions
                 (cons #'tempel-expand completion-at-point-functions)))
 
-  (defun tempel-smart-case (elt fields)
-    (pcase elt
-      (`(sc ,word) ; "sc" for Smart Case
-       (let ((val (cdr (assoc 'formula fields))))
-         (if (and val (not (string= "" val)))
-             (capitalize word)
-           word)))))
-  
-  (add-to-list 'tempel-user-elements #'tempel-smart-case)
-  
-  ;; Doom's cleaner way to add hooks to multiple modes
   (add-hook! '(conf-mode-hook prog-mode-hook text-mode-hook)
-             #'tempel-setup-capf)
-  )
-  
+             #'tempel-setup-capf))
+
+(defun tempel-case-match (elt fields)
+  (pcase elt
+    (`(c ,text)
+     (let ((at-start (save-excursion
+                       (skip-chars-backward " \t")
+                       (or (bobp)
+                           (bolp)
+                           (memq (char-before) '(?. ?? ?!))
+                           (looking-back "^\\s-*[*\\-]+" (line-beginning-position))))))
+       (if (and at-start (> (length text) 0))
+           (concat (upcase (substring text 0 1)) (substring text 1))
+         text)))))
 
 ;; Load the collection of templates
 (use-package! tempel-collection)
+
+(add-to-list 'tempel-user-elements #'tempel-case-match)
 
 (+global-word-wrap-mode +1)
 (add-hook 'writeroom-mode-hook #'+word-wrap-mode)

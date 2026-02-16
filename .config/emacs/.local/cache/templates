@@ -1,22 +1,17 @@
 ;; ~/.config/emacs/templates
 
-text-mode
+fundamental-mode text-mode
 
 (calc (p "Formula: " formula noinsert) (format "%s" (calc-eval formula)))
-;; (calc (p "Formula: " formula noinsert) (format "%s" (calc-eval formula)) q)
 
-;; MD related
-(AA "All-Atom")
-(CG "Coarse-Grain")
-(ff (p "Formula: " formula noinsert)
-    (if (string-empty-p formula)
-        "force-field"
-      "Force-field"))
+;; Molecular dynamics related
+(ff (c "force field"))
+(cg (c "coarse-grain"))
+(aa (c "all-atom"))
+(md (c "molecular dynamics"))
 
-(mc (case 2 "monte-carlo"))    ;; mc → monte-carlo, MC → Monte-Carlo
-(ml (case 2 "machine-learning")) 
-(dm (p "Formula: " formula noinsert) (sc "dark-matter") q)
-(en (p "Formula: " formula noinsert) (sc "entropy") q);; Local Variables:
+
+;; Local Variables:
 ;; mode: lisp-data
 ;; outline-regexp: "[a-z]"
 ;; End:

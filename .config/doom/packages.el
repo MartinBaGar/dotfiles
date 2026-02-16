@@ -65,6 +65,7 @@
 (package! whisper :recipe (:host github :repo "natrys/whisper.el"))
 (package! gptel-prompts :recipe (:host github :repo "jwiegley/gptel-prompts"))
 (package! gptel-commit :recipe (:host github :repo "lakkiy/gptel-commit"))
+(package! gptel-agent)
 
 ;; Editor
 (package! jinx)
@@ -82,4 +83,10 @@
 (package! typst-preview :recipe (:host github :repo "havarddj/typst-preview.el"))
 (package! popper :recipe (:host github :repo "karthink/popper"))
 (package! code-cells :recipe (:host github :repo "astoff/code-cells.el"))
+;; 
+;; Hard dependencies for jupyter
+(package! zmq)
+(package! websocket)
+(package! simple-httpd)
+;; The jupyter package itself
 (package! emacs-jupyter :recipe (:host github :repo "emacs-jupyter/jupyter"))
