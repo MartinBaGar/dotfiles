@@ -90,3 +90,6 @@
 (package! simple-httpd)
 ;; The jupyter package itself
 (package! emacs-jupyter :recipe (:host github :repo "emacs-jupyter/jupyter"))
+
+;; Third parties
+(package! org-drawio :recipe (:host github :repo "4honor/org-drawio"))

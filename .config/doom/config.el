@@ -216,6 +216,15 @@
       (setq org-download-timestamp "%Y%m%d_%H%M%S")
       )))
 
+;; In your config.el
+(use-package! org-drawio
+  :commands (org-drawio-add org-drawio-open)
+  :config
+  ;; This package uses specific variables for input/output
+  (setq org-drawio-default-directory "/path/to/drawio/root"))
+
+(require 'org-drawio)
+
 (defun vterm-dired-other-window ()
   "Open dired in the current working directory of vterm in another window."
   (interactive)
