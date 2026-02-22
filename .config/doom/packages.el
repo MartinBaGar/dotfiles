@@ -90,3 +90,14 @@
 (package! simple-httpd)
 ;; The jupyter package itself
 (package! emacs-jupyter :recipe (:host github :repo "emacs-jupyter/jupyter"))
+(package! org-excalidraw :recipe (:host github :repo "4honor/org-excalidraw"))
+
+;; Third parties
+;; (package! org-drawio
+;;   :recipe (:host codeberg 
+;;            :repo "timmli/org-drawio"
+;;            :files ("org-drawio.el")))
+
+(package! org-inkscape
+  :recipe (:local-repo "~/git-repos/org-inkscape"
+           :files ("org-inkscape.el")))

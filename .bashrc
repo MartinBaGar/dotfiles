@@ -43,6 +43,7 @@ fi
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 # export GTK_THEME="Adwaita:dark"
+export BROWSER=/opt/brave-bin/brave
 
 #########################
 # ALIASES AND FUNCTIONS #

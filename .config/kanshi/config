@@ -22,8 +22,8 @@ output "Virtual-1" {
 # output $tablet disable mode 2560x1600@60 scale 2.0 position 3026,0
 
 profile docked {
-    output $monitor enable mode 1920x1080@119.879 scale 1.1 position 1281,0 
-    output $laptop enable mode 1920x1080@165.004 scale 1.5 position 0,0
+    output $monitor enable mode 1920x1080@60 scale 1.1 position 1281,0 
+    output $laptop enable mode 1920x1080@60 scale 1.5 position 0,0
 }
 
 profile undocked {

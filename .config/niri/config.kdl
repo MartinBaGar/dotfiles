@@ -361,6 +361,12 @@ window-rule {
 }
 
 window-rule {
+    match app-id=r#"^org\.keepassxc\.KeePassXC$"# title="^Unlock Database - KeePassXC$"
+
+    open-focused true
+}
+
+window-rule {
     match app-id="thunderbird_thunderbird"
     open-on-workspace "chat"
 }
@@ -446,6 +452,12 @@ window-rule {
     open-floating false
     geometry-corner-radius 0
 }
+
+// window-rule {
+//     match app-id="org.inkscape.Inkscape"
+//     default-column-width { fixed 600; }
+//     open-fullscreen false
+// }
 
 recent-windows {
     // off
