@@ -9,6 +9,9 @@ fundamental-mode text-mode
 (cg (c "coarse-grain"))
 (aa (c "all-atom"))
 (md (c "molecular dynamics"))
+(CG "Coarse-Grain")
+(AA "All-Atom")
+(MD "Molecular Dynamics")
 
 
 ;; Local Variables:

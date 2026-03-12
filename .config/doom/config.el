@@ -10,7 +10,7 @@
 (setq-default tab-width 4)
 (define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
 
-(after! evil-escape
+(with-eval-after-load 'evil-escape
   (setq evil-escape-key-sequence "fd"))
 
 ;; https://github.com/joaotavora/yasnippet/issues/998
@@ -20,7 +20,7 @@
 ;;       (yas-expand))))
 ;; (add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
 
-(after! emacs
+(with-eval-after-load 'emacs
   ;; Enable indentation+completion using the TAB key
   (setq tab-always-indent 'complete)
 
@@ -42,13 +42,11 @@
 
 (add-hook! 'doom-switch-buffer-hook #'+my-setup-cape-dict-h)
 
-;; Configure Tempel
-(use-package! tempel
-  ;; "bind" maps keys. In Doom, we prefer map! but :bind works too.
+(use-package tempel
   :bind (("M-+" . tempel-complete)
          ("M-*" . tempel-insert))
   :init
-  ;; Setup completion at point function
+  
   (defun tempel-setup-capf ()
     (setq-local completion-at-point-functions
                 (cons #'tempel-expand completion-at-point-functions)))
@@ -69,8 +67,7 @@
            (concat (upcase (substring text 0 1)) (substring text 1))
          text)))))
 
-;; Load the collection of templates
-(use-package! tempel-collection)
+(use-package tempel-collection)
 
 (add-to-list 'tempel-user-elements #'tempel-case-match)
 
@@ -95,12 +92,12 @@
 (setq display-line-numbers nil)
 (setq display-line-numbers-type nil)
 
-(after! dirvish
+(with-eval-after-load 'dirvish
   (setq dirvish-hide-details 't)
   )
 
 ;; Defined in ~/.config/emacs/lisp/doom.el
-(setq! dotfiles-dir
+(setopt dotfiles-dir
   (let* ((homedir (getenv-internal "HOME"))
          (dotdir (concat homedir "/dotfiles/")))
     (expand-file-name dotdir)
@@ -124,7 +121,7 @@
 (setq org-image-max-width 500)
 (setq +zen-text-scale 0.5)
 
-(after! org
+(with-eval-after-load 'org
   (add-hook! 'org-mode-hook #'org-modern-mode)
   (add-hook! 'org-mode-hook #'+org-pretty-mode)
   (add-hook! 'org-mode-hook #'+zen/toggle)
@@ -132,7 +129,7 @@
   ;; TODOs
   (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
   (setq org-tag-alist
-        '(("baal" . ?b) ("adastra" . ?a)))
+        '(("baal" . ?b) ("adastra" . ?a) ("question" . ?q)))
   (setq org-log-done t)
 
   (setq-default org-display-custom-times t)
@@ -155,13 +152,54 @@
   (add-to-list 'org-capture-templates
                '("a" "Appointment" entry (file+headline "~/org/agenda.org" "Inbox")
                  "* %?\n  SCHEDULED: %^T\n  %a" :prepend t))
-  
   )
 
-(after! org-modern
+(defun my-dynamic-export-exclude-tags (backend)
+  "Dynamically tell Org which tags to ignore based on the backend."
+  (cond
+   ((eq backend 'typst)
+    (setq-local org-export-exclude-tags (cons "html_only" org-export-exclude-tags)))
+   
+   ((eq backend 'html)
+    (setq-local org-export-exclude-tags (cons "pdf_only" org-export-exclude-tags)))))
+
+(defun my-org-export-ignore-headlines (data backend info)
+  "Remove headlines tagged 'ignore', retain contents, and promote children.
+Operates directly on the Org AST."
+  (org-element-map data 'headline
+    (lambda (object)
+      (when (member "ignore" (org-element-property :tags object))
+        (let ((level-top (org-element-property :level object))
+              level-diff)
+          (mapc (lambda (el)
+                  ;; Recursively promote all nested child headlines
+                  (org-element-map el 'headline
+                    (lambda (el)
+                      (when (equal 'headline (org-element-type el))
+                        (unless level-diff
+                          (setq level-diff (- (org-element-property :level el)
+                                              level-top)))
+                        (org-element-put-property el
+                          :level (- (org-element-property :level el)
+                                    level-diff)))))
+                  ;; Insert the contents back into the parse tree
+                  (org-element-insert-before el object))
+                (org-element-contents object)))
+        ;; Remove the original headline node
+        (org-element-extract-element object)))
+    info nil)
+  data)
+
+;; Add it to the AST parsing hook
+(add-hook 'org-export-filter-parse-tree-functions #'my-org-export-ignore-headlines)
+
+;; Hook into the very beginning of the export process
+(add-hook 'org-export-before-processing-hook #'my-dynamic-export-exclude-tags)
+
+(with-eval-after-load 'org-modern
     (setq org-modern-fold-stars '(("▸" . "▾"))))
 
-(use-package! org-transclusion
+(use-package org-transclusion
   :after org
   :init
   (map!
@@ -186,7 +224,7 @@
     (kill-new link)
     (message "Copied: %s" link)))
 
-(after! org-download
+(with-eval-after-load 'org-download
   ;; Fix the underscore prefix issue
   (setq org-download-timestamp "%Y%m%d-%H%M%S")
   (setq org-download-screenshot-method "flameshot gui --raw > %s")
@@ -216,14 +254,23 @@
       (setq org-download-timestamp "%Y%m%d_%H%M%S")
       )))
 
-;; In your config.el
-(use-package! org-drawio
-  :commands (org-drawio-add org-drawio-open)
-  :config
-  ;; This package uses specific variables for input/output
-  (setq org-drawio-default-directory "/path/to/drawio/root"))
+; (use-package org-img
+;   :after org
+;   :config
+;   (setq org-inkscape-base-directory "~/org/inkscape/"
+;         org-inkscape-image-type 'svg)  ; or 'png if you prefer
+;   (add-hook 'org-mode-hook #'org-inkscape-mode))
 
-(require 'org-drawio)
+;; Ensure it's attached to the export hook
+;; (add-hook 'org-export-before-parsing-hook #'my-org-export-inkscape-as-file)
+
+(setopt org-img-dir "~/org/img/")
+(add-hook 'org-mode-hook #'org-img-mode)
+; (use-package org-img
+;   :after org
+;   :config
+;   (setq org-img-dir "~/org/img/"
+;   (add-hook 'org-mode-hook #'org-img-mode)))
 
 (defun vterm-dired-other-window ()
   "Open dired in the current working directory of vterm in another window."
@@ -270,10 +317,9 @@
       (:prefix-map ("t" . "toggle")
        :desc "Toggle window split" "W" #'toggle-window-split))
 
-(use-package! gptel
+(use-package gptel
   :config
-  ;; Register Mistral backend
-(gptel-make-openai "Mistral"
+  (gptel-make-openai "Mistral"
   :host "api.mistral.ai"
   :endpoint "/v1/chat/completions"
   :models '("mistral-small-latest" "mistral-large-latest" "codestral-latest" "ministral-8b-latest")
@@ -288,48 +334,14 @@
   :models '(openai/gpt-oss-120b:free
             tngtech/deepseek-r1t2-chimera:free))
 
-  ;; Llama.cpp offers an OpenAI compatible API
-  (gptel-make-openai "llama-cpp"          ;Any name
-  :stream t                             ;Stream responses
-  :protocol "http"
-  :host "localhost:8080"                ;Llama.cpp server location
-  :models '(LLAMA))                    ;Any names, doesn't matter for Llama
-
-  ;; Llama.cpp offers an OpenAI compatible API
-  (gptel-make-openai "koboldcpp"          ;Any name
-  :stream t                             ;Stream responses
-  :protocol "http"
-  :host "localhost:5001"                ;Llama.cpp server location
-  :models '(KOBOLD))                    ;Any names, doesn't matter for Llama
-
   ;; Default model + backend
-  (setq! gptel-backend (gptel-get-backend "Mistral"))
-  (setq! gptel-model 'mistral-large-latest)
-  (setq! gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
-  (setq! gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
-  (setq! gptel-default-mode 'org-mode)
+  (setopt gptel-backend (gptel-get-backend "Mistral"))
+  (setopt gptel-model 'mistral-large-latest)
+  (setopt gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
+  (setopt gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
+  (setopt gptel-default-mode 'org-mode))
 
-  (defun gptel-send-with-options (&optional arg)
-    "Send query.  With prefix ARG open gptel's menu instead."
-    (interactive "P")
-    (if arg
-        (call-interactively 'gptel-menu)
-      (gptel--suffix-send (transient-args 'gptel-menu))))
-  
-  (defun gptel-scratch-from-minibuffer ()
-    "Send prompt from minibuffer to *scratch* buffer using 'scratch preset."
-    (interactive)
-    ;; Then send with specific UI flags: "m" for minibuffer, "b" for specific buffer
-    (gptel--suffix-send (list "m" "b*scratch*")))
-
-  (map! :leader
-        (:prefix-map ("l" . "LLM")
-         :desc "Select a gptel buffer"   "b" #'gptel
-         :desc "Send with options"   "l" #'gptel-scratch-from-minibuffer
-         :desc "Show menu"           "m" #'gptel-menu))
-  )
-
-(use-package! gptel-prompts
+(use-package gptel-prompts
   :after (gptel)
   :demand t
   :config
@@ -339,23 +351,23 @@
   (gptel-prompts-add-update-watchers)
   )
 
-(use-package! gptel-commit
+(use-package gptel-commit
   :ensure t
   :after (gptel magit)
   :custom
   (gptel-commit-stream t))
 
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
-(setq! bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))
-(setq! bibtex-completion-library-path '("~/zotero-lib/referenciator.bib"))
+(setopt bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))
+(setopt bibtex-completion-library-path '("~/zotero-lib/referenciator.bib"))
 
-(after! citar
-(setq! citar-bibliography '("~/zotero-lib/referenciator.bib"))
-(setq! citar-file-open-functions (list (cons "html" #'citar-file-open-external)
-                                       (cons "pdf" #'citar-file-open-external)
-                                           (cons t #'find-file)))
+(with-eval-after-load 'citar
+  (setopt citar-bibliography '("~/zotero-lib/referenciator.bib"))
+  (setopt citar-file-open-functions (list (cons "html" #'citar-file-open-external)
+                                          (cons "pdf" #'citar-file-open-external)
+                                          (cons t #'find-file)))
 
-(setq! citar-library-paths '("~/zotero-lib/"))
+  (setopt citar-library-paths '("~/zotero-lib/"))
 
   (defun my-citar-open-in-zotero ()
     "Open current entry in Zotero instead of opening files."
@@ -400,7 +412,7 @@ Works on selected region if active, otherwise on whole buffer."
             (insert output)
             (message "Done.")))))))
 
-(after! markdown-mode
+(with-eval-after-load 'markdown-mode
   (setq-hook! 'markdown-mode-hook
     markdown-hide-markup t
     markdown-hide-urls t
@@ -418,8 +430,8 @@ Works on selected region if active, otherwise on whole buffer."
   '(markdown-header-face-5 :inherit outline-5)
   '(markdown-header-face-3 :inherit outline-6))
 
-(after! projectile
-  (setq! magit-repository-directories
+(with-eval-after-load 'projectile
+  (setopt magit-repository-directories
          (mapcar (lambda (dir) (cons dir 0))
                  projectile-known-projects)))
 
@@ -430,7 +442,7 @@ Works on selected region if active, otherwise on whole buffer."
         (mapcar (lambda (dir) (cons dir 0))
                 projectile-known-projects)))
 
-(setq! magit-repolist-columns
+(setopt magit-repolist-columns
       '(("Name"    25 magit-repolist-column-ident                  ())
         ("Flags"    5 magit-repolist-column-flags                  ())
         ("Branch"  15 magit-repolist-column-branch                 ())
@@ -443,7 +455,7 @@ Works on selected region if active, otherwise on whole buffer."
       (:prefix "g l"
       :desc "update" "u" #'my/update-magit-repos))
 
-(use-package! gt
+(use-package gt
   :config
   (setq gt-default-translator
         (gt-translator
@@ -479,12 +491,12 @@ Works on selected region if active, otherwise on whole buffer."
 ;; (setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
 ;; (require 'langtool)
 
-(use-package! jinx
+(use-package jinx
   ;; :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
          ("C-M-$" . jinx-languages)))
 
-(after! jinx
+(with-eval-after-load 'jinx
   ;; Limitations:
   ;; 1. since raw block highlighting let the local parser highlights the area,
   ;; some area doesn't contain face (like `bash-ts-mode'), and those areas will
@@ -536,7 +548,7 @@ Works on selected region if active, otherwise on whole buffer."
       :desc "Open file at point with default app"
       "x" #'my/xdg-open-path-at-point)
 
-(use-package! blender
+(use-package blender
   :defer t
   :commands (blender-mode blender-start blender-run-current-buffer)
   :init
@@ -546,7 +558,7 @@ Works on selected region if active, otherwise on whole buffer."
   (blender-external-python "/data/bari-garnier/blender/blender_env/bin/activate")
   )
 
-(use-package! typst-preview
+(use-package typst-preview
   :custom
   (typst-preview-browser "default")
   (typst-preview-open-browser-automatically t)
@@ -554,7 +566,7 @@ Works on selected region if active, otherwise on whole buffer."
   (typst-preview-autostart t)
   (typst-preview-invert-colors "never"))
 
-(use-package! typst-ts-mode
+(use-package typst-ts-mode
   :custom
   (typst-ts-watch-options "--open")
   (typst-ts-mode-grammar-location (expand-file-name "tree-sitter/libtree-sitter-typst.so" user-emacs-directory))
@@ -562,21 +574,21 @@ Works on selected region if active, otherwise on whole buffer."
   :config
   (keymap-set typst-ts-mode-map "C-c C-c" #'typst-ts-tmenu))
 
-(use-package! org-typst
-  :after org)
+;; (use-package org-typst
+;;   :after org)
 
-(after! eglot
-  (after! typst-ts-mode
+(with-eval-after-load 'eglot
+  (with-eval-after-load 'typst-ts-mode
     (add-to-list 'eglot-server-programs
                  `((typst-ts-mode) .
                    ,(eglot-alternatives `(,typst-ts-lsp-download-path
                                           "tinymist"
                                           "typst-lsp"))))))
 
-(after! cc-mode
+(with-eval-after-load 'cc-mode
   (set-eglot-client! 'cc-mode '("clangd" "-j=3" "--clang-tidy")))
 
-(after! python
+(with-eval-after-load 'python
   (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server"))
   (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
 

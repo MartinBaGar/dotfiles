@@ -46,6 +46,7 @@ fi
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 export PATH="$HOME/.local/libreoffice/opt/libreoffice25.8/program:$PATH"
+export LD_LIBRARY_PATH="/data/bari-garnier/local/lib"
 
 # export PATH="/data/bari-garnier/local/bin:$PATH"
 . "$HOME/.cargo/env"
@@ -74,3 +75,5 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
+export PATH="/home/bari-garnier/.pixi/bin:$PATH"
+eval "$(pixi completion --shell bash)"

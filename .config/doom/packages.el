@@ -57,11 +57,11 @@
 (package! org-modern)
 (package! org-transclusion)
 (package! savefold :recipe (:host github :repo "jcfk/savefold.el"))
-(package! org-typst :recipe (:host github :repo "MartinBaGar/org-typst"))
+;; (package! org-typst :recipe (:host github :repo "MartinBaGar/org-typst"))
 (package! ox-typst)
 
 ;; AI
-(package! gptel :recipe (:nonrecursive t))
+;; (package! gptel :recipe (:nonrecursive t))
 (package! whisper :recipe (:host github :repo "natrys/whisper.el"))
 (package! gptel-prompts :recipe (:host github :repo "jwiegley/gptel-prompts"))
 (package! gptel-commit :recipe (:host github :repo "lakkiy/gptel-commit"))
@@ -83,7 +83,7 @@
 (package! typst-preview :recipe (:host github :repo "havarddj/typst-preview.el"))
 (package! popper :recipe (:host github :repo "karthink/popper"))
 (package! code-cells :recipe (:host github :repo "astoff/code-cells.el"))
-;; 
+
 ;; Hard dependencies for jupyter
 (package! zmq)
 (package! websocket)
@@ -92,4 +92,4 @@
 (package! emacs-jupyter :recipe (:host github :repo "emacs-jupyter/jupyter"))
 
 ;; Third parties
-(package! org-drawio :recipe (:host github :repo "4honor/org-drawio"))
+(package! org-img :recipe (:host github :repo "MartinBaGar/org-img"))
