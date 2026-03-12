@@ -167,22 +167,45 @@
   (setq org-agenda-files (list "~/org"))
 
   (org-link-set-parameters "zotero"
-  :follow (lambda (path) 
-              (browse-url (concat "zotero:" path))))
+                           :follow (lambda (path) 
+                                     (browse-url (concat "zotero:" path))))
   
   (add-to-list 'org-capture-templates
                '("a" "Appointment" entry (file+headline "~/org/agenda.org" "Inbox")
                  "* %?\n  SCHEDULED: %^T\n  %a" :prepend t))
   )
 
-(defun my-dynamic-export-exclude-tags (backend)
+;; Teach Org's export engine about our custom :adtoc property
+;; 1. Teach Org about the new option
+(add-to-list 'org-export-options-alist
+             '(:adtoc "ADTOC" "adtoc" nil t)) ;; 't' allows it to be read as a boolean/value
+
+(defun my-dynamic-export-exclude-tags (info backend)
   "Dynamically tell Org which tags to ignore based on the backend."
   (cond
    ((eq backend 'typst)
-    (setq-local org-export-exclude-tags (cons "html_only" org-export-exclude-tags)))
-   
+    (plist-put info :exclude-tags (cons "html_only" org-export-exclude-tags)))
    ((eq backend 'html)
-    (setq-local org-export-exclude-tags (cons "pdf_only" org-export-exclude-tags)))))
+    (plist-put info :exclude-tags (cons "pdf_only" org-export-exclude-tags))
+    ))
+  info)
+
+;; 2. Your streamlined hook
+(defun my-org-export-conditional-toc (info backend)
+  "Dynamically enable/disable TOC based on backend and ADTOC property."
+  
+  (let ((my-custom-adtoc-value (plist-get info :adtoc)))
+    
+    (if my-custom-adtoc-value
+        (cond
+         ((eq backend 'html)
+          (plist-put info :with-toc nil))
+         ((eq backend 'typst)
+          (plist-put info :with-toc t)))
+      ))
+  info)
+
+(add-hook 'org-export-filter-options-functions #'my-org-export-conditional-toc)
 
 (defun my-org-export-ignore-headlines (data backend info)
   "Remove headlines tagged 'ignore', retain contents, and promote children.
@@ -201,8 +224,8 @@ Operates directly on the Org AST."
                           (setq level-diff (- (org-element-property :level el)
                                               level-top)))
                         (org-element-put-property el
-                          :level (- (org-element-property :level el)
-                                    level-diff)))))
+                                                  :level (- (org-element-property :level el)
+                                                            level-diff)))))
                   ;; Insert the contents back into the parse tree
                   (org-element-insert-before el object))
                 (org-element-contents object)))
@@ -214,11 +237,8 @@ Operates directly on the Org AST."
 ;; Add it to the AST parsing hook
 (add-hook 'org-export-filter-parse-tree-functions #'my-org-export-ignore-headlines)
 
-;; Hook into the very beginning of the export process
-(add-hook 'org-export-before-processing-hook #'my-dynamic-export-exclude-tags)
-
 (with-eval-after-load 'org-modern
-    (setq org-modern-fold-stars '(("▸" . "▾"))))
+  (setq org-modern-fold-stars '(("▸" . "▾"))))
 
 (use-package org-transclusion
   :after org
