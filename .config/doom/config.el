@@ -613,6 +613,15 @@ Works on selected region if active, otherwise on whole buffer."
 ;; (use-package org-typst
 ;;   :after org)
 
+(defun my/update-elabftw-exp-body ()
+  (interactive)
+  (let ((title (org-get-title (current-buffer)))
+        (body (org-export-as 'html nil nil t))
+        (elabkey (funcall (plist-get (car (auth-source-search :host "eln.readwrite.org")) :secret)))
+        (host (plist-get (car (auth-source-search :host "eln.readwrite.org")) :user)))
+    ;; My user ID is 4
+    (shell-command (format "python3 ~/scripts/python/elabftw/elabftw_replace_exp_body.py %s %s %s 4 %s" (shell-quote-argument elabkey) (shell-quote-argument body) (shell-quote-argument title) (shell-quote-argument host)))))
+
 (with-eval-after-load 'eglot
   (with-eval-after-load 'typst-ts-mode
     (add-to-list 'eglot-server-programs
