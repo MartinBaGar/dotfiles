@@ -247,6 +247,15 @@
     (kill-new link)
     (message "Copied: %s" link)))
 
+(defun my/message-org-link-at-point ()
+  "Copy the org link at point to the kill ring."
+  (interactive)
+  (let ((link (org-element-property :path (org-element-context))))
+    (if link
+        (progn (kill-new link)
+               (message "Copied: %s" link))
+      (user-error "No link at point"))))
+
 (with-eval-after-load 'org-download
   ;; Fix the underscore prefix issue
   (setq org-download-timestamp "%Y%m%d-%H%M%S")
@@ -558,13 +567,17 @@ Works on selected region if active, otherwise on whole buffer."
       :desc "Open file at point in VS Code"
       "v" #'my/vscode-open-path-at-point)
 
+;; TODO: solidify the link handling. Didn't work on tranclusion links
 (defun my/xdg-open-path-at-point ()
   "Open the file at point with xdg-open."
   (interactive)
-  (let ((path (thing-at-point 'filename t)))
-    (if (and path (file-exists-p path))
-        (start-process "open" nil "xdg-open" (expand-file-name path))
-      (message "No valid file path at point."))))
+  (let ((path (or (org-element-property :path (org-element-context))
+                  (thing-at-point 'filename t))))
+    (cond
+     ((and path (file-exists-p path))
+      (start-process "xdg-open" nil "xdg-open" (expand-file-name path)))
+     (t
+      (message "No valid file path at point.")))))
 
 (map! :leader
       :prefix "o"
