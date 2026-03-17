@@ -62,7 +62,9 @@
                 (cons #'tempel-expand completion-at-point-functions)))
 
   (add-hook! '(conf-mode-hook prog-mode-hook text-mode-hook)
-             #'tempel-setup-capf))
+             #'tempel-setup-capf)
+  (setopt tempel-path (concat (expand-file-name "templates" user-emacs-directory) "/*"))
+  )
 
 (defun tempel-case-match (elt fields)
   (pcase elt
