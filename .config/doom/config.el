@@ -144,7 +144,8 @@
   ;; Attach
   (setq org-attach-id-dir "~/org/.attach")
   (setq org-agenda-files (list "~/org"))
-
+  (setq org-timestamp-formats '("%Y-%m-%d %a" . "%Y-%m-%d %a %H:%M"))
+  
   (org-link-set-parameters "zotero"
                            :follow (lambda (path) 
                                      (browse-url (concat "zotero:" path))))
@@ -152,50 +153,54 @@
   (add-to-list 'org-capture-templates
                '("a" "Appointment" entry (file+headline "~/org/agenda.org" "Inbox")
                  "* %?\n  SCHEDULED: %^T\n  %a" :prepend t))
+  
   )
 
-;; Teach Org's export engine about our custom :adtoc property
-;; 1. Teach Org about the new option
-(add-to-list 'org-export-options-alist
-             '(:adtoc "ADTOC" "adtoc" nil t)) ;; 't' allows it to be read as a boolean/value
+;; 1. Register ADTOC
+(with-eval-after-load 'ox
+  (add-to-list 'org-export-options-alist
+               '(:adtoc "ADTOC" "adtoc" nil t)))
 
+;; 2. Exclude Tags Function
 (defun my-dynamic-export-exclude-tags (info backend)
   "Dynamically tell Org which tags to ignore based on the backend."
+  (message "export exclude is called")
   (cond
    ((eq backend 'typst)
     (plist-put info :exclude-tags (cons "html_only" org-export-exclude-tags)))
    ((eq backend 'html)
-    (plist-put info :exclude-tags (cons "pdf_only" org-export-exclude-tags))
-    ))
+    (plist-put info :exclude-tags (cons "pdf_only" org-export-exclude-tags))))
   info)
 
-;; 2. Your streamlined hook
+;; IMPORTANT: Attach to filter-options-functions (which provides 2 arguments)
+(add-hook 'org-export-filter-options-functions #'my-dynamic-export-exclude-tags)
+
+;; 3. Conditional TOC Function
 (defun my-org-export-conditional-toc (info backend)
   "Dynamically enable/disable TOC based on backend and ADTOC property."
-  
+  (message "export conditional toc has been called")
   (let ((my-custom-adtoc-value (plist-get info :adtoc)))
-    
     (if my-custom-adtoc-value
         (cond
          ((eq backend 'html)
           (plist-put info :with-toc nil))
          ((eq backend 'typst)
-          (plist-put info :with-toc t)))
-      ))
+          (plist-put info :with-toc t)))))
   info)
 
+;; Attach to filter-options-functions
 (add-hook 'org-export-filter-options-functions #'my-org-export-conditional-toc)
 
+;; 4. Ignore Headlines Function (AST)
 (defun my-org-export-ignore-headlines (data backend info)
-  "Remove headlines tagged 'ignore', retain contents, and promote children.
-Operates directly on the Org AST."
+  "Remove headlines tagged 'ignore', retain contents, and promote children."
+  (message "export conditional toc has been called")
   (org-element-map data 'headline
     (lambda (object)
       (when (member "ignore" (org-element-property :tags object))
         (let ((level-top (org-element-property :level object))
               level-diff)
           (mapc (lambda (el)
-                  ;; Recursively promote all nested child headlines
                   (org-element-map el 'headline
                     (lambda (el)
                       (when (equal 'headline (org-element-type el))
@@ -205,15 +210,13 @@ Operates directly on the Org AST."
                         (org-element-put-property el
                                                   :level (- (org-element-property :level el)
                                                             level-diff)))))
-                  ;; Insert the contents back into the parse tree
                   (org-element-insert-before el object))
                 (org-element-contents object)))
-        ;; Remove the original headline node
         (org-element-extract-element object)))
     info nil)
   data)
 
-;; Add it to the AST parsing hook
+;; Attach to the parse-tree hook
 (add-hook 'org-export-filter-parse-tree-functions #'my-org-export-ignore-headlines)
 
 (with-eval-after-load 'org-modern
