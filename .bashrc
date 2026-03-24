@@ -42,7 +42,7 @@ fi
 ################
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
-# export GTK_THEME="Adwaita:dark"
+export PATH="/home/mabagar/.pixi/bin:$PATH"
 export BROWSER=/opt/brave-bin/brave
 
 #########################
@@ -60,7 +60,6 @@ fi
 # EVALS #
 #########
 source -- ~/.local/share/blesh/ble.sh
-. "$HOME/.atuin/bin/env"
 
 eval "$(zoxide init bash)"
 eval "$(starship init bash)"
