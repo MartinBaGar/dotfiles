@@ -71,3 +71,11 @@ export NVM_DIR="$HOME/.config/nvm"
 
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
 . "/home/mabagar/.deno/env"
+
+# Automatically added by the Guix install script.
+if [ -n "$GUIX_ENVIRONMENT" ]; then
+    if [[ $PS1 =~ (.*)"\\$" ]]; then
+        PS1="${BASH_REMATCH[1]} [env]\\\$ "
+    fi
+fi
+

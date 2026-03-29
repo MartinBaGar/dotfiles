@@ -501,14 +501,14 @@ binds {
     Mod+Space hotkey-overlay-title="Application Launcher" {
         spawn "fuzzel";
     }
-
+    Mod+Alt+Space { spawn-sh "~/scripts/bash/niri-window-switcher.sh"; }
     Mod+Alt+O { spawn-sh "~/scripts/bash/fuzzel-file-actions.sh"; }
     Mod+Alt+V { spawn-sh "~/scripts/bash/fuzzel-clipboard.sh"; }
     Mod+Alt+P { spawn-sh "~/scripts/bash/fuzzel-powermenu.sh"; }
     Mod+Alt+W { spawn-sh "~/scripts/bash/reload_waybar.sh"; }
     Mod+Alt+K { spawn "niri" "msg" "action" "switch-layout" "next"; }
     Mod+Alt+T { spawn-sh "~/scripts/bash/niri_switch_theme.sh"; }
-    Mod+Alt+D { spawn-sh "~/.local/bin/waypaper"; }
+    Mod+Alt+D { spawn "~/.local/bin/waypaper" "--random"; }
 
     Mod+E {spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main";}
 
@@ -602,8 +602,8 @@ binds {
     // Mod+Ctrl+I         { move-column-to-workspace-up; }
 
     // === Move Workspaces ===
-    Mod+Shift+Page_Down { move-workspace-down; }
-    Mod+Shift+Page_Up   { move-workspace-up; }
+    Mod+Shift+Page_Down { move-workspace-to-monitor-next; }
+    Mod+Shift+Page_Up   { move-workspace-to-monitor-previous; }
     // Mod+Shift+U         { move-workspace-down; }
     // Mod+Shift+I         { move-workspace-up; }
 

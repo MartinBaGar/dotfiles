@@ -57,11 +57,10 @@
 (package! org-modern)
 (package! org-transclusion)
 (package! savefold :recipe (:host github :repo "jcfk/savefold.el"))
-;; (package! org-typst :recipe (:host github :repo "MartinBaGar/org-typst"))
 (package! ox-typst)
+(package! gnuplot :pin "7138b139d2dca9683f1a81325c643b2744aa1ea3")
 
 ;; AI
-;; (package! gptel :recipe (:nonrecursive t))
 (package! whisper :recipe (:host github :repo "natrys/whisper.el"))
 (package! gptel-prompts :recipe (:host github :repo "jwiegley/gptel-prompts"))
 (package! gptel-commit :recipe (:host github :repo "lakkiy/gptel-commit"))
@@ -76,13 +75,11 @@
 (package! magit-todos)
 
 ;; Modes
-;; (package! quarto-mode :recipe (:host github :repo "quarto-dev/quarto-emacs"))
-(package! blender :recipe (:host github :repo "MartinBaGar/blender.el" :files ("*.el" "*.py")))
-(package! gdoc-handler :recipe (:host github :repo "MartinBaGar/gdoc-handler"))
 (package! typst-ts-mode :recipe (:host nil :repo "https://git.sr.ht/~meow_king/typst-ts-mode"))
 (package! typst-preview :recipe (:host github :repo "havarddj/typst-preview.el"))
 (package! popper :recipe (:host github :repo "karthink/popper"))
 (package! code-cells :recipe (:host github :repo "astoff/code-cells.el"))
+(package! gnuplot-mode :pin "601f6392986f0cba332c87678d31ae0d0a496ce7")
 
 ;; Hard dependencies for jupyter
 (package! zmq)
@@ -91,5 +88,10 @@
 ;; The jupyter package itself
 (package! emacs-jupyter :recipe (:host github :repo "emacs-jupyter/jupyter"))
 
-;; Third parties
+;; My packages
 (package! org-img :recipe (:host github :repo "MartinBaGar/org-img"))
+;; (package! org-typst :recipe (:host github :repo "MartinBaGar/org-typst"))
+(package! blender :recipe (:host github :repo "MartinBaGar/blender.el" :files ("*.el" "*.py")))
+;; (package! gdoc-handler :recipe (:host github :repo "MartinBaGar/gdoc-handler"))
+
+;; Waiting for approval

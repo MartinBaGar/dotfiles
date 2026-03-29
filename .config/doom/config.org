@@ -62,7 +62,9 @@
                 (cons #'tempel-expand completion-at-point-functions)))
 
   (add-hook! '(conf-mode-hook prog-mode-hook text-mode-hook)
-             #'tempel-setup-capf))
+             #'tempel-setup-capf)
+  (setopt tempel-path (concat (expand-file-name "templates" user-emacs-directory) "/*"))
+  )
 
 (defun tempel-case-match (elt fields)
   (pcase elt
@@ -86,6 +88,14 @@
 (+global-word-wrap-mode +1)
 (add-hook 'writeroom-mode-hook #'+word-wrap-mode)
 #+end_src
+** Revealjs
+#+begin_src emacs-lisp
+;; (setq org-re-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js")
+;; (setq org-re-reveal-revealjs-version "4")
+#+end_src
+
+#+RESULTS:
+
 * Modes
 #+begin_src emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.pdb\\'" . fundamental-mode))
@@ -93,10 +103,9 @@
 * Aesthetic
 *** Theme & Fonts
 #+begin_src emacs-lisp
-;; (setq doom-theme 'doom-gruvbox)
-;; (setq doom-theme 'doom-feather-dark)
-(setq doom-theme 'doom-myfeather-dark)
+;; (setq doom-theme 'doom-myfeather-dark)
 ;; (setq doom-theme 'doom-myoksolar-light)
+(setq doom-theme 'modus-operandi-tinted)
 
 (setq doom-font (font-spec
                  :family "DejaVu Sans Mono"
@@ -164,7 +173,8 @@
   ;; Attach
   (setq org-attach-id-dir "~/org/.attach")
   (setq org-agenda-files (list "~/org"))
-
+  (setq org-timestamp-formats '("%Y-%m-%d %a" . "%Y-%m-%d %a %H:%M"))
+  
   (org-link-set-parameters "zotero"
                            :follow (lambda (path) 
                                      (browse-url (concat "zotero:" path))))
@@ -174,45 +184,41 @@
                  "* %?\n  SCHEDULED: %^T\n  %a" :prepend t))
   )
 
-;; Teach Org's export engine about our custom :adtoc property
-;; 1. Teach Org about the new option
-(add-to-list 'org-export-options-alist
-             '(:adtoc "ADTOC" "adtoc" nil t))
+;; 1. Register ADTOC
+(with-eval-after-load 'ox
+  (add-to-list 'org-export-options-alist
+               '(:adtoc "ADTOC" "adtoc" nil t)))
 
+;; 2. Exclude Tags Function
 (defun my-dynamic-export-exclude-tags (info backend)
   "Dynamically tell Org which tags to ignore based on the backend."
   (cond
    ((eq backend 'typst)
     (plist-put info :exclude-tags (cons "html_only" org-export-exclude-tags)))
    ((eq backend 'html)
-    (plist-put info :exclude-tags (cons "pdf_only" org-export-exclude-tags))
-    ))
+    (plist-put info :exclude-tags (cons "pdf_only" org-export-exclude-tags))))
   info)
 
+;; IMPORTANT: Attach to filter-options-functions (which provides 2 arguments)
 (add-hook 'org-export-filter-options-functions #'my-dynamic-export-exclude-tags)
 
-;; 2. Your streamlined hook
+;; 3. Conditional TOC Function
 (defun my-org-export-conditional-toc (info backend)
   "Dynamically enable/disable TOC based on backend and ADTOC property."
-  (message "function invoked")
-  
+  (message "export conditional toc has been called")
   (let ((my-custom-adtoc-value (plist-get info :adtoc)))
-    (progn
-      (message "we found it %s" my-custom-adtoc-value)
-      (if my-custom-adtoc-value
+    (if my-custom-adtoc-value
         (cond
          ((eq backend 'html)
           (plist-put info :with-toc nil))
          ((eq backend 'typst)
-          (plist-put info :with-toc t)))
-      )
-      )
-    
-    )
+          (plist-put info :with-toc t)))))
   info)
 
+;; Attach to filter-options-functions
 (add-hook 'org-export-filter-options-functions #'my-org-export-conditional-toc)
 
+;; 4. Ignore Headlines Function (AST)
 (defun my-org-export-ignore-headlines (data backend info)
   "Remove headlines tagged 'ignore', retain contents, and promote children.
 Operates directly on the Org AST."
@@ -271,6 +277,15 @@ Operates directly on the Org AST."
     (kill-new link)
     (message "Copied: %s" link)))
 
+(defun my/message-org-link-at-point ()
+  "Copy the org link at point to the kill ring."
+  (interactive)
+  (let ((link (org-element-property :path (org-element-context))))
+    (if link
+        (progn (kill-new link)
+               (message "Copied: %s" link))
+      (user-error "No link at point"))))
+
 (with-eval-after-load 'org-download
   ;; Fix the underscore prefix issue
   (setq org-download-timestamp "%Y%m%d-%H%M%S")
@@ -321,7 +336,7 @@ Operates directly on the Org AST."
 ;   (setq org-img-dir "~/org/img/"
 ;   (add-hook 'org-mode-hook #'org-img-mode)))
 #+end_src
-* Vterm
+* Terminal
 #+begin_src emacs-lisp
 (defun vterm-dired-other-window ()
   "Open dired in the current working directory of vterm in another window."
@@ -607,13 +622,17 @@ Works on selected region if active, otherwise on whole buffer."
       :desc "Open file at point in VS Code"
       "v" #'my/vscode-open-path-at-point)
 
+;; TODO: solidify the link handling. Didn't work on tranclusion links
 (defun my/xdg-open-path-at-point ()
   "Open the file at point with xdg-open."
   (interactive)
-  (let ((path (thing-at-point 'filename t)))
-    (if (and path (file-exists-p path))
-        (start-process "open" nil "xdg-open" (expand-file-name path))
-      (message "No valid file path at point."))))
+  (let ((path (or (org-element-property :path (org-element-context))
+                  (thing-at-point 'filename t))))
+    (cond
+     ((and path (file-exists-p path))
+      (start-process "xdg-open" nil "xdg-open" (expand-file-name path)))
+     (t
+      (message "No valid file path at point.")))))
 
 (map! :leader
       :prefix "o"
@@ -664,7 +683,9 @@ Works on selected region if active, otherwise on whole buffer."
                  `((typst-ts-mode) .
                    ,(eglot-alternatives `(,typst-ts-lsp-download-path
                                           "tinymist"
-                                          "typst-lsp"))))))
+                                          "typst-lsp")))))
+  (add-to-list 'eglot-server-programs
+               '((web-mode) . ("vscode-html-language-server" "--stdio"))))
 
 (with-eval-after-load 'cc-mode
   (set-eglot-client! 'cc-mode '("clangd" "-j=3" "--clang-tidy")))
@@ -710,3 +731,4 @@ FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
             (writeroom-mode 1)))
         frame))))
 #+end_src
+
