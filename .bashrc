@@ -43,11 +43,18 @@ fi
 ################
 # PATH EXPORTS #
 ################
+export PIXI_HOME="/data/bari-garnier/pixi"
+export UV_TOOL_DIR="/data/bari-garnier/uv/tools"
+export UV_TOOL_BIN_DIR="/data/bari-garnier/uv/bin"
+export UV_PYTHON_INSTALL_DIR="/data/bari-garnier/uv/python"
+export UV_CACHE_DIR="/data/bari-garnier/uv/cache"
+# export PATH="/data/bari-garnier/pixi/bin:$PATH"
+export PATH="/data/bari-garnier/uv/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 export PATH="$HOME/.local/libreoffice/opt/libreoffice25.8/program:$PATH"
-export LD_LIBRARY_PATH="/data/bari-garnier/local/lib"
 
+export LD_LIBRARY_PATH="/data/bari-garnier/local/lib"
 # export PATH="/data/bari-garnier/local/bin:$PATH"
 . "$HOME/.cargo/env"
 
@@ -62,6 +69,10 @@ if [ -f "$HOME"/.bash_functions ]; then
     . "$HOME"/.bash_functions
 fi
 
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+
 #########
 # EVALS #
 #########
@@ -69,11 +80,5 @@ eval "$(zoxide init bash)"
 eval "$(starship init bash)"
 source -- ~/.local/share/blesh/ble.sh
 
-eval "$(atuin init bash)"
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
-
-export PATH="/home/bari-garnier/.pixi/bin:$PATH"
 eval "$(pixi completion --shell bash)"
+eval "$(atuin init bash)"

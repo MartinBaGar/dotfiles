@@ -81,7 +81,8 @@
 
 ;; (setq doom-theme 'doom-gruvbox)
 ;; (setq doom-theme 'doom-feather-dark)
-(setq doom-theme 'doom-myfeather-dark)
+;; (setq doom-theme 'doom-myfeather-dark)
+(setq doom-theme 'modus-operandi-tinted)
 ;; (setq doom-theme 'doom-myoksolar-light)
 
 (setq doom-font (font-spec
@@ -639,21 +640,21 @@ Works on selected region if active, otherwise on whole buffer."
   (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server"))
   (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
 
-(setq wl-copy-process nil)
-(defun wl-copy (text)
-  (setq wl-copy-process (make-process :name "wl-copy"
-                                      :buffer nil
-                                      :command '("wl-copy" "-f" "-n")
-                                      :connection-type 'pipe
-                                      :noquery t))
-  (process-send-string wl-copy-process text)
-  (process-send-eof wl-copy-process))
-(defun wl-paste ()
-  (if (and wl-copy-process (process-live-p wl-copy-process))
-      nil ; should return nil if we're the current paste owner
-      (shell-command-to-string "wl-paste -n | tr -d \r")))
-(setq interprogram-cut-function 'wl-copy)
-(setq interprogram-paste-function 'wl-paste)
+;; (setq wl-copy-process nil)
+;; (defun wl-copy (text)
+;;   (setq wl-copy-process (make-process :name "wl-copy"
+;;                                       :buffer nil
+;;                                       :command '("wl-copy" "-f" "-n")
+;;                                       :connection-type 'pipe
+;;                                       :noquery t))
+;;   (process-send-string wl-copy-process text)
+;;   (process-send-eof wl-copy-process))
+;; (defun wl-paste ()
+;;   (if (and wl-copy-process (process-live-p wl-copy-process))
+;;       nil ; should return nil if we're the current paste owner
+;;       (shell-command-to-string "wl-paste -n | tr -d \r")))
+;; (setq interprogram-cut-function 'wl-copy)
+;; (setq interprogram-paste-function 'wl-paste)
 
 ;; For niri to toggle a notepad
 (defun toggle-named-frame (frame-name &rest frame-params)
