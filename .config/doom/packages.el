@@ -93,3 +93,5 @@
 ;; (package! org-typst :recipe (:host github :repo "MartinBaGar/org-typst"))
 (package! blender :recipe (:host github :repo "MartinBaGar/blender.el" :files ("*.el" "*.py")))
 ;; (package! gdoc-handler :recipe (:host github :repo "MartinBaGar/gdoc-handler"))
+
+;; Waiting for approval

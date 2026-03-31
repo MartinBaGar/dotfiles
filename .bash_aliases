@@ -5,7 +5,7 @@ alias ll='eza -l --git --icons=auto'
 alias la='eza -la --git --icons=auto'
 alias lt='eza --tree --level=2 --icons=auto'
 
-alias gh='history|grep'
+# alias gh='history|grep'
 alias left='ls -t -1'
 alias count='find . -type f | wc -l'
 alias cpv='rsync -ah --info=progress2'

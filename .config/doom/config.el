@@ -79,11 +79,9 @@
 (add-to-list 'auto-mode-alist '("\\.pdb\\'" . fundamental-mode))
 (add-to-list 'auto-mode-alist '("\\.pml\\'" . python-mode))
 
-;; (setq doom-theme 'doom-gruvbox)
-;; (setq doom-theme 'doom-feather-dark)
 ;; (setq doom-theme 'doom-myfeather-dark)
-(setq doom-theme 'modus-operandi-tinted)
 ;; (setq doom-theme 'doom-myoksolar-light)
+(setq doom-theme 'modus-operandi-tinted)
 
 (setq doom-font (font-spec
                  :family "DejaVu Sans Mono"
@@ -156,7 +154,6 @@
   (add-to-list 'org-capture-templates
                '("a" "Appointment" entry (file+headline "~/org/agenda.org" "Inbox")
                  "* %?\n  SCHEDULED: %^T\n  %a" :prepend t))
-  
   )
 
 ;; 1. Register ADTOC
@@ -167,7 +164,6 @@
 ;; 2. Exclude Tags Function
 (defun my-dynamic-export-exclude-tags (info backend)
   "Dynamically tell Org which tags to ignore based on the backend."
-  (message "export exclude is called")
   (cond
    ((eq backend 'typst)
     (plist-put info :exclude-tags (cons "html_only" org-export-exclude-tags)))
@@ -196,14 +192,15 @@
 
 ;; 4. Ignore Headlines Function (AST)
 (defun my-org-export-ignore-headlines (data backend info)
-  "Remove headlines tagged 'ignore', retain contents, and promote children."
-  (message "export conditional toc has been called")
+  "Remove headlines tagged 'ignore', retain contents, and promote children.
+Operates directly on the Org AST."
   (org-element-map data 'headline
     (lambda (object)
       (when (member "ignore" (org-element-property :tags object))
         (let ((level-top (org-element-property :level object))
               level-diff)
           (mapc (lambda (el)
+                  ;; Recursively promote all nested child headlines
                   (org-element-map el 'headline
                     (lambda (el)
                       (when (equal 'headline (org-element-type el))
@@ -213,13 +210,15 @@
                         (org-element-put-property el
                                                   :level (- (org-element-property :level el)
                                                             level-diff)))))
+                  ;; Insert the contents back into the parse tree
                   (org-element-insert-before el object))
                 (org-element-contents object)))
+        ;; Remove the original headline node
         (org-element-extract-element object)))
     info nil)
   data)
 
-;; Attach to the parse-tree hook
+;; Add it to the AST parsing hook
 (add-hook 'org-export-filter-parse-tree-functions #'my-org-export-ignore-headlines)
 
 (with-eval-after-load 'org-modern
@@ -631,7 +630,9 @@ Works on selected region if active, otherwise on whole buffer."
                  `((typst-ts-mode) .
                    ,(eglot-alternatives `(,typst-ts-lsp-download-path
                                           "tinymist"
-                                          "typst-lsp"))))))
+                                          "typst-lsp")))))
+  (add-to-list 'eglot-server-programs
+               '((web-mode) . ("vscode-html-language-server" "--stdio"))))
 
 (with-eval-after-load 'cc-mode
   (set-eglot-client! 'cc-mode '("clangd" "-j=3" "--clang-tidy")))
