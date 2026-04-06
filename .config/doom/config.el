@@ -77,7 +77,16 @@
 (add-hook 'writeroom-mode-hook #'+word-wrap-mode)
 
 ;; (setq org-re-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js")
-;; (setq org-re-reveal-revealjs-version "4")
+(setq org-re-reveal-revealjs-version nil)
+(setq org-re-reveal-extra-css "~/org/html/css/revealjs.css")
+(setq org-re-reveal-transition "none")
+(setq org-re-reveal-extra-options "none")
+(setq org-re-reveal-extra-options "display: 'flex'")
+(setq org-re-reveal-slide-container "<div class=\"slide-body\">%s</div>")
+(setq org-re-reveal-width 1280)
+(setq org-re-reveal-height 720)
+(setq org-re-reveal-margin "0.04")
+(setq org-re-reveal-center nil)
 
 (add-to-list 'auto-mode-alist '("\\.pdb\\'" . fundamental-mode))
 
