@@ -58,6 +58,11 @@ export LD_LIBRARY_PATH="/data/bari-garnier/local/lib"
 # export PATH="/data/bari-garnier/local/bin:$PATH"
 . "$HOME/.cargo/env"
 
+GUIX_PROFILE="/home/bari-garnier/.guix-profile"
+. "$GUIX_PROFILE/etc/profile"
+# 
+# Add Guix apps and icons to the desktop environment
+export XDG_DATA_DIRS="$HOME/.guix-profile/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 #########################
 # ALIASES AND FUNCTIONS #
 #########################
