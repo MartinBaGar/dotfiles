@@ -524,15 +524,15 @@ binds {
         spawn "kitty" "-o" "window_padding_width=0" "--class" "btop-float" "btop" "--preset" "1" ; }
     Mod+Shift+E { quit; }
 
-    // === Audio Controls ===
+// === Audio Controls ===
     XF86AudioRaiseVolume allow-when-locked=true {
-        spawn "pamixer" "--increase" "3";
+        spawn "wpctl" "set-volume" "-l" "1.5" "@DEFAULT_AUDIO_SINK@" "5%+"
     }
     XF86AudioLowerVolume allow-when-locked=true {
-        spawn "pamixer" "--decrease" "3";
+        spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"
     }
     XF86AudioMute allow-when-locked=true {
-        spawn "pamixer" "--toggle-mute";
+        spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"
     }
 
     // === Window Management ===
