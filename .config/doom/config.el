@@ -42,6 +42,93 @@
 
 (add-hook! 'doom-switch-buffer-hook #'+my-setup-cape-dict-h)
 
+;; =============================================================================
+;; EVIL MACRO MODE (THE TRUE FIX)
+;; =============================================================================
+
+;; 1. Variable to remember which register we are editing
+(defvar my/edit-macro-register nil
+  "Remembers which Evil register is currently being edited.")
+
+;; 2. Edit Macro Function
+(defun my/edit-evil-macro (register)
+  "Edit the macro stored in an Evil REGISTER."
+  (interactive "cEdit macro in register: ")
+  (let ((macro (evil-get-register register t)))
+    (cond
+     ((null macro)
+      (user-error "Register '%c' is empty" register))
+     ((or (stringp macro) (vectorp macro))
+      (setq my/edit-macro-register register)
+      (setq last-kbd-macro macro)
+      (kmacro-edit-macro)
+      (message "Editing register '%c'. Press C-c C-c to save changes." register))
+     (t
+      (user-error "Register '%c' doesn't contain a macro" register)))))
+
+;; 3. The Save Hook (Advise the CORRECT function: edmacro-finish-edit)
+(defun my/save-evil-macro-advice (&rest _)
+  "Save the compiled macro back to the Evil register."
+  (when my/edit-macro-register
+    ;; edmacro-finish-edit has just successfully compiled your changes 
+    ;; and placed them into last-kbd-macro. We scoop it up and save it!
+    (evil-set-register my/edit-macro-register last-kbd-macro)
+    (message "SUCCESS: Macro saved back to register '%c'. Use @%c to execute." 
+             my/edit-macro-register my/edit-macro-register)
+    (setq my/edit-macro-register nil)))
+
+;; Attach the advice to run IMMEDIATELY AFTER Emacs closes the editor
+(advice-add 'edmacro-finish-edit :after #'my/save-evil-macro-advice)
+
+;; 4. Assign Emacs kmacro to Evil
+(defun my/kmacro-to-evil-register (register)
+  "Assign the last keyboard macro to an Evil REGISTER."
+  (interactive "cAssign last kmacro to register: ")
+  (if last-kbd-macro
+      (progn
+        (evil-set-register register last-kbd-macro)
+        (message "Macro assigned to register '%c'. Use @%c to execute." register register))
+    (user-error "No keyboard macro defined")))
+
+;; 5. Show Macros
+(defun my/show-evil-macros ()
+  "Display a-z registers containing text or keyboard macros."
+  (interactive)
+  (with-output-to-temp-buffer "*Evil Macros*"
+    (princ "Evil Macro Registers (a-z):\n")
+    (princ "---------------------------\n")
+    (let ((found-any nil))
+      (dolist (reg register-alist)
+        (let ((key (car reg))
+              (val (cdr reg)))
+          (when (and (>= key ?a) (<= key ?z))
+            (when (or (vectorp val) (stringp val))
+              (setq found-any t)
+              (princ (format "Register [%c]: %s\n" key (format-kbd-macro val)))))))
+      (unless found-any
+        (princ "No macros found in a-z registers.\n")))))
+
+;; 6. Export Macro Code
+(defun my/save-evil-macro-to-kill-ring (register)
+  "Copy the macro in REGISTER to kill ring as elisp code."
+  (interactive "cCopy macro from register: ")
+  (let ((content (evil-get-register register t)))
+    (if (and content (or (vectorp content) (stringp content)))
+        (let ((code (format "(evil-set-register ?%c %S)" register content)))
+          (kill-new code)
+          (message "Copied to kill ring: %s" code))
+      (user-error "Register '%c' doesn't contain a macro" register))))
+
+;; =============================================================================
+;; KEYBINDINGS
+;; =============================================================================
+(map! :leader
+      (:prefix ("k" . "macros")
+       :desc "Edit Evil macro"           "e" #'my/edit-evil-macro
+       :desc "Show Evil macros"          "s" #'my/show-evil-macros
+       :desc "Assign kmacro to register" "a" #'my/kmacro-to-evil-register
+       :desc "Copy macro code"           "c" #'my/save-evil-macro-to-kill-ring))
+
 (use-package tempel
   :bind (("M-+" . tempel-complete)
          ("M-*" . tempel-insert))
@@ -75,6 +162,19 @@
 
 (+global-word-wrap-mode +1)
 (add-hook 'writeroom-mode-hook #'+word-wrap-mode)
+
+;; (setq org-re-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js")
+(setq org-re-reveal-revealjs-version nil)
+(setq org-re-reveal-extra-css "~/org/html/css/revealjs.css")
+(setq org-re-reveal-transition "none")
+(setq org-re-reveal-extra-options "none")
+(setq org-re-reveal-extra-options "display: 'flex'")
+(setq org-re-reveal-slide-container "<div class=\"slide-body\">%s</div>")
+(setq org-re-reveal-width 1280)
+(setq org-re-reveal-height 720)
+(setq org-re-reveal-margin "0.04")
+(setq org-re-reveal-center nil)
+(setq org-re-reveal-title-slide "<h1>%t</h1><h2>%a</h2>")
 
 (add-to-list 'auto-mode-alist '("\\.pdb\\'" . fundamental-mode))
 (add-to-list 'auto-mode-alist '("\\.pml\\'" . python-mode))
