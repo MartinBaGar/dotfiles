@@ -69,6 +69,10 @@
            (concat (upcase (substring text 0 1)) (substring text 1))
          text)))))
 
+(defun my/open-tempel-templates ()
+  (interactive)
+    (find-file (f-dirname tempel-path)))
+
 (use-package tempel-collection)
 
 (add-to-list 'tempel-user-elements #'tempel-case-match)
@@ -89,6 +93,14 @@
 (setq org-re-reveal-center nil)
 
 (add-to-list 'auto-mode-alist '("\\.pdb\\'" . fundamental-mode))
+
+;; Load ox-typst after org is loaded
+(use-package! ox-typst
+  :after org)
+
+;; Load ox-hugo after the ox exporter framework is loaded
+(use-package! ox-hugo
+  :after ox)
 
 ;; (setq doom-theme 'doom-myfeather-dark)
 ;; (setq doom-theme 'doom-myoksolar-light)

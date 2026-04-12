@@ -79,6 +79,10 @@
            (concat (upcase (substring text 0 1)) (substring text 1))
          text)))))
 
+(defun my/open-tempel-templates ()
+  (interactive)
+    (find-file (f-dirname tempel-path)))
+
 (use-package tempel-collection)
 
 (add-to-list 'tempel-user-elements #'tempel-case-match)
@@ -108,6 +112,14 @@
 * Modes
 #+begin_src emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.pdb\\'" . fundamental-mode))
+
+;; Load ox-typst after org is loaded
+(use-package! ox-typst
+  :after org)
+
+;; Load ox-hugo after the ox exporter framework is loaded
+(use-package! ox-hugo
+  :after ox)
 #+end_src
 * Aesthetic
 *** Theme & Fonts
