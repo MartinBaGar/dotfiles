@@ -181,8 +181,8 @@
 #+begin_src emacs-lisp
 ;; (setq org-re-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js")
 (setq org-re-reveal-revealjs-version nil)
-(setq org-re-reveal-extra-css "~/org/html/css/revealjs.css")
 (setq org-re-reveal-transition "none")
+(setq org-re-reveal-theme "white")
 (setq org-re-reveal-extra-options "none")
 (setq org-re-reveal-extra-options "display: 'flex'")
 (setq org-re-reveal-slide-container "<div class=\"slide-body\">%s</div>")
