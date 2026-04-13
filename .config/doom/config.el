@@ -156,6 +156,10 @@
            (concat (upcase (substring text 0 1)) (substring text 1))
          text)))))
 
+(defun my/open-tempel-templates ()
+  (interactive)
+    (find-file (f-dirname tempel-path)))
+
 (use-package tempel-collection)
 
 (add-to-list 'tempel-user-elements #'tempel-case-match)
@@ -177,7 +181,14 @@
 (setq org-re-reveal-title-slide "<h1>%t</h1><h2>%a</h2>")
 
 (add-to-list 'auto-mode-alist '("\\.pdb\\'" . fundamental-mode))
-(add-to-list 'auto-mode-alist '("\\.pml\\'" . python-mode))
+
+;; Load ox-typst after org is loaded
+(use-package! ox-typst
+  :after org)
+
+;; Load ox-hugo after the ox exporter framework is loaded
+(use-package! ox-hugo
+  :after ox)
 
 ;; (setq doom-theme 'doom-myfeather-dark)
 ;; (setq doom-theme 'doom-myoksolar-light)
@@ -715,14 +726,110 @@ Works on selected region if active, otherwise on whole buffer."
 ;; (use-package org-typst
 ;;   :after org)
 
-(defun my/update-elabftw-exp-body ()
+(defun elabftw--get-id-by-title (title)
+  "Get the eLabFTW experiment ID matching TITLE."
+  ;; We use `jq --arg t` to safely pass the title without breaking bash quotes
+  (let* ((cmd (format "elapi get experiments --format json | jq -r --arg t %s '.[] | select(.title==$t) | .id'"
+                      (shell-quote-argument title)))
+         (res (string-trim (shell-command-to-string cmd))))
+    (if (string= res "") nil res)))
+
+(defun elabftw--get-upload-id (exp-id file-name)
+  "Get the upload ID for a file named FILE-NAME in experiment EXP-ID."
+  (let* ((cmd (format "elapi get experiments --id %s --format json | jq -r --arg f %s '.uploads[] | select(.real_name==$f) | .id'"
+                      exp-id
+                      (shell-quote-argument file-name)))
+         (res (string-trim (shell-command-to-string cmd))))
+    (if (string= res "") nil res)))
+
+;; ==========================================
+;; MAIN INTERACTIVE FUNCTIONS
+;; ==========================================
+
+(defun my/get-match-exp ()
+  "Check if an experiment matching the current buffer's title exists."
   (interactive)
-  (let ((title (org-get-title (current-buffer)))
-        (body (org-export-as 'html nil nil t))
-        (elabkey (funcall (plist-get (car (auth-source-search :host "eln.readwrite.org")) :secret)))
-        (host (plist-get (car (auth-source-search :host "eln.readwrite.org")) :user)))
-    ;; My user ID is 4
-    (shell-command (format "python3 ~/scripts/python/elabftw/elabftw_replace_exp_body.py %s %s %s 4 %s" (shell-quote-argument elabkey) (shell-quote-argument body) (shell-quote-argument title) (shell-quote-argument host)))))
+  (let* ((title (org-get-title (current-buffer)))
+         (exp-id (elabftw--get-id-by-title title)))
+    (if exp-id
+        (message "Found experiment '%s' with ID: %s" title exp-id)
+      (message "No experiment found matching title: '%s'" title))))
+
+(defun my/update-elabftw-exp-body ()
+  "Update the body of the eLabFTW experiment matching the current buffer's title."
+  (interactive)
+  (let* ((title (org-get-title (current-buffer)))
+         (exp-id (elabftw--get-id-by-title title)))
+    (if (not exp-id)
+        (message "Error: No experiment found with title '%s'" title)
+      
+      (let* ((body (org-export-as 'html nil nil t))
+             ;; Create a temp file and encode the HTML payload directly into JSON
+             (temp-file (make-temp-file "elabftw-body-" nil ".json"))
+             (json-data (json-encode `((body . ,body)))))
+        
+        ;; Write JSON to file to bypass bash quoting hell
+        (with-temp-file temp-file
+          (insert json-data))
+        
+        (message "Updating experiment '%s' (ID: %s)..." title exp-id)
+        
+        ;; Pass the JSON file directly to elapi using the -d flag
+        (shell-command (format "elapi patch experiments --id %s -d %s" 
+                               exp-id 
+                               (shell-quote-argument temp-file)))
+        
+        ;; Cleanup
+        (delete-file temp-file)
+        (message "Body updated successfully!")))))
+
+(defun my/update-elabftw-exp-pdf ()
+  "Exports the current Org buffer to PDF and smart-syncs it to eLabFTW."
+  (interactive)
+  (let* ((title (org-get-title (current-buffer)))
+         (exp-id (elabftw--get-id-by-title title)))
+    (if (not exp-id)
+        (message "Error: No experiment found with title '%s'" title)
+      
+      (message "Exporting to PDF...")
+      (let* ((pdf-file (org-typst-export-to-pdf))
+             (pdf-name (file-name-nondirectory pdf-file))
+             (upload-id (elabftw--get-upload-id exp-id pdf-name)))
+        
+        ;; Smart PDF Sync logic: If PDF already exists, delete it first to keep the archive clean
+        (when upload-id
+          (message "Deleting old PDF (Upload ID: %s)..." upload-id)
+          (shell-command (format "elapi delete experiments -i %s --sub uploads --sub-id %s" exp-id upload-id)))
+        
+        (message "Uploading new PDF...")
+        (shell-command (format "elapi experiments upload-attachment --id %s --path %s --comment %s"
+                               exp-id
+                               (shell-quote-argument pdf-file)
+                               (shell-quote-argument "Uploaded via Emacs")))
+        (message "PDF synced successfully!")))))
+
+(defun my/new-exp-from-current-file ()
+  "Create a new eLabFTW experiment from the current Org buffer."
+  (interactive)
+  (let ((title (org-get-title (current-buffer))))
+    
+    ;; 1. Fast check: Abort immediately if it exists (no files created)
+    (when (elabftw--get-id-by-title title)
+      (user-error "Experiment '%s' already exists" title))
+    
+    ;; 2. Heavy work: Only runs if the check passed
+    (let* ((body (org-export-as 'html nil nil t))
+           (temp-file (make-temp-file "elabftw-new-" nil ".json"))
+           (json-data (json-encode `((title . ,title) (body . ,body)))))
+      
+      (with-temp-file temp-file
+        (insert json-data))
+      
+      (message "Creating new experiment '%s'..." title)
+      (shell-command (format "elapi post experiments -d %s" (shell-quote-argument temp-file)))
+      
+      (delete-file temp-file)
+      (message "New experiment created successfully!"))))
 
 (with-eval-after-load 'eglot
   (with-eval-after-load 'typst-ts-mode

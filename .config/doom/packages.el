@@ -58,6 +58,7 @@
 (package! org-transclusion)
 (package! savefold :recipe (:host github :repo "jcfk/savefold.el"))
 (package! ox-typst)
+(package! ox-hugo)
 (package! gnuplot :pin "7138b139d2dca9683f1a81325c643b2744aa1ea3")
 
 ;; AI
