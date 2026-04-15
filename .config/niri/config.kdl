@@ -18,7 +18,7 @@ gestures {
 input {
     keyboard {
         xkb {
-	    layout "us,fr"
+	    layout "fr,us"
         // You can set rules, model, layout, variant and options.
         // For more information, see xkeyboard-config(7).
 
@@ -76,12 +76,6 @@ input {
     // focus-follows-mouse max-scroll-amount="0%"
 }
 
-// You can configure outputs by their name, which you can find
-// by running `niri msg outputs` while inside a niri instance.
-// The built-in laptop monitor is usually called "eDP-1".
-// Find more information on the wiki:
-// https://github.com/YaLTeR/niri/wiki/Configuration:-Outputs
-// Remember to uncomment the node by removing "/-"!
 /-output "HDMI-A-2" {
     scale 1.1
 }
@@ -91,9 +85,6 @@ input {
     scale 1.5
 }
 
-// Settings that influence how windows are positioned and sized.
-// Find more information on the wiki:
-// https://github.com/YaLTeR/niri/wiki/Configuration:-Layout
 layout {
     // Set gaps around windows in logical pixels.
     gaps 0
@@ -123,11 +114,6 @@ layout {
     // You can also customize the heights that "switch-preset-window-height" (Mod+Shift+R) toggles between.
     // preset-window-heights { }
 
-    // You can change the default width of the new windows.
-    default-column-width { proportion 0.5; }
-    // If you leave the brackets empty, the windows themselves will decide their initial width.
-    // default-column-width {}
-
     // By default focus ring and border are rendered as a solid background rectangle
     // behind windows. That is, they will show up through semitransparent windows.
     // This is because windows using client-side decorations can have an arbitrary shape.
@@ -151,8 +137,7 @@ layout {
         // - CSS-like notation: "rgb(255, 127, 0)", rgba(), hsl() and a few others.
 
         // Color of the ring on the active monitor.
-        // active-color   "#808080"      // Medium gray
-        active-color   "#FFFFFF"      // Medium gray
+        active-color   "#808080"      // Medium gray
 
         // Color of the ring on inactive monitors.
         //
@@ -261,29 +246,19 @@ workspace "visualisation" {
     open-on-output "HDMI-A-2"
     }
 
-layer-rule {
-    match namespace="^quickshell$"
-    place-within-backdrop true
-}
 overview {
     workspace-shadow {
         off
     }
 }
-// Add lines like this to spawn processes at startup.
-// note that running niri as a session supports xdg-desktop-autostart,
-// which may be more convenient to use.
-// see the binds section below for more spawn examples.
-// This line starts waybar, a commonly used bar for Wayland compositors.
-// spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
 spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
 spawn-at-startup "waybar"
-spawn-at-startup "swaybg" "--i" "Images/Wallpapers/harambe_arms_crossed.jpg" "-m" "tile"
-spawn-at-startup "/data/bari-garnier/local/bin/kanshi"
+spawn-at-startup "kanshi"
 environment {
   XDG_CURRENT_DESKTOP "niri"
   QT_QPA_PLATFORM "wayland"
   ELECTRON_OZONE_PLATFORM_HINT "auto"
+  SAL_USE_VCLPLUGIN "qt5"
   QT_QPA_PLATFORMTHEME "qt5ct"
   QT_QPA_PLATFORMTHEME_QT6 "gtk3"
   QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
@@ -297,7 +272,7 @@ screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 animations {
     off
     workspace-switch {
-        spring damping-ratio=0.90 stiffness=523 epsilon=0.0001
+        // spring damping-ratio=0.90 stiffness=523 epsilon=0.0001
     }
     window-open {
         duration-ms 150
@@ -388,9 +363,9 @@ window-rule {
 }
 
 window-rule {
+    match app-id="com.gabm.satty"
     match title="satty"
-    open-floating false
-    open-maximized true
+    open-floating true
 }
 
 window-rule {
@@ -501,6 +476,7 @@ binds {
     Mod+Alt+W { spawn-sh "~/scripts/bash/reload_waybar.sh"; }
     Mod+Alt+K { spawn "niri" "msg" "action" "switch-layout" "next"; }
     Mod+Alt+T { spawn-sh "~/scripts/bash/niri_switch_theme.sh"; }
+    Mod+Alt+D { spawn-sh "~/.local/bin/waypaper"; }
 
     Mod+E {spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main";}
 
@@ -616,22 +592,22 @@ binds {
     Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
 
     // === Numbered Workspaces ===
-    Mod+1 { focus-workspace "navigation"; }
-    Mod+2 { focus-workspace "code"; }
-    Mod+3 { focus-workspace "chat"; }
-    Mod+4 { focus-workspace "lecture"; }
-    Mod+5 { focus-workspace "Visualisation"; }
+    Mod+Ampersand { focus-workspace "navigation"; }
+    Mod+Eacute { focus-workspace "code"; }
+    Mod+Quotedbl { focus-workspace "chat"; }
+    Mod+Apostrophe { focus-workspace "lecture"; }
+    Mod+Agrave { focus-workspace "Visualisation"; }
     // Mod+6 { focus-workspace 6; }
     // Mod+7 { focus-workspace 7; }
     // Mod+8 { focus-workspace 8; }
     // Mod+9 { focus-workspace 9; }
 
     // === Move to Numbered Workspaces ===
-    Mod+Shift+1 { move-column-to-workspace "navigation"; }
-    Mod+Shift+2 { move-column-to-workspace "code"; }
-    Mod+Shift+3 { move-column-to-workspace "chat"; }
-    Mod+Shift+4 { move-column-to-workspace "lecture"; }
-    Mod+Shift+5 { move-column-to-workspace "Visualisation"; }
+    Mod+Shift+Ampersand { move-column-to-workspace "navigation"; }
+    Mod+Shift+Eacute { move-column-to-workspace "code"; }
+    Mod+Shift+Quotedbl { move-column-to-workspace "chat"; }
+    Mod+Shift+Apostrophe { move-column-to-workspace "lecture"; }
+    Mod+Shift+Agrave { move-column-to-workspace "Visualisation"; }
     // Mod+Shift+6 { move-column-to-workspace 6; }
     // Mod+Shift+7 { move-column-to-workspace 7; }
     // Mod+Shift+8 { move-column-to-workspace 8; }
@@ -665,16 +641,16 @@ binds {
     // Ctrl+Mod+Shift+S { screenshot-screen; }
     // Ctrl+Mod+Shift+S { spawn "bash" "-c" "niri msg action screenshot-window -d false && wl-paste | satty -f -"; }
     // Ctrl+Mod+Shift+S { spawn "zsh" "-c" "/home/mabagar/.local/bin/my_screenshot"; }
-    Ctrl+Mod+Shift+S { spawn "/home/mabagar/.local/bin/my_screenshot_screen"; }
-    Alt+Mod+Shift+S { spawn "/home/mabagar/.local/bin/my_screenshot_window"; }
+        Ctrl+Mod+Shift+S { spawn "/home/mabagar/.local/bin/my_screenshot_screen"; }
+        Alt+Mod+Shift+S { spawn "/home/mabagar/.local/bin/my_screenshot_window"; }
 
-    // === System Controls ===
-    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+        // === System Controls ===
+        Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
 
 
-    // MediaPlayer
-    XF86AudioPrev allow-when-locked=true {
-     spawn "playerctl" "previous";
+        // MediaPlayer
+        XF86AudioPrev allow-when-locked=true {
+        spawn "playerctl" "previous";
     }
     XF86AudioNext allow-when-locked=true {
      spawn "playerctl" "next";
