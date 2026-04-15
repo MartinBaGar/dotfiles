@@ -745,6 +745,16 @@ Works on selected region if active, otherwise on whole buffer."
 ;; ==========================================
 ;; MAIN INTERACTIVE FUNCTIONS
 ;; ==========================================
+(defun my/open-elab-in-browser ()
+  (interactive)
+  (let* ((raw (ansi-color-filter-apply (shell-command-to-string "elapi whoami")))
+         (server (when (string-match "Server ?:? +\\([^ \n\t]+\\)" raw)
+                   (match-string 1 raw))))
+    (if server
+        (progn
+          (message "Opening %s" server)
+          (browse-url-xdg-open server))
+      (message "Could not find Server URL in output"))))
 
 (defun my/get-match-exp ()
   "Check if an experiment matching the current buffer's title exists."
@@ -830,6 +840,13 @@ Works on selected region if active, otherwise on whole buffer."
       
       (delete-file temp-file)
       (message "New experiment created successfully!"))))
+
+(map! :leader
+      (:prefix ("e" . "elab")
+       :desc "Sync pdf"           "p" #'my/update-elabftw-exp-pdf
+       :desc "Sync body"          "b" #'my/update-elabftw-exp-body
+       :desc "New exp from buffer" "n" #'my/new-exp-from-current-file
+       :desc "Open ElabFTW in browser" "o" #'my/open-elab-in-browser))
 
 (with-eval-after-load 'eglot
   (with-eval-after-load 'typst-ts-mode
