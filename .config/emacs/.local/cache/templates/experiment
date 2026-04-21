@@ -4,7 +4,7 @@ org-mode
      "#+AUTHOR: " (user-full-name) n
      "#+OPTIONS: title:nil " n
      "#+OPTIONS: html-postamble:nil " n
-     "#+ADTOC :t" n n
+     "#+ADTOC: :t" n n
      "* Final Protocol :pdf_only:ignore:" n
      "* Logs :html_only:ignore:" n
      q) ; 'q' tells Tempel to leave your cursor here when done

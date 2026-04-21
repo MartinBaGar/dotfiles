@@ -267,10 +267,10 @@
                  "* %?\n  SCHEDULED: %^T\n  %a" :prepend t))
   )
 
-;; 1. Register ADTOC
-(with-eval-after-load 'ox
-  (add-to-list 'org-export-options-alist
-               '(:adtoc "ADTOC" "adtoc" nil t)))
+;; ;; 1. Register ADTOC
+;; (with-eval-after-load 'ox
+;;   (add-to-list 'org-export-options-alist
+;;                '(:adtoc "ADTOC" "adtoc" nil t)))
 
 ;; 2. Exclude Tags Function
 (defun my-dynamic-export-exclude-tags (info backend)
@@ -804,7 +804,14 @@ Works on selected region if active, otherwise on whole buffer."
       (message "Exporting to PDF...")
       (let* ((pdf-file (org-typst-export-to-pdf))
              (pdf-name (file-name-nondirectory pdf-file))
+             (f-name-base (file-name-base pdf-file))
+             (typ-file (concat (file-name-base pdf-file) ".typ"))
              (upload-id (elabftw--get-upload-id exp-id pdf-name)))
+        
+        (when (and typ-file 
+             (string-suffix-p ".typ" typ-file) 
+             (file-exists-p typ-file))
+        (delete-file typ-file))
         
         ;; Smart PDF Sync logic: If PDF already exists, delete it first to keep the archive clean
         (when upload-id
@@ -816,7 +823,12 @@ Works on selected region if active, otherwise on whole buffer."
                                exp-id
                                (shell-quote-argument pdf-file)
                                (shell-quote-argument "Uploaded via Emacs")))
-        (message "PDF synced successfully!")))))
+        (message "PDF synced successfully!")
+        (when (and pdf-file 
+             (string-suffix-p ".pdf" pdf-file) 
+             (file-exists-p pdf-file))
+        (delete-file pdf-file))
+        ))))
 
 (defun my/new-exp-from-current-file ()
   "Create a new eLabFTW experiment from the current Org buffer."
