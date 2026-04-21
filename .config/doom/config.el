@@ -638,6 +638,8 @@ Works on selected region if active, otherwise on whole buffer."
 ;; (use-package org-typst
 ;;   :after org)
 
+(load! "treesit-predicate-rewrite")
+
 (with-eval-after-load 'eglot
   (with-eval-after-load 'typst-ts-mode
     (add-to-list 'eglot-server-programs

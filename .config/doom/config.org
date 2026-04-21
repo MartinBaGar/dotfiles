@@ -698,6 +698,8 @@ Works on selected region if active, otherwise on whole buffer."
 
 * LSP / Formater
 #+begin_src emacs-lisp
+(load! "treesit-predicate-rewrite")
+
 (with-eval-after-load 'eglot
   (with-eval-after-load 'typst-ts-mode
     (add-to-list 'eglot-server-programs
