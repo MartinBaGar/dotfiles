@@ -87,7 +87,14 @@ input {
 
 layout {
     // Set gaps around windows in logical pixels.
-    gaps 0
+    gaps 6
+    struts {
+        left 6
+        right 6
+        top -6
+        bottom 0
+    }
+
     background-color "transparent"
 
     // When to center a column when changing focus, options are:
@@ -216,18 +223,6 @@ layout {
         // You can also change the shadow color and opacity.
         color "#0007"
     }
-
-    // Struts shrink the area occupied by windows, similarly to layer-shell panels.
-    // You can think of them as a kind of outer gaps. They are set in logical pixels.
-    // Left and right struts will cause the next window to the side to always be visible.
-    // Top and bottom struts will simply add outer gaps in addition to the area occupied by
-    // layer-shell panels and regular gaps.
-    struts {
-        // left 64
-        // right 64
-        // top 64
-        // bottom 64
-    }
 }
 
 workspace "navigation" {
@@ -244,6 +239,19 @@ workspace "lecture" {
     }
 workspace "visualisation" {
     open-on-output "HDMI-A-2"
+    layout {
+        gaps 0
+        struts {
+            left 0
+            right 0
+            bottom 0
+            top -4
+        }
+    preset-column-widths {
+        proportion 0.7
+        proportion 0.3
+    }
+    }
     }
 
 overview {
@@ -254,6 +262,7 @@ overview {
 spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
 spawn-at-startup "waybar"
 spawn-at-startup "kanshi"
+spawn-at-startup "waypaper" "--random"
 environment {
   XDG_CURRENT_DESKTOP "niri"
   QT_QPA_PLATFORM "wayland"
@@ -353,6 +362,12 @@ window-rule {
 }
 
 window-rule {
+    match app-id=r#"^org\.keepassxc\.KeePassXC$"# title="^Unlock Database - KeePassXC$"
+
+    open-focused true
+}
+
+window-rule {
     match app-id="thunderbird_thunderbird"
     open-on-workspace "chat"
 }
@@ -436,6 +451,7 @@ window-rule {
 }
 // End of VMD
 
+
 window-rule {
     match app-id="org.pymol.PyMOL" title="PyMOL"
     default-column-width { proportion 0.7; }
@@ -469,14 +485,15 @@ binds {
     Mod+Space hotkey-overlay-title="Application Launcher" {
         spawn "fuzzel";
     }
-
+    // Mod+Alt+Space { spawn "bash" "~/scripts/bash/niri-window-switcher.sh"; }
+    Mod+Alt+Space { spawn-sh "~/scripts/bash/niri-window-switcher.sh"; }
     Mod+Alt+O { spawn-sh "~/scripts/bash/fuzzel-file-actions.sh"; }
     Mod+Alt+V { spawn-sh "~/scripts/bash/fuzzel-clipboard.sh"; }
     Mod+Alt+P { spawn-sh "~/scripts/bash/fuzzel-powermenu.sh"; }
     Mod+Alt+W { spawn-sh "~/scripts/bash/reload_waybar.sh"; }
     Mod+Alt+K { spawn "niri" "msg" "action" "switch-layout" "next"; }
     Mod+Alt+T { spawn-sh "~/scripts/bash/niri_switch_theme.sh"; }
-    Mod+Alt+D { spawn-sh "~/.local/bin/waypaper"; }
+    Mod+Alt+D { spawn "waypaper" "--random"; }
 
     Mod+E {spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main";}
 
@@ -593,10 +610,10 @@ binds {
 
     // === Numbered Workspaces ===
     Mod+Ampersand { focus-workspace "navigation"; }
-    Mod+Eacute { focus-workspace "code"; }
+    Mod+2 { focus-workspace "code"; }
     Mod+Quotedbl { focus-workspace "chat"; }
     Mod+Apostrophe { focus-workspace "lecture"; }
-    Mod+Agrave { focus-workspace "Visualisation"; }
+    Mod+parenleft { focus-workspace "visualisation"; }
     // Mod+6 { focus-workspace 6; }
     // Mod+7 { focus-workspace 7; }
     // Mod+8 { focus-workspace 8; }
@@ -604,10 +621,10 @@ binds {
 
     // === Move to Numbered Workspaces ===
     Mod+Shift+Ampersand { move-column-to-workspace "navigation"; }
-    Mod+Shift+Eacute { move-column-to-workspace "code"; }
+    Mod+Shift+2 { move-column-to-workspace "code"; }
     Mod+Shift+Quotedbl { move-column-to-workspace "chat"; }
     Mod+Shift+Apostrophe { move-column-to-workspace "lecture"; }
-    Mod+Shift+Agrave { move-column-to-workspace "Visualisation"; }
+    Mod+Shift+parenleft { move-column-to-workspace "visualisation"; }
     // Mod+Shift+6 { move-column-to-workspace 6; }
     // Mod+Shift+7 { move-column-to-workspace 7; }
     // Mod+Shift+8 { move-column-to-workspace 8; }

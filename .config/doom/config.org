@@ -15,7 +15,7 @@
 (setq-default tab-width 4)
 (define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
 
-(after! evil-escape
+(with-eval-after-load 'evil-escape
   (setq evil-escape-key-sequence "fd"))
 #+end_src
 * Editor
@@ -28,7 +28,7 @@
 ;;       (yas-expand))))
 ;; (add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
 
-(after! emacs
+(with-eval-after-load 'emacs
   ;; Enable indentation+completion using the TAB key
   (setq tab-always-indent 'complete)
 
@@ -50,43 +50,171 @@
 
 (add-hook! 'doom-switch-buffer-hook #'+my-setup-cape-dict-h)
 #+end_src
+** Macros
+#+begin_src emacs-lisp
+;; =============================================================================
+;; EVIL MACRO MODE (THE TRUE FIX)
+;; =============================================================================
+
+;; 1. Variable to remember which register we are editing
+(defvar my/edit-macro-register nil
+  "Remembers which Evil register is currently being edited.")
+
+;; 2. Edit Macro Function
+(defun my/edit-evil-macro (register)
+  "Edit the macro stored in an Evil REGISTER."
+  (interactive "cEdit macro in register: ")
+  (let ((macro (evil-get-register register t)))
+    (cond
+     ((null macro)
+      (user-error "Register '%c' is empty" register))
+     ((or (stringp macro) (vectorp macro))
+      (setq my/edit-macro-register register)
+      (setq last-kbd-macro macro)
+      (kmacro-edit-macro)
+      (message "Editing register '%c'. Press C-c C-c to save changes." register))
+     (t
+      (user-error "Register '%c' doesn't contain a macro" register)))))
+
+;; 3. The Save Hook (Advise the CORRECT function: edmacro-finish-edit)
+(defun my/save-evil-macro-advice (&rest _)
+  "Save the compiled macro back to the Evil register."
+  (when my/edit-macro-register
+    ;; edmacro-finish-edit has just successfully compiled your changes 
+    ;; and placed them into last-kbd-macro. We scoop it up and save it!
+    (evil-set-register my/edit-macro-register last-kbd-macro)
+    (message "SUCCESS: Macro saved back to register '%c'. Use @%c to execute." 
+             my/edit-macro-register my/edit-macro-register)
+    (setq my/edit-macro-register nil)))
+
+;; Attach the advice to run IMMEDIATELY AFTER Emacs closes the editor
+(advice-add 'edmacro-finish-edit :after #'my/save-evil-macro-advice)
+
+;; 4. Assign Emacs kmacro to Evil
+(defun my/kmacro-to-evil-register (register)
+  "Assign the last keyboard macro to an Evil REGISTER."
+  (interactive "cAssign last kmacro to register: ")
+  (if last-kbd-macro
+      (progn
+        (evil-set-register register last-kbd-macro)
+        (message "Macro assigned to register '%c'. Use @%c to execute." register register))
+    (user-error "No keyboard macro defined")))
+
+;; 5. Show Macros
+(defun my/show-evil-macros ()
+  "Display a-z registers containing text or keyboard macros."
+  (interactive)
+  (with-output-to-temp-buffer "*Evil Macros*"
+    (princ "Evil Macro Registers (a-z):\n")
+    (princ "---------------------------\n")
+    (let ((found-any nil))
+      (dolist (reg register-alist)
+        (let ((key (car reg))
+              (val (cdr reg)))
+          (when (and (>= key ?a) (<= key ?z))
+            (when (or (vectorp val) (stringp val))
+              (setq found-any t)
+              (princ (format "Register [%c]: %s\n" key (format-kbd-macro val)))))))
+      (unless found-any
+        (princ "No macros found in a-z registers.\n")))))
+
+;; 6. Export Macro Code
+(defun my/save-evil-macro-to-kill-ring (register)
+  "Copy the macro in REGISTER to kill ring as elisp code."
+  (interactive "cCopy macro from register: ")
+  (let ((content (evil-get-register register t)))
+    (if (and content (or (vectorp content) (stringp content)))
+        (let ((code (format "(evil-set-register ?%c %S)" register content)))
+          (kill-new code)
+          (message "Copied to kill ring: %s" code))
+      (user-error "Register '%c' doesn't contain a macro" register))))
+
+;; =============================================================================
+;; KEYBINDINGS
+;; =============================================================================
+(map! :leader
+      (:prefix ("k" . "macros")
+       :desc "Edit Evil macro"           "e" #'my/edit-evil-macro
+       :desc "Show Evil macros"          "s" #'my/show-evil-macros
+       :desc "Assign kmacro to register" "a" #'my/kmacro-to-evil-register
+       :desc "Copy macro code"           "c" #'my/save-evil-macro-to-kill-ring))
+#+end_src
 ** Snippets
 #+begin_src emacs-lisp
-;; Configure Tempel
-(use-package! tempel
-  ;; "bind" maps keys. In Doom, we prefer map! but :bind works too.
+(use-package tempel
   :bind (("M-+" . tempel-complete)
          ("M-*" . tempel-insert))
   :init
-  ;; Setup completion at point function
+  
   (defun tempel-setup-capf ()
     (setq-local completion-at-point-functions
                 (cons #'tempel-expand completion-at-point-functions)))
 
-  ;; Doom's cleaner way to add hooks to multiple modes
   (add-hook! '(conf-mode-hook prog-mode-hook text-mode-hook)
-             #'tempel-setup-capf))
+             #'tempel-setup-capf)
+  (setopt tempel-path (concat (expand-file-name "templates" user-emacs-directory) "/*"))
+  )
 
-;; Load the collection of templates
-(use-package! tempel-collection)
+(defun tempel-case-match (elt fields)
+  (pcase elt
+    (`(c ,text)
+     (let ((at-start (save-excursion
+                       (skip-chars-backward " \t")
+                       (or (bobp)
+                           (bolp)
+                           (memq (char-before) '(?. ?? ?!))
+                           (looking-back "^\\s-*[*\\-]+" (line-beginning-position))))))
+       (if (and at-start (> (length text) 0))
+           (concat (upcase (substring text 0 1)) (substring text 1))
+         text)))))
+
+(defun my/open-tempel-templates ()
+  (interactive)
+    (find-file (f-dirname tempel-path)))
+
+(use-package tempel-collection)
+
+(add-to-list 'tempel-user-elements #'tempel-case-match)
 #+end_src
 ** Misc
 #+begin_src emacs-lisp
 (+global-word-wrap-mode +1)
 (add-hook 'writeroom-mode-hook #'+word-wrap-mode)
 #+end_src
+** Revealjs
+#+begin_src emacs-lisp
+;; (setq org-re-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js")
+(setq org-re-reveal-revealjs-version nil)
+(setq org-re-reveal-transition "none")
+(setq org-re-reveal-theme "white")
+(setq org-re-reveal-extra-options "none")
+(setq org-re-reveal-extra-options "display: 'flex'")
+(setq org-re-reveal-slide-container "<div class=\"slide-body\">%s</div>")
+(setq org-re-reveal-width 1280)
+(setq org-re-reveal-height 720)
+(setq org-re-reveal-margin "0.04")
+(setq org-re-reveal-center nil)
+(setq org-re-reveal-title-slide "<h1>%t</h1><h2>%a</h2>")
+#+end_src
+
 * Modes
 #+begin_src emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.pdb\\'" . fundamental-mode))
-(add-to-list 'auto-mode-alist '("\\.pml\\'" . python-mode))
+
+;; Load ox-typst after org is loaded
+(use-package! ox-typst
+  :after org)
+
+;; Load ox-hugo after the ox exporter framework is loaded
+(use-package! ox-hugo
+  :after ox)
 #+end_src
 * Aesthetic
 *** Theme & Fonts
 #+begin_src emacs-lisp
-;; (setq doom-theme 'doom-gruvbox)
-;; (setq doom-theme 'doom-feather-dark)
-(setq doom-theme 'doom-myfeather-dark)
+;; (setq doom-theme 'doom-myfeather-dark)
 ;; (setq doom-theme 'doom-myoksolar-light)
+(setq doom-theme 'modus-operandi-tinted)
 
 (setq doom-font (font-spec
                  :family "DejaVu Sans Mono"
@@ -100,12 +228,12 @@
 #+end_src
 * File management
 #+begin_src emacs-lisp
-(after! dirvish
+(with-eval-after-load 'dirvish
   (setq dirvish-hide-details 't)
   )
 
 ;; Defined in ~/.config/emacs/lisp/doom.el
-(setq! dotfiles-dir
+(setopt dotfiles-dir
   (let* ((homedir (getenv-internal "HOME"))
          (dotdir (concat homedir "/dotfiles/")))
     (expand-file-name dotdir)
@@ -131,7 +259,7 @@
 (setq org-image-max-width 500)
 (setq +zen-text-scale 0.5)
 
-(after! org
+(with-eval-after-load 'org
   (add-hook! 'org-mode-hook #'org-modern-mode)
   (add-hook! 'org-mode-hook #'+org-pretty-mode)
   (add-hook! 'org-mode-hook #'+zen/toggle)
@@ -139,7 +267,7 @@
   ;; TODOs
   (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "WAITING" "DONE")))
   (setq org-tag-alist
-        '(("baal" . ?b) ("adastra" . ?a)))
+        '(("baal" . ?b) ("adastra" . ?a) ("question" . ?q)))
   (setq org-log-done t)
 
   (setq-default org-display-custom-times t)
@@ -154,21 +282,86 @@
   ;; Attach
   (setq org-attach-id-dir "~/org/.attach")
   (setq org-agenda-files (list "~/org"))
-
+  (setq org-timestamp-formats '("%Y-%m-%d %a" . "%Y-%m-%d %a %H:%M"))
+  
   (org-link-set-parameters "zotero"
-  :follow (lambda (path) 
-              (browse-url (concat "zotero:" path))))
+                           :follow (lambda (path) 
+                                     (browse-url (concat "zotero:" path))))
   
   (add-to-list 'org-capture-templates
                '("a" "Appointment" entry (file+headline "~/org/agenda.org" "Inbox")
                  "* %?\n  SCHEDULED: %^T\n  %a" :prepend t))
-  
   )
 
-(after! org-modern
-    (setq org-modern-fold-stars '(("▸" . "▾"))))
+;; 1. Register ADTOC
+(with-eval-after-load 'ox
+  (add-to-list 'org-export-options-alist
+               '(:adtoc "ADTOC" "adtoc" nil t)))
 
-(use-package! org-transclusion
+;; 2. Exclude Tags Function
+(defun my-dynamic-export-exclude-tags (info backend)
+  "Dynamically tell Org which tags to ignore based on the backend."
+  (cond
+   ((eq backend 'typst)
+    (plist-put info :exclude-tags (cons "html_only" org-export-exclude-tags)))
+   ((eq backend 'html)
+    (plist-put info :exclude-tags (cons "pdf_only" org-export-exclude-tags))))
+  info)
+
+;; IMPORTANT: Attach to filter-options-functions (which provides 2 arguments)
+(add-hook 'org-export-filter-options-functions #'my-dynamic-export-exclude-tags)
+
+;; 3. Conditional TOC Function
+(defun my-org-export-conditional-toc (info backend)
+  "Dynamically enable/disable TOC based on backend and ADTOC property."
+  (message "export conditional toc has been called")
+  (let ((my-custom-adtoc-value (plist-get info :adtoc)))
+    (if my-custom-adtoc-value
+        (cond
+         ((eq backend 'html)
+          (plist-put info :with-toc nil))
+         ((eq backend 'typst)
+          (plist-put info :with-toc t)))))
+  info)
+
+;; Attach to filter-options-functions
+(add-hook 'org-export-filter-options-functions #'my-org-export-conditional-toc)
+
+;; 4. Ignore Headlines Function (AST)
+(defun my-org-export-ignore-headlines (data backend info)
+  "Remove headlines tagged 'ignore', retain contents, and promote children.
+Operates directly on the Org AST."
+  (org-element-map data 'headline
+    (lambda (object)
+      (when (member "ignore" (org-element-property :tags object))
+        (let ((level-top (org-element-property :level object))
+              level-diff)
+          (mapc (lambda (el)
+                  ;; Recursively promote all nested child headlines
+                  (org-element-map el 'headline
+                    (lambda (el)
+                      (when (equal 'headline (org-element-type el))
+                        (unless level-diff
+                          (setq level-diff (- (org-element-property :level el)
+                                              level-top)))
+                        (org-element-put-property el
+                                                  :level (- (org-element-property :level el)
+                                                            level-diff)))))
+                  ;; Insert the contents back into the parse tree
+                  (org-element-insert-before el object))
+                (org-element-contents object)))
+        ;; Remove the original headline node
+        (org-element-extract-element object)))
+    info nil)
+  data)
+
+;; Add it to the AST parsing hook
+(add-hook 'org-export-filter-parse-tree-functions #'my-org-export-ignore-headlines)
+
+(with-eval-after-load 'org-modern
+  (setq org-modern-fold-stars '(("▸" . "▾"))))
+
+(use-package org-transclusion
   :after org
   :init
   (map!
@@ -193,7 +386,16 @@
     (kill-new link)
     (message "Copied: %s" link)))
 
-(after! org-download
+(defun my/message-org-link-at-point ()
+  "Copy the org link at point to the kill ring."
+  (interactive)
+  (let ((link (org-element-property :path (org-element-context))))
+    (if link
+        (progn (kill-new link)
+               (message "Copied: %s" link))
+      (user-error "No link at point"))))
+
+(with-eval-after-load 'org-download
   ;; Fix the underscore prefix issue
   (setq org-download-timestamp "%Y%m%d-%H%M%S")
   (setq org-download-screenshot-method "flameshot gui --raw > %s")
@@ -240,7 +442,6 @@
        :desc "Dired vterm-cwd in new win" "v" #'vterm-dired-other-window))
 #+end_src
 * Layout
-
 #+begin_src emacs-lisp
 (defun toggle-window-split ()
   "Toggle between horizontal and vertical split with two windows."
@@ -274,12 +475,10 @@
        :desc "Toggle window split" "W" #'toggle-window-split))
 #+end_src
 * LLM
-
 #+begin_src emacs-lisp
-(use-package! gptel
+(use-package gptel
   :config
-  ;; Register Mistral backend
-(gptel-make-openai "Mistral"
+  (gptel-make-openai "Mistral"
   :host "api.mistral.ai"
   :endpoint "/v1/chat/completions"
   :models '("mistral-small-latest" "mistral-large-latest" "codestral-latest" "ministral-8b-latest")
@@ -294,48 +493,14 @@
   :models '(openai/gpt-oss-120b:free
             tngtech/deepseek-r1t2-chimera:free))
 
-  ;; Llama.cpp offers an OpenAI compatible API
-  (gptel-make-openai "llama-cpp"          ;Any name
-  :stream t                             ;Stream responses
-  :protocol "http"
-  :host "localhost:8080"                ;Llama.cpp server location
-  :models '(LLAMA))                    ;Any names, doesn't matter for Llama
-
-  ;; Llama.cpp offers an OpenAI compatible API
-  (gptel-make-openai "koboldcpp"          ;Any name
-  :stream t                             ;Stream responses
-  :protocol "http"
-  :host "localhost:5001"                ;Llama.cpp server location
-  :models '(KOBOLD))                    ;Any names, doesn't matter for Llama
-
   ;; Default model + backend
-  (setq! gptel-backend (gptel-get-backend "Mistral"))
-  (setq! gptel-model 'mistral-large-latest)
-  (setq! gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
-  (setq! gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
-  (setq! gptel-default-mode 'org-mode)
+  (setopt gptel-backend (gptel-get-backend "Mistral"))
+  (setopt gptel-model 'mistral-large-latest)
+  (setopt gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
+  (setopt gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
+  (setopt gptel-default-mode 'org-mode))
 
-  (defun gptel-send-with-options (&optional arg)
-    "Send query.  With prefix ARG open gptel's menu instead."
-    (interactive "P")
-    (if arg
-        (call-interactively 'gptel-menu)
-      (gptel--suffix-send (transient-args 'gptel-menu))))
-  
-  (defun gptel-scratch-from-minibuffer ()
-    "Send prompt from minibuffer to *scratch* buffer using 'scratch preset."
-    (interactive)
-    ;; Then send with specific UI flags: "m" for minibuffer, "b" for specific buffer
-    (gptel--suffix-send (list "m" "b*scratch*")))
-
-  (map! :leader
-        (:prefix-map ("l" . "LLM")
-         :desc "Select a gptel buffer"   "b" #'gptel
-         :desc "Send with options"   "l" #'gptel-scratch-from-minibuffer
-         :desc "Show menu"           "m" #'gptel-menu))
-  )
-
-(use-package! gptel-prompts
+(use-package gptel-prompts
   :after (gptel)
   :demand t
   :config
@@ -345,26 +510,25 @@
   (gptel-prompts-add-update-watchers)
   )
 
-(use-package! gptel-commit
+(use-package gptel-commit
   :ensure t
   :after (gptel magit)
   :custom
   (gptel-commit-stream t))
 #+end_src
 * Bibliography
-
 #+begin_src emacs-lisp
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
-(setq! bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))
-(setq! bibtex-completion-library-path '("~/zotero-lib/referenciator.bib"))
+(setopt bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))
+(setopt bibtex-completion-library-path '("~/zotero-lib/referenciator.bib"))
 
-(after! citar
-(setq! citar-bibliography '("~/zotero-lib/referenciator.bib"))
-(setq! citar-file-open-functions (list (cons "html" #'citar-file-open-external)
-                                       (cons "pdf" #'citar-file-open-external)
-                                           (cons t #'find-file)))
+(with-eval-after-load 'citar
+  (setopt citar-bibliography '("~/zotero-lib/referenciator.bib"))
+  (setopt citar-file-open-functions (list (cons "html" #'citar-file-open-external)
+                                          (cons "pdf" #'citar-file-open-external)
+                                          (cons t #'find-file)))
 
-(setq! citar-library-paths '("~/zotero-lib/"))
+  (setopt citar-library-paths '("~/zotero-lib/"))
 
   (defun my-citar-open-in-zotero ()
     "Open current entry in Zotero instead of opening files."
@@ -411,28 +575,29 @@ Works on selected region if active, otherwise on whole buffer."
 #+end_src
 * Markdown
 #+begin_src emacs-lisp
-;; The proper Doom way
-(setq-hook! 'markdown-mode-hook
-  markdown-hide-markup t
-  markdown-fontify-code-blocks-natively t
-  markdown-hide-urls t
-  markdown-italic-underscore t
-  markdown-asymmetric-header t
-  markdown-gfm-additional-languages '("sh" "json" "elisp"))
+(with-eval-after-load 'markdown-mode
+  (setq-hook! 'markdown-mode-hook
+    markdown-hide-markup t
+    markdown-hide-urls t
+    markdown-italic-underscore t
+    markdown-fontify-code-blocks-natively t
+    markdown-gfm-additional-languages '("sh" "json" "elisp")
+    markdown-asymmetric-header t)
+  (add-hook! 'markdown-mode-hook #'writeroom-mode))
 
 (custom-set-faces!
-  '(markdown-header-delimiter-face :foreground "#616161" :height 0.9)
-  '(markdown-header-face-1 :height 1.6 :foreground "#A3BE8C" :weight extra-bold :inherit markdown-header-face)
-  '(markdown-header-face-2 :height 1.4 :foreground "#EBCB8B" :weight extra-bold :inherit markdown-header-face)
-  '(markdown-header-face-3 :height 1.2 :foreground "#D08770" :weight extra-bold :inherit markdown-header-face)
-  '(markdown-header-face-4 :height 1.15 :foreground "#BF616A" :weight bold :inherit markdown-header-face)
-  '(markdown-header-face-5 :height 1.1 :foreground "#b48ead" :weight bold :inherit markdown-header-face)
-  '(markdown-header-face-6 :height 1.05 :foreground "#5e81ac" :weight semi-bold :inherit markdown-header-face))
+  '(markdown-header-face-1 :inherit outline-1)
+  '(markdown-header-face-2 :inherit outline-2)
+  '(markdown-header-face-3 :inherit outline-3)
+  '(markdown-header-face-4 :inherit outline-4)
+  '(markdown-header-face-5 :inherit outline-5)
+  '(markdown-header-face-3 :inherit outline-6))
+
 #+end_src
 * Projects
 #+begin_src emacs-lisp
-(after! projectile
-  (setq! magit-repository-directories
+(with-eval-after-load 'projectile
+  (setopt magit-repository-directories
          (mapcar (lambda (dir) (cons dir 0))
                  projectile-known-projects)))
 
@@ -443,7 +608,7 @@ Works on selected region if active, otherwise on whole buffer."
         (mapcar (lambda (dir) (cons dir 0))
                 projectile-known-projects)))
 
-(setq! magit-repolist-columns
+(setopt magit-repolist-columns
       '(("Name"    25 magit-repolist-column-ident                  ())
         ("Flags"    5 magit-repolist-column-flags                  ())
         ("Branch"  15 magit-repolist-column-branch                 ())
@@ -459,7 +624,7 @@ Works on selected region if active, otherwise on whole buffer."
 * Language
 ** Translation
 #+begin_src emacs-lisp
-(use-package! gt
+(use-package gt
   :config
   (setq gt-default-translator
         (gt-translator
@@ -500,12 +665,12 @@ Works on selected region if active, otherwise on whole buffer."
 #+end_src
 ** Spell
 #+begin_src emacs-lisp
-(use-package! jinx
+(use-package jinx
   ;; :hook (emacs-startup . global-jinx-mode)
   :bind (("M-$" . jinx-correct)
          ("C-M-$" . jinx-languages)))
 
-(after! jinx
+(with-eval-after-load 'jinx
   ;; Limitations:
   ;; 1. since raw block highlighting let the local parser highlights the area,
   ;; some area doesn't contain face (like `bash-ts-mode'), and those areas will
@@ -546,13 +711,17 @@ Works on selected region if active, otherwise on whole buffer."
       :desc "Open file at point in VS Code"
       "v" #'my/vscode-open-path-at-point)
 
+;; TODO: solidify the link handling. Didn't work on tranclusion links
 (defun my/xdg-open-path-at-point ()
   "Open the file at point with xdg-open."
   (interactive)
-  (let ((path (thing-at-point 'filename t)))
-    (if (and path (file-exists-p path))
-        (start-process "open" nil "xdg-open" (expand-file-name path))
-      (message "No valid file path at point."))))
+  (let ((path (or (org-element-property :path (org-element-context))
+                  (thing-at-point 'filename t))))
+    (cond
+     ((and path (file-exists-p path))
+      (start-process "xdg-open" nil "xdg-open" (expand-file-name path)))
+     (t
+      (message "No valid file path at point.")))))
 
 (map! :leader
       :prefix "o"
@@ -563,7 +732,7 @@ Works on selected region if active, otherwise on whole buffer."
 * Third party apps
 ** Blender
 #+begin_src emacs-lisp
-(use-package! blender
+(use-package blender
   :defer t
   :commands (blender-mode blender-start blender-run-current-buffer)
   :init
@@ -575,7 +744,7 @@ Works on selected region if active, otherwise on whole buffer."
 #+end_src
 ** Typst
 #+begin_src emacs-lisp
-(use-package! typst-preview
+(use-package typst-preview
   :custom
   (typst-preview-browser "default")
   (typst-preview-open-browser-automatically t)
@@ -583,7 +752,7 @@ Works on selected region if active, otherwise on whole buffer."
   (typst-preview-autostart t)
   (typst-preview-invert-colors "never"))
 
-(use-package! typst-ts-mode
+(use-package typst-ts-mode
   :custom
   (typst-ts-watch-options "--open")
   (typst-ts-mode-grammar-location (expand-file-name "tree-sitter/libtree-sitter-typst.so" user-emacs-directory))
@@ -591,41 +760,166 @@ Works on selected region if active, otherwise on whole buffer."
   :config
   (keymap-set typst-ts-mode-map "C-c C-c" #'typst-ts-tmenu))
 #+end_src
+** ElabFTW
+#+begin_src emacs-lisp
+(defun elabftw--get-id-by-title (title)
+  "Get the eLabFTW experiment ID matching TITLE."
+  ;; We use `jq --arg t` to safely pass the title without breaking bash quotes
+  (let* ((cmd (format "elapi get experiments --format json | jq -r --arg t %s '.[] | select(.title==$t) | .id'"
+                      (shell-quote-argument title)))
+         (res (string-trim (shell-command-to-string cmd))))
+    (if (string= res "") nil res)))
 
+(defun elabftw--get-upload-id (exp-id file-name)
+  "Get the upload ID for a file named FILE-NAME in experiment EXP-ID."
+  (let* ((cmd (format "elapi get experiments --id %s --format json | jq -r --arg f %s '.uploads[] | select(.real_name==$f) | .id'"
+                      exp-id
+                      (shell-quote-argument file-name)))
+         (res (string-trim (shell-command-to-string cmd))))
+    (if (string= res "") nil res)))
+
+;; ==========================================
+;; MAIN INTERACTIVE FUNCTIONS
+;; ==========================================
+(defun my/open-elab-in-browser ()
+  (interactive)
+  (let* ((raw (ansi-color-filter-apply (shell-command-to-string "elapi whoami")))
+         (server (when (string-match "Server ?:? +\\([^ \n\t]+\\)" raw)
+                   (match-string 1 raw))))
+    (if server
+        (progn
+          (message "Opening %s" server)
+          (browse-url-xdg-open server))
+      (message "Could not find Server URL in output"))))
+
+(defun my/get-match-exp ()
+  "Check if an experiment matching the current buffer's title exists."
+  (interactive)
+  (let* ((title (org-get-title (current-buffer)))
+         (exp-id (elabftw--get-id-by-title title)))
+    (if exp-id
+        (message "Found experiment '%s' with ID: %s" title exp-id)
+      (message "No experiment found matching title: '%s'" title))))
+
+(defun my/update-elabftw-exp-body ()
+  "Update the body of the eLabFTW experiment matching the current buffer's title."
+  (interactive)
+  (let* ((title (org-get-title (current-buffer)))
+         (exp-id (elabftw--get-id-by-title title)))
+    (if (not exp-id)
+        (message "Error: No experiment found with title '%s'" title)
+      
+      (let* ((body (org-export-as 'html nil nil t))
+             ;; Create a temp file and encode the HTML payload directly into JSON
+             (temp-file (make-temp-file "elabftw-body-" nil ".json"))
+             (json-data (json-encode `((body . ,body)))))
+        
+        ;; Write JSON to file to bypass bash quoting hell
+        (with-temp-file temp-file
+          (insert json-data))
+        
+        (message "Updating experiment '%s' (ID: %s)..." title exp-id)
+        
+        ;; Pass the JSON file directly to elapi using the -d flag
+        (shell-command (format "elapi patch experiments --id %s -d %s" 
+                               exp-id 
+                               (shell-quote-argument temp-file)))
+        
+        ;; Cleanup
+        (delete-file temp-file)
+        (message "Body updated successfully!")))))
+
+(defun my/update-elabftw-exp-pdf ()
+  "Exports the current Org buffer to PDF and smart-syncs it to eLabFTW."
+  (interactive)
+  (let* ((title (org-get-title (current-buffer)))
+         (exp-id (elabftw--get-id-by-title title)))
+    (if (not exp-id)
+        (message "Error: No experiment found with title '%s'" title)
+      
+      (message "Exporting to PDF...")
+      (let* ((pdf-file (org-typst-export-to-pdf))
+             (pdf-name (file-name-nondirectory pdf-file))
+             (upload-id (elabftw--get-upload-id exp-id pdf-name)))
+        
+        ;; Smart PDF Sync logic: If PDF already exists, delete it first to keep the archive clean
+        (when upload-id
+          (message "Deleting old PDF (Upload ID: %s)..." upload-id)
+          (shell-command (format "elapi delete experiments -i %s --sub uploads --sub-id %s" exp-id upload-id)))
+        
+        (message "Uploading new PDF...")
+        (shell-command (format "elapi experiments upload-attachment --id %s --path %s --comment %s"
+                               exp-id
+                               (shell-quote-argument pdf-file)
+                               (shell-quote-argument "Uploaded via Emacs")))
+        (message "PDF synced successfully!")))))
+
+(defun my/new-exp-from-current-file ()
+  "Create a new eLabFTW experiment from the current Org buffer."
+  (interactive)
+  (let ((title (org-get-title (current-buffer))))
+    
+    ;; 1. Fast check: Abort immediately if it exists (no files created)
+    (when (elabftw--get-id-by-title title)
+      (user-error "Experiment '%s' already exists" title))
+    
+    ;; 2. Heavy work: Only runs if the check passed
+    (let* ((body (org-export-as 'html nil nil t))
+           (temp-file (make-temp-file "elabftw-new-" nil ".json"))
+           (json-data (json-encode `((title . ,title) (body . ,body)))))
+      
+      (with-temp-file temp-file
+        (insert json-data))
+      
+      (message "Creating new experiment '%s'..." title)
+      (shell-command (format "elapi post experiments -d %s" (shell-quote-argument temp-file)))
+      
+      (delete-file temp-file)
+      (message "New experiment created successfully!"))))
+
+(map! :leader
+      (:prefix ("e" . "elab")
+       :desc "Sync pdf"           "p" #'my/update-elabftw-exp-pdf
+       :desc "Sync body"          "b" #'my/update-elabftw-exp-body
+       :desc "New exp from buffer" "n" #'my/new-exp-from-current-file
+       :desc "Open ElabFTW in browser" "o" #'my/open-elab-in-browser))
+#+end_src
 * LSP / Formater
 #+begin_src emacs-lisp
-(after! eglot
-  (after! typst-ts-mode
+(with-eval-after-load 'eglot
+  (with-eval-after-load 'typst-ts-mode
     (add-to-list 'eglot-server-programs
                  `((typst-ts-mode) .
                    ,(eglot-alternatives `(,typst-ts-lsp-download-path
                                           "tinymist"
-                                          "typst-lsp"))))))
+                                          "typst-lsp")))))
+  (add-to-list 'eglot-server-programs
+               '((web-mode) . ("vscode-html-language-server" "--stdio"))))
 
-(after! cc-mode
+(with-eval-after-load 'cc-mode
   (set-eglot-client! 'cc-mode '("clangd" "-j=3" "--clang-tidy")))
 
-(after! python
+(with-eval-after-load 'python
   (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server"))
   (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
 #+end_src
 * Wayland
 #+begin_src emacs-lisp
-(setq wl-copy-process nil)
-(defun wl-copy (text)
-  (setq wl-copy-process (make-process :name "wl-copy"
-                                      :buffer nil
-                                      :command '("wl-copy" "-f" "-n")
-                                      :connection-type 'pipe
-                                      :noquery t))
-  (process-send-string wl-copy-process text)
-  (process-send-eof wl-copy-process))
-(defun wl-paste ()
-  (if (and wl-copy-process (process-live-p wl-copy-process))
-      nil ; should return nil if we're the current paste owner
-      (shell-command-to-string "wl-paste -n | tr -d \r")))
-(setq interprogram-cut-function 'wl-copy)
-(setq interprogram-paste-function 'wl-paste)
+;; (setq wl-copy-process nil)
+;; (defun wl-copy (text)
+;;   (setq wl-copy-process (make-process :name "wl-copy"
+;;                                       :buffer nil
+;;                                       :command '("wl-copy" "-f" "-n")
+;;                                       :connection-type 'pipe
+;;                                       :noquery t))
+;;   (process-send-string wl-copy-process text)
+;;   (process-send-eof wl-copy-process))
+;; (defun wl-paste ()
+;;   (if (and wl-copy-process (process-live-p wl-copy-process))
+;;       nil ; should return nil if we're the current paste owner
+;;       (shell-command-to-string "wl-paste -n | tr -d \r")))
+;; (setq interprogram-cut-function 'wl-copy)
+;; (setq interprogram-paste-function 'wl-paste)
 
 ;; For niri to toggle a notepad
 (defun toggle-named-frame (frame-name &rest frame-params)

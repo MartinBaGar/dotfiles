@@ -1,6 +1,6 @@
 /* ---------- Global ---------- */
 * {
-  margin: 0;
+  margin: 2px 2px 2px 2px;
   font-size: 13px;
   min-height: 0;
 }
@@ -8,23 +8,26 @@
 #window,
 #workspaces button,
 window#waybar {
-  background-color: {{ colors.background.default.hex }};
+  background: alpha({{ colors.background.default.hex }}, 0.0);
   color: {{ colors.on_background.default.hex }};
 }
 
 /* ---------- Common Button Styling ---------- */
+#bluetooth,
 #mpris,
 #pulseaudio,
 #custom-dunst,
 #battery,
 #language,
 #window,
+#clock,
 #workspaces button {
   margin: 1px 2px;
   padding: 4px 12px;
   border: 1px solid;
   border-radius: 4px;
   font-weight: 600;
+  background: alpha({{ colors.background.default.hex }}, 0.9);
 }
 
 /* ---------- Workspaces ---------- */
@@ -48,9 +51,8 @@ window#waybar {
   font-weight: 800;
   letter-spacing: 1px;
   font-size: 25px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
+    padding: 0px 12px;
+  background: alpha({{ colors.background.default.hex }}, 0.9);
 }
 
 /* ---------- Media Player ---------- */

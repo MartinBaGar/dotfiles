@@ -1,2 +1,4 @@
 !.config
 !.oh-my-zsh
+/.config/kitty/kitty.conf.bak
+/.config/waybar/style.css

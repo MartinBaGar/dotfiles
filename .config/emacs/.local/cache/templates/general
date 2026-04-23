@@ -1,0 +1,20 @@
+;; ~/.config/emacs/templates
+
+fundamental-mode text-mode
+
+(calc (p "Formula: " formula noinsert) (format "%s" (calc-eval formula)))
+
+;; Molecular dynamics related
+(ff (c "force field"))
+(cg (c "coarse-grain"))
+(aa (c "all-atom"))
+(md (c "molecular dynamics"))
+(CG "Coarse-Grain")
+(AA "All-Atom")
+(MD "Molecular Dynamics")
+
+
+;; Local Variables:
+;; mode: lisp-data
+;; outline-regexp: "[a-z]"
+;; End:
