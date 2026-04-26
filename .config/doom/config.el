@@ -457,8 +457,8 @@ Works on selected region if active, otherwise on whole buffer."
     (if (or (not citation-key) (string-empty-p citation-key))
         (message "No reference selected.")
       
-      (let* ((script-path (expand-file-name "/home/bari-garnier/scripts/python/zotero_content.py"))
-             (python-cmd "/home/bari-garnier/.venv/bin/python")
+      (let* ((script-path (expand-file-name "~/scripts/python/zotero/zotero_content.py"))
+             (python-cmd "~/scripts/python/zotero/.pixi/envs/default/bin/python")
              (cmd (format "%s \"%s\" \"%s\"" python-cmd script-path citation-key)))
         
         (message "Fetching notes for %s..." citation-key)
