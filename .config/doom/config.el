@@ -194,9 +194,22 @@
 ;; (setq doom-theme 'doom-myoksolar-light)
 (setq doom-theme 'modus-operandi-tinted)
 
-(setq doom-font (font-spec
-                 :family "DejaVu Sans Mono"
-                 :size 18))
+;; 1. The Main Font (for code and standard text)
+;; JetBrains Mono provides a clean, modern, and highly readable look.
+(setq doom-font (font-spec :family "JetBrains Mono" :size 18 :weight 'medium))
+
+;; 2. The Variable Pitch Font (for Org-mode, Markdown, and UI elements)
+;; Using a sans-serif font for non-code text instantly modernizes Emacs. 
+;; "Inter", "Roboto", or "Helvetica" work perfectly here.
+(setq doom-variable-pitch-font (font-spec :family "Inter" :size 18 :weight 'regular))
+
+;; 3. The Symbol Font (Optional but recommended)
+;; Ensures icons and special characters render cleanly.
+(setq doom-symbol-font (font-spec :family "Symbols Nerd Font Mono" :size 18))
+
+;; (setq doom-font (font-spec
+;;                  :family "DejaVu Sans Mono"
+;;                  :size 18))
 
 (add-to-list 'default-frame-alist '(undecorated . t))
 ;; (add-to-list 'default-frame-alist '(alpha-background . 96))
@@ -545,8 +558,8 @@ Works on selected region if active, otherwise on whole buffer."
     (if (or (not citation-key) (string-empty-p citation-key))
         (message "No reference selected.")
       
-      (let* ((script-path (expand-file-name "/home/bari-garnier/scripts/python/zotero_content.py"))
-             (python-cmd "/home/bari-garnier/.venv/bin/python")
+      (let* ((script-path (expand-file-name "~/scripts/python/zotero/zotero_content.py"))
+             (python-cmd "~/scripts/python/zotero/.pixi/envs/default/bin/python")
              (cmd (format "%s \"%s\" \"%s\"" python-cmd script-path citation-key)))
         
         (message "Fetching notes for %s..." citation-key)
@@ -859,6 +872,8 @@ Works on selected region if active, otherwise on whole buffer."
        :desc "Sync body"          "b" #'my/update-elabftw-exp-body
        :desc "New exp from buffer" "n" #'my/new-exp-from-current-file
        :desc "Open ElabFTW in browser" "o" #'my/open-elab-in-browser))
+
+(load! "treesit-predicate-rewrite")
 
 (with-eval-after-load 'eglot
   (with-eval-after-load 'typst-ts-mode
