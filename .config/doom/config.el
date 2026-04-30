@@ -13,28 +13,15 @@
 (with-eval-after-load 'evil-escape
   (setq evil-escape-key-sequence "fd"))
 
-;; https://github.com/joaotavora/yasnippet/issues/998
-;; (defun my-yas-try-expanding-auto-snippets ()
-;;   (when (and (boundp 'yas-minor-mode) yas-minor-mode)
-;;     (let ((yas-buffer-local-condition ''(require-snippet-condition . auto)))
-;;       (yas-expand))))
-;; (add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
-
 (with-eval-after-load 'emacs
   ;; Enable indentation+completion using the TAB key
   (setq tab-always-indent 'complete)
-
-  ;; Emacs 30+: Disable Ispell completion function
   (setq text-mode-ispell-word-completion nil)
-
-  ;; Hide commands in M-x which don't apply to the current mode
   (setq read-extended-command-predicate #'command-completion-default-include-p))
 
 (defun +my-setup-cape-dict-h ()
   (when (derived-mode-p 'text-mode)
     (add-hook 'completion-at-point-functions #'cape-dict 'append 'local)
-    
-    ;; Use the clean list we just generated
     (when (and (bound-and-true-p jinx-languages)
                (string-match-p "fr" jinx-languages)
                (not (string-match-p "dict-fr" cape-dict-file)))
@@ -43,7 +30,7 @@
 (add-hook! 'doom-switch-buffer-hook #'+my-setup-cape-dict-h)
 
 ;; =============================================================================
-;; EVIL MACRO MODE (THE TRUE FIX)
+;; EVIL MACRO MODE 
 ;; =============================================================================
 
 ;; 1. Variable to remember which register we are editing
@@ -190,32 +177,29 @@
 (use-package! ox-hugo
   :after ox)
 
-;; (setq doom-theme 'doom-myfeather-dark)
 ;; (setq doom-theme 'doom-myoksolar-light)
 (setq doom-theme 'modus-operandi-tinted)
 
 ;; 1. The Main Font (for code and standard text)
 ;; JetBrains Mono provides a clean, modern, and highly readable look.
-(setq doom-font (font-spec :family "JetBrains Mono" :size 18 :weight 'medium))
+(setq doom-font (font-spec :family "Iosevka" :size 18 :weight 'medium))
 
 ;; 2. The Variable Pitch Font (for Org-mode, Markdown, and UI elements)
 ;; Using a sans-serif font for non-code text instantly modernizes Emacs. 
 ;; "Inter", "Roboto", or "Helvetica" work perfectly here.
-(setq doom-variable-pitch-font (font-spec :family "Inter" :size 18 :weight 'regular))
+(setq doom-variable-pitch-font (font-spec :family "Lexend" :size 18 :weight 'regular))
 
 ;; 3. The Symbol Font (Optional but recommended)
 ;; Ensures icons and special characters render cleanly.
 (setq doom-symbol-font (font-spec :family "Symbols Nerd Font Mono" :size 18))
-
-;; (setq doom-font (font-spec
-;;                  :family "DejaVu Sans Mono"
-;;                  :size 18))
 
 (add-to-list 'default-frame-alist '(undecorated . t))
 ;; (add-to-list 'default-frame-alist '(alpha-background . 96))
 
 (setq display-line-numbers nil)
 (setq display-line-numbers-type nil)
+
+(remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-banner)
 
 (with-eval-after-load 'dirvish
   (setq dirvish-hide-details 't)
@@ -279,11 +263,6 @@
                '("a" "Appointment" entry (file+headline "~/org/agenda.org" "Inbox")
                  "* %?\n  SCHEDULED: %^T\n  %a" :prepend t))
   )
-
-;; ;; 1. Register ADTOC
-;; (with-eval-after-load 'ox
-;;   (add-to-list 'org-export-options-alist
-;;                '(:adtoc "ADTOC" "adtoc" nil t)))
 
 ;; 2. Exclude Tags Function
 (defun my-dynamic-export-exclude-tags (info backend)
@@ -525,7 +504,7 @@ Operates directly on the Org AST."
                                           (cons "pdf" #'citar-file-open-external)
                                           (cons t #'find-file)))
 
-  (setopt citar-library-paths '("~/zotero-lib/"))
+  (setopt citar-library-paths '("~/zotero-lib/"))  
 
   (defun my-citar-open-in-zotero ()
     "Open current entry in Zotero instead of opening files."
@@ -736,9 +715,6 @@ Works on selected region if active, otherwise on whole buffer."
   :config
   (keymap-set typst-ts-mode-map "C-c C-c" #'typst-ts-tmenu))
 
-;; (use-package org-typst
-;;   :after org)
-
 (defun elabftw--get-id-by-title (title)
   "Get the eLabFTW experiment ID matching TITLE."
   ;; We use `jq --arg t` to safely pass the title without breaking bash quotes
@@ -892,22 +868,6 @@ Works on selected region if active, otherwise on whole buffer."
   (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server"))
   (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
 
-;; (setq wl-copy-process nil)
-;; (defun wl-copy (text)
-;;   (setq wl-copy-process (make-process :name "wl-copy"
-;;                                       :buffer nil
-;;                                       :command '("wl-copy" "-f" "-n")
-;;                                       :connection-type 'pipe
-;;                                       :noquery t))
-;;   (process-send-string wl-copy-process text)
-;;   (process-send-eof wl-copy-process))
-;; (defun wl-paste ()
-;;   (if (and wl-copy-process (process-live-p wl-copy-process))
-;;       nil ; should return nil if we're the current paste owner
-;;       (shell-command-to-string "wl-paste -n | tr -d \r")))
-;; (setq interprogram-cut-function 'wl-copy)
-;; (setq interprogram-paste-function 'wl-paste)
-
 ;; For niri to toggle a notepad
 (defun toggle-named-frame (frame-name &rest frame-params)
   "Toggle a frame with FRAME-NAME. Create if doesn't exist, delete if exists.
@@ -926,3 +886,256 @@ FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
             (org-mode)
             (writeroom-mode 1)))
         frame))))
+
+;; =============================================================================
+;; Org-Babel JIT Path & File Completion (Powered by Cape)
+;; =============================================================================
+
+(require 'cape)
+(require 'org)
+
+;; -----------------------------------------------------------------------------
+;; 1. Variable Resolver
+;; -----------------------------------------------------------------------------
+
+(defun my/org-babel-get-sh-var-path (var-name)
+  "Resolve VAR-NAME to its path via babel params then property drawer.
+Uses the src block heading as anchor so inherited properties resolve
+correctly even when point is inside the block body.
+Guards against infinite loops with a depth limit of 5."
+  (let* ((block-pos (org-babel-where-is-src-block-head))
+         ;; Use babel's own param parser — handles all header-args forms
+         ;; (:var on #+begin_src, #+header:, property drawers with
+         ;; header-args:sh+, etc.)
+         (params    (when block-pos
+                      (nth 2 (org-babel-get-src-block-info t))))
+         ;; :var entries arrive as ((sym . val) ...) under the :var key
+         (vars      (when params
+                      (mapcar (lambda (v) (if (consp v) v (cons v nil)))
+                              (ensure-list (alist-get :var params)))))
+         (val       (or
+                     (cdr (assoc (intern var-name) vars))
+                     (cdr (assoc (intern (upcase var-name)) vars))
+                     ;; Fallback: raw property drawer lookup
+                     (when block-pos
+                       (org-with-point-at block-pos
+                         (or (org-entry-get (point) var-name t)
+                             (org-entry-get (point) (upcase var-name) t)))))))
+    ;; Recursively dereference (org-entry-get ...) expressions with depth guard
+    (let ((depth 0))
+      (while (and val (< depth 5)
+                  (string-match "(org-entry-get [^ ]+ \"\\([^\"]+\\)\".*)" val))
+        (cl-incf depth)
+        (setq val (when block-pos
+                    (org-with-point-at block-pos
+                      (org-entry-get (point) (match-string 1 val) t))))))
+    (when val (string-trim val "\"" "\""))))
+
+;; -----------------------------------------------------------------------------
+;; 2. Path-start detector
+;; -----------------------------------------------------------------------------
+
+(defun my/org-babel--find-path-start ()
+  "Return the buffer position where a shell path expression starts.
+Extends backward through embedded spaces that belong to the same path,
+e.g. ./Music/Flying Zodd/ or \"$VAR\"/some dir/.
+
+Logic: after the initial char-skip we cross each space and check whether
+the token on the other side either ends with '/' (so we are continuing a
+path component) or starts with a path-like character [$~/.]."
+  (save-excursion
+    (let ((path-chars "-a-zA-Z0-9_./$\"{}~':@+=%"))
+      (skip-chars-backward path-chars)
+      (let (done)
+        (while (not done)
+          (if (and (> (point) (line-beginning-position))
+                   (eq (char-before) ?\ ))
+              (let ((saved (point))
+                    (extended
+                     (save-excursion
+                       (backward-char)            ; cross the space
+                       (skip-chars-backward path-chars)
+                       (point))))
+                ;; Keep the extension when the preceding token ends with /
+                ;; (continuing an in-progress path) or begins with a path-like
+                ;; sigil (start of a new absolute/relative/home path)
+                (if (or (eq (char-before extended) ?/)
+                        (progn (goto-char extended)
+                               (looking-at-p "[$~/.]")))
+                    (goto-char extended)   ; accepted — loop again
+                  (goto-char saved)        ; rejected — stop here
+                  (setq done t)))
+            (setq done t))))
+      (point))))
+
+;; -----------------------------------------------------------------------------
+;; 3. Raw CAPF
+;; -----------------------------------------------------------------------------
+
+(defun my/org-babel-sh-path-capf-raw ()
+  "CAPF for file paths inside sh/bash org-babel blocks.
+
+Handles:
+  - $VAR/path and ${VAR}/path resolved via babel params / property drawers
+  - \"$VAR\"suffix  (variable immediately followed by a literal suffix)
+  - /absolute, ./relative, ~/home-relative paths
+  - Paths whose components contain spaces (e.g. ./Music/Flying Zodd/)
+  - TRAMP remote buffers
+  - :dir header-arg for relative path resolution
+
+Filters . and .. from all candidate lists."
+  (when (and (org-in-src-block-p)
+             (member (car (org-babel-get-src-block-info)) '("sh" "bash")))
+    (let* ((end (point))
+           (beg (my/org-babel--find-path-start))
+           (raw-input (and (< beg end)
+                           (buffer-substring-no-properties beg end))))
+
+      ;; Fire when content looks like a path:
+      ;;   - contains a $VAR reference, OR
+      ;;   - starts with /, ~, or . (absolute / home-relative / relative paths,
+      ;;     including those with spaces that would defeat cape-file)
+      (when (and raw-input
+                 (string-match-p "\\$\\|\\`[~/.]" raw-input))
+        (let* (;; Respect :dir header-arg for relative path expansion
+               (params    (nth 2 (org-babel-get-src-block-info t)))
+               (babel-dir (alist-get :dir params))
+               (default-directory (or babel-dir default-directory))
+               (eval-path raw-input)
+               (temp      raw-input))
+
+          ;; Step 1: expand org/babel variables.
+          ;; Two explicit branches for ${VAR} and $VAR — the previous
+          ;; \\1? backreference made the closing } optional, matching ${FOO
+          ;; without consuming the }.
+          (while (string-match
+                  "\\$\\({\\([[:alnum:]_]+\\)}\\|\\([[:alnum:]_]+\\)\\)"
+                  temp)
+            (let* ((var-full (match-string 0 temp))
+                   (var-name (or (match-string 2 temp)
+                                 (match-string 3 temp)))
+                   (m-end    (match-end 0))
+                   (val      (save-match-data
+                               (my/org-babel-get-sh-var-path var-name))))
+              (when val
+                (setq eval-path
+                      (replace-regexp-in-string
+                       (regexp-quote var-full) val eval-path t t)))
+              (setq temp (substring temp m-end))))
+
+          ;; Step 2: resolve standard env vars ($HOME etc.).
+          ;; Wrapped in condition-case — substitute-in-file-name throws an
+          ;; error when a variable is absent from the environment (e.g. an
+          ;; org-only var like $SYS not found in step 1), which would
+          ;; previously kill the entire capf silently.
+          (setq eval-path
+                (condition-case nil
+                    (substitute-in-file-name eval-path)
+                  (error eval-path)))
+
+          ;; Step 3: strip shell quoting now that variables are safely expanded
+          (setq eval-path (replace-regexp-in-string "[\"']" "" eval-path))
+
+          ;; Step 4: inject TRAMP prefix when the org buffer is remote
+          ;; but the resolved path is still a bare local path
+          (let ((remote (file-remote-p (or (buffer-file-name) default-directory))))
+            (when (and remote (not (file-remote-p eval-path)))
+              (setq eval-path (concat remote eval-path))))
+
+          ;; Step 5: expand ~ — expand-file-name is TRAMP-aware
+          (setq eval-path (expand-file-name eval-path))
+
+          ;; Step 6: build candidates, always filtering out . and ..
+          (let* ((raw-dir   (file-name-directory raw-input))
+                 (eval-dir  (file-name-directory eval-path))
+                 (eval-file (file-name-nondirectory eval-path))
+                 (drop-dot  (lambda (files)
+                              (cl-remove-if
+                               (lambda (f)
+                                 (member (directory-file-name f) '("." "..")))
+                               files)))
+                 candidates)
+
+            (if (not raw-dir)
+                (cond
+                 ;; Resolved to a directory but no trailing slash yet —
+                 ;; offer to enter it
+                 ((file-directory-p eval-path)
+                  (setq candidates (list (concat raw-input "/"))))
+
+                 ;; Partial filename — complete against its parent directory
+                 ((and (file-exists-p (file-name-directory eval-path))
+                       (not (string-empty-p eval-file)))
+                  (let ((files (condition-case nil
+                                   (funcall drop-dot
+                                            (file-name-all-completions
+                                             eval-file
+                                             (file-name-directory eval-path)))
+                                 (error nil))))
+                    (when files
+                      (setq candidates
+                            (mapcar (lambda (f)
+                                      (concat (or (file-name-directory raw-input) "") f))
+                                    files))))))
+
+              ;; Slash already present — complete inside the resolved directory
+              (when (and eval-dir (file-directory-p eval-dir))
+                (let ((files (condition-case nil
+                                 (funcall drop-dot
+                                          (file-name-all-completions eval-file eval-dir))
+                               (error nil))))
+                  (when files
+                    (setq candidates
+                          (mapcar (lambda (f) (concat raw-dir f)) files))))))
+
+            (when candidates
+              (list beg end candidates))))))))
+
+;; -----------------------------------------------------------------------------
+;; 4. Cape Wrappers (public API only)
+;; -----------------------------------------------------------------------------
+
+;; Single capf alias: babel-aware completion merged with standard cape-file.
+;; cape-capf-prefix-length 1 prevents flooding the popup immediately on "$VAR/"
+;; before any filename character has been entered.
+(defalias 'my/cape-babel-or-file
+  (cape-capf-prefix-length
+   (cape-capf-choose
+    (cape-capf-properties
+     ;; cape-capf-noninterruptible protects against slow TRAMP mounts
+     (cape-capf-noninterruptible #'my/org-babel-sh-path-capf-raw)
+     :exclusive 'no
+     :category 'file
+     :company-kind (lambda (_) 'file)
+     :annotation-function
+     (lambda (candidate)
+       ;; Show the resolved variable value rather than a static tag —
+       ;; useful when several $VARs are in scope simultaneously
+       (when (string-match "\\$\\([A-Za-z_][A-Za-z0-9_]*\\)" candidate)
+         (let ((resolved (my/org-babel-get-sh-var-path (match-string 1 candidate))))
+           (when resolved
+             (concat "  " (truncate-string-to-width resolved 48 nil nil "…")))))))
+    #'cape-file)
+   1))
+
+;; Interactive command for explicit keybinding invocation
+(defalias 'cape-babel-or-file
+  (cape-capf-interactive #'my/cape-babel-or-file)
+  "Complete Org-Babel $VAR paths, falling back to standard file completion.")
+
+;; -----------------------------------------------------------------------------
+;; 5. Integration
+;; -----------------------------------------------------------------------------
+
+;; my/cape-babel-or-file is the raw capf — goes on the hook
+(add-hook 'org-mode-hook
+          (lambda ()
+            (add-hook 'completion-at-point-functions
+                      #'my/cape-babel-or-file nil t)))
+
+;; cape-babel-or-file is the interactive command — goes on keys
+(after! cape
+  (map! :map cape-prefix-map
+        "f" #'cape-babel-or-file)
+  (map! :map evil-insert-state-map
+        "C-x C-f" #'cape-babel-or-file))
