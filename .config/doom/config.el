@@ -867,6 +867,9 @@ Works on selected region if active, otherwise on whole buffer."
   (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server"))
   (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
 
+(with-eval-after-load 'tramp
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
+
 ;; For niri to toggle a notepad
 (defun toggle-named-frame (frame-name &rest frame-params)
   "Toggle a frame with FRAME-NAME. Create if doesn't exist, delete if exists.
@@ -979,7 +982,7 @@ Handles:
   - \"$VAR\"suffix  (variable immediately followed by a literal suffix)
   - /absolute, ./relative, ~/home-relative paths
   - Paths whose components contain spaces (e.g. ./Music/Flying Zodd/)
-  - TRAMP remote buffers
+  - TRAMP-AWARE remote buffers
   - :dir header-arg for relative path resolution
 
 Filters . and .. from all candidate lists."

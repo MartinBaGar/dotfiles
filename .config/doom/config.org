@@ -930,6 +930,11 @@ Works on selected region if active, otherwise on whole buffer."
   (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server"))
   (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
 #+end_src
+* Remote
+#+begin_src emacs-lisp
+(with-eval-after-load 'tramp
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
+#+end_src
 * Wayland
 #+begin_src emacs-lisp
 ;; For niri to toggle a notepad
@@ -1046,7 +1051,7 @@ Handles:
   - \"$VAR\"suffix  (variable immediately followed by a literal suffix)
   - /absolute, ./relative, ~/home-relative paths
   - Paths whose components contain spaces (e.g. ./Music/Flying Zodd/)
-  - TRAMP remote buffers
+  - TRAMP-AWARE remote buffers
   - :dir header-arg for relative path resolution
 
 Filters . and .. from all candidate lists."
