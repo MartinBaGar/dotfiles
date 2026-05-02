@@ -191,6 +191,19 @@
 (use-package! ox-typst
   :after org)
 
+;; Fix the main .typ file path passed to org-compile-file
+(defun my/org-typst-fix-tramp-compile (orig-fun typst-file &rest args)
+  (apply orig-fun (file-local-name (expand-file-name typst-file)) args))
+
+(advice-add 'org-typst-compile :around #'my/org-typst-fix-tramp-compile)
+
+;; Fix all paths inside the generated typst command (images, root, etc.)
+(defun my/org-typst-fix-tramp-command (orig-fun typst-file &rest args)
+  (let ((default-directory (file-local-name default-directory)))
+    (apply orig-fun (file-local-name (expand-file-name typst-file)) args)))
+
+(advice-add 'org-typst--generate-command :around #'my/org-typst-fix-tramp-command)
+
 ;; Load ox-hugo after the ox exporter framework is loaded
 (use-package! ox-hugo
   :after ox)
