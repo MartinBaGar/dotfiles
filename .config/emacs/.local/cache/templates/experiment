@@ -1,10 +1,16 @@
 org-mode
 
-(exp "#+TITLE: " (p "Experiment Title") n
+(exp "#+TITLE: " (p "Experiment Title") n q
      "#+AUTHOR: " (user-full-name) n
      "#+OPTIONS: title:nil " n
      "#+OPTIONS: html-postamble:nil " n
-     "#+ADTOC: :t" n n
      "* Final Protocol :pdf_only:ignore:" n
+     "#+INCLUDE: \"~/org/org_rules/typst/exp-setup.typ\" export typst" n n
      "* Logs :html_only:ignore:" n
-     q) ; 'q' tells Tempel to leave your cursor here when done
+     "#+BEGIN_EXPORT html" n
+     "<style>" n
+     "#+END_EXPORT" n
+     "#+INCLUDE: \"~/org/org_rules/html/styles.css\" export html" n
+     "#+BEGIN_EXPORT html" n
+     "</style>" n
+     "#+END_EXPORT" n)
