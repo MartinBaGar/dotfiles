@@ -185,9 +185,14 @@
 (setq doom-font (font-spec :family "Iosevka" :size 18 :weight 'medium))
 
 ;; 2. The Variable Pitch Font (for Org-mode, Markdown, and UI elements)
-;; Using a sans-serif font for non-code text instantly modernizes Emacs. 
+;; Using a sans-serif font for non-code text instantly modernizes Emacs.
 ;; "Inter", "Roboto", or "Helvetica" work perfectly here.
-(setq doom-variable-pitch-font (font-spec :family "Lexend" :size 18 :weight 'regular))
+;; (setq doom-variable-pitch-font (font-spec :family "Lexend" :size 18 :weight 'regular))
+;; (setq doom-variable-pitch-font (font-spec :family "Atkinson Hyperlegible Next" :size 18 :weight 'regular))
+;; (setq doom-variable-pitch-font (font-spec :family "Montserrat" :size 18 :weight 'semi-bold))
+(setq doom-variable-pitch-font (font-spec :family "Figtree" :size 18 :weight 'semi-bold))
+;; (setq doom-variable-pitch-font (font-spec :family "Figtree" :size 18 :weight 'regular))
+;; (setq doom-variable-pitch-font (font-spec :family "Plus Jakarta Sans" :size 18 :weight 'semi-bold))
 
 ;; 3. The Symbol Font (Optional but recommended)
 ;; Ensures icons and special characters render cleanly.
@@ -199,7 +204,9 @@
 (setq display-line-numbers nil)
 (setq display-line-numbers-type nil)
 
-(remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-banner)
+;; (remove-hook '+dashboard-functions #'dashboard-widget-banner)
+(setq +dashboard-functions
+      (remove '+dashboard-widget-banner +dashboard-functions))
 
 (with-eval-after-load 'dirvish
   (setq dirvish-hide-details 't)
@@ -493,6 +500,17 @@ Operates directly on the Org AST."
   :after (gptel magit)
   :custom
   (gptel-commit-stream t))
+
+;; accept completion from copilot and fallback to company
+(use-package copilot
+  :hook (prog-mode . copilot-mode)
+  :bind (:map copilot-completion-map
+              ("<tab>" . 'copilot-accept-completion)
+              ("TAB" . 'copilot-accept-completion)
+              ("C-TAB" . 'copilot-accept-completion-by-word)
+              ("C-<tab>" . 'copilot-accept-completion-by-word)))
+
+(add-hook 'prog-mode-hook 'copilot-mode)
 
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
 (setopt bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))

@@ -12,6 +12,7 @@ fundamental-mode text-mode
 (CG "Coarse-Grain")
 (AA "All-Atom")
 (MD "Molecular Dynamics")
+(ara "/Arabidopsis thaliana/")
 
 org-mode
 
