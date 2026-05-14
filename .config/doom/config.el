@@ -177,8 +177,7 @@
 (use-package! ox-hugo
   :after ox)
 
-;; (setq doom-theme 'doom-myoksolar-light)
-(setq doom-theme 'modus-operandi-tinted)
+(setq doom-theme 'doom-spacegrey-light)
 
 ;; 1. The Main Font (for code and standard text)
 ;; JetBrains Mono provides a clean, modern, and highly readable look.
@@ -186,16 +185,9 @@
 
 ;; 2. The Variable Pitch Font (for Org-mode, Markdown, and UI elements)
 ;; Using a sans-serif font for non-code text instantly modernizes Emacs.
-;; "Inter", "Roboto", or "Helvetica" work perfectly here.
-;; (setq doom-variable-pitch-font (font-spec :family "Lexend" :size 18 :weight 'regular))
-;; (setq doom-variable-pitch-font (font-spec :family "Atkinson Hyperlegible Next" :size 18 :weight 'regular))
-;; (setq doom-variable-pitch-font (font-spec :family "Montserrat" :size 18 :weight 'semi-bold))
 (setq doom-variable-pitch-font (font-spec :family "Figtree" :size 18 :weight 'semi-bold))
-;; (setq doom-variable-pitch-font (font-spec :family "Figtree" :size 18 :weight 'regular))
-;; (setq doom-variable-pitch-font (font-spec :family "Plus Jakarta Sans" :size 18 :weight 'semi-bold))
 
 ;; 3. The Symbol Font (Optional but recommended)
-;; Ensures icons and special characters render cleanly.
 (setq doom-symbol-font (font-spec :family "Symbols Nerd Font Mono" :size 18))
 
 (add-to-list 'default-frame-alist '(undecorated . t))
@@ -270,6 +262,11 @@
                '("a" "Appointment" entry (file+headline "~/org/agenda.org" "Inbox")
                  "* %?\n  SCHEDULED: %^T\n  %a" :prepend t))
   )
+
+;; 1. Register ADTOC
+(with-eval-after-load 'ox
+  (add-to-list 'org-export-options-alist
+               '(:adtoc "ADTOC" "adtoc" nil t)))
 
 ;; 2. Exclude Tags Function
 (defun my-dynamic-export-exclude-tags (info backend)
