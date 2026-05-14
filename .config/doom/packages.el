@@ -62,6 +62,8 @@
 (package! gnuplot :pin "7138b139d2dca9683f1a81325c643b2744aa1ea3")
 
 ;; AI
+(package! copilot
+  :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el")))
 (package! whisper :recipe (:host github :repo "natrys/whisper.el"))
 (package! gptel-prompts :recipe (:host github :repo "jwiegley/gptel-prompts"))
 (package! gptel-commit :recipe (:host github :repo "lakkiy/gptel-commit"))
