@@ -189,20 +189,17 @@
 (use-package! ox-hugo
   :after ox)
 
-;; (setq doom-theme 'doom-myoksolar-light)
-(setq doom-theme 'modus-operandi-tinted)
+(setq doom-theme 'doom-spacegrey-light)
 
 ;; 1. The Main Font (for code and standard text)
 ;; JetBrains Mono provides a clean, modern, and highly readable look.
 (setq doom-font (font-spec :family "Iosevka" :size 18 :weight 'medium))
 
 ;; 2. The Variable Pitch Font (for Org-mode, Markdown, and UI elements)
-;; Using a sans-serif font for non-code text instantly modernizes Emacs. 
-;; "Inter", "Roboto", or "Helvetica" work perfectly here.
-(setq doom-variable-pitch-font (font-spec :family "Lexend" :size 18 :weight 'regular))
+;; Using a sans-serif font for non-code text instantly modernizes Emacs.
+(setq doom-variable-pitch-font (font-spec :family "Figtree" :size 18 :weight 'semi-bold))
 
 ;; 3. The Symbol Font (Optional but recommended)
-;; Ensures icons and special characters render cleanly.
 (setq doom-symbol-font (font-spec :family "Symbols Nerd Font Mono" :size 18))
 
 (add-to-list 'default-frame-alist '(undecorated . t))
@@ -211,7 +208,9 @@
 (setq display-line-numbers nil)
 (setq display-line-numbers-type nil)
 
-(remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-banner)
+;; (remove-hook '+dashboard-functions #'dashboard-widget-banner)
+(setq +dashboard-functions
+      (remove '+dashboard-widget-banner +dashboard-functions))
 
 (with-eval-after-load 'dirvish
   (setq dirvish-hide-details 't)
@@ -506,6 +505,55 @@ Operates directly on the Org AST."
   :custom
   (gptel-commit-stream t))
 
+;; accept completion from copilot and fallback to company
+;; (use-package copilot
+;;   :hook (prog-mode . copilot-mode)
+;;   :bind (:map copilot-completion-map
+;;               ("<tab>" . 'copilot-accept-completion)
+;;               ("TAB" . 'copilot-accept-completion)
+;;               ("C-TAB" . 'copilot-accept-completion-by-word)
+;;               ("C-<tab>" . 'copilot-accept-completion-by-word)))
+
+;; (add-hook 'prog-mode-hook 'copilot-mode)
+
+;; 1. Define the function to get the key from ~/.authinfo.gpg
+(defun my-get-mistral-api-key ()
+  "Securely fetch the Mistral API key from ~/.authinfo.gpg."
+  (let* ((auth-info (car (auth-source-search :machine "api.mistral.ai")))
+         (secret (plist-get auth-info :secret)))
+    (if (functionp secret)
+        (funcall secret)
+      secret)))
+
+;; 2. Configure Minuet using Doom's use-package! macro
+(use-package! minuet
+  :defer t
+  :hook (prog-mode . minuet-auto-suggestion-mode)
+  :config
+  ;; THIS IS THE MISSING LINE: Tell Minuet to use Codestral
+  (setq minuet-provider 'codestral)
+
+  ;; Safely inject your function as the API key into Codestral's options
+  (plist-put minuet-codestral-options :api-key "xseX6oFKZQwiLQmb13Ax5cJ2kuCR3H5U")
+
+  ;; Apply the recommended limits to prevent burning through tokens/timeouts
+  (minuet-set-optional-options minuet-codestral-options :max_tokens 256)
+  (minuet-set-optional-options minuet-codestral-options :stop ["\n\n"])
+
+  ;; Keybindings for Evil mode (M- keys work perfectly in Insert mode)
+  (map! :map prog-mode-map
+        "M-y" #'minuet-complete-with-minibuffer
+        "M-i" #'minuet-show-suggestion
+        "C-c m" #'minuet-configure-provider)
+
+  (map! :map minuet-active-mode-map
+        "M-p" #'minuet-previous-suggestion
+        "M-n" #'minuet-next-suggestion
+        "M-A" #'minuet-accept-suggestion
+        "M-a" #'minuet-accept-suggestion-line
+        "M-e" #'minuet-dismiss-suggestion)
+  )
+
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
 (setopt bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))
 (setopt bibtex-completion-library-path '("~/zotero-lib/referenciator.bib"))
@@ -518,10 +566,10 @@ Operates directly on the Org AST."
 
   (setopt citar-library-paths '("~/zotero-lib/"))  
 
-  (defun my-citar-open-in-zotero     ()
-    "Open current entry in Zotero instead of opening     files."
-    (i    nteractive)
-    (let ((citekey (cita      lect-ref)))
+  (defun my-citar-open-in-zotero ()
+    "Open current entry in Zotero instead of opening files."
+    (interactive)
+    (let ((citekey (citar-select-ref)))
       (citar-open-entry-in-zotero citekey))))
 
 (defun markdown-to-org-links ()
@@ -995,7 +1043,7 @@ Handles:
   - \"$VAR\"suffix  (variable immediately followed by a literal suffix)
   - /absolute, ./relative, ~/home-relative paths
   - Paths whose components contain spaces (e.g. ./Music/Flying Zodd/)
-  - TRAMP-AWARE remote buffers
+  - TRAMP remote buffers
   - :dir header-arg for relative path resolution
 
 Filters . and .. from all candidate lists."
