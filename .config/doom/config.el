@@ -516,31 +516,23 @@ Operates directly on the Org AST."
 
 ;; (add-hook 'prog-mode-hook 'copilot-mode)
 
-;; 1. Define the function to get the key from ~/.authinfo.gpg
-(defun my-get-mistral-api-key ()
-  "Securely fetch the Mistral API key from ~/.authinfo.gpg."
-  (let* ((auth-info (car (auth-source-search :machine "api.mistral.ai")))
-         (secret (plist-get auth-info :secret)))
-    (if (functionp secret)
-        (funcall secret)
-      secret)))
-
-;; 2. Configure Minuet using Doom's use-package! macro
 (use-package! minuet
   :defer t
   :hook (prog-mode . minuet-auto-suggestion-mode)
   :config
-  ;; THIS IS THE MISSING LINE: Tell Minuet to use Codestral
+  ;; Tell Minuet to use Codestral
   (setq minuet-provider 'codestral)
 
-  ;; Safely inject your function as the API key into Codestral's options
-  (plist-put minuet-codestral-options :api-key "xseX6oFKZQwiLQmb13Ax5cJ2kuCR3H5U")
+  ;; Use gptel's built-in function to extract the key.
+  ;; We use a lambda so it is evaluated only when Minuet needs it.
+  (plist-put minuet-codestral-options :api-key
+             (lambda () (gptel-api-key-from-auth-source "api.codestral.ai")))
 
-  ;; Apply the recommended limits to prevent burning through tokens/timeouts
+  ;; Recommended limits to prevent burning through tokens or timing out
   (minuet-set-optional-options minuet-codestral-options :max_tokens 256)
   (minuet-set-optional-options minuet-codestral-options :stop ["\n\n"])
 
-  ;; Keybindings for Evil mode (M- keys work perfectly in Insert mode)
+  ;; Keybindings for Evil mode
   (map! :map prog-mode-map
         "M-y" #'minuet-complete-with-minibuffer
         "M-i" #'minuet-show-suggestion
@@ -551,8 +543,7 @@ Operates directly on the Org AST."
         "M-n" #'minuet-next-suggestion
         "M-A" #'minuet-accept-suggestion
         "M-a" #'minuet-accept-suggestion-line
-        "M-e" #'minuet-dismiss-suggestion)
-  )
+        "M-e" #'minuet-dismiss-suggestion))
 
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
 (setopt bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))
