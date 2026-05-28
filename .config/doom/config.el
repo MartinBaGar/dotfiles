@@ -499,15 +499,44 @@ Operates directly on the Org AST."
   (gptel-commit-stream t))
 
 ;; accept completion from copilot and fallback to company
-(use-package copilot
-  :hook (prog-mode . copilot-mode)
-  :bind (:map copilot-completion-map
-              ("<tab>" . 'copilot-accept-completion)
-              ("TAB" . 'copilot-accept-completion)
-              ("C-TAB" . 'copilot-accept-completion-by-word)
-              ("C-<tab>" . 'copilot-accept-completion-by-word)))
+;; (use-package copilot
+;;   :hook (prog-mode . copilot-mode)
+;;   :bind (:map copilot-completion-map
+;;               ("<tab>" . 'copilot-accept-completion)
+;;               ("TAB" . 'copilot-accept-completion)
+;;               ("C-TAB" . 'copilot-accept-completion-by-word)
+;;               ("C-<tab>" . 'copilot-accept-completion-by-word)))
 
-(add-hook 'prog-mode-hook 'copilot-mode)
+;; (add-hook 'prog-mode-hook 'copilot-mode)
+
+(use-package! minuet
+  :defer t
+  :hook (prog-mode . minuet-auto-suggestion-mode)
+  :config
+  ;; Tell Minuet to use Codestral
+  (setq minuet-provider 'codestral)
+
+  ;; Use gptel's built-in function to extract the key.
+  ;; We use a lambda so it is evaluated only when Minuet needs it.
+  (plist-put minuet-codestral-options :api-key
+             (lambda () (gptel-api-key-from-auth-source "api.codestral.ai")))
+
+  ;; Recommended limits to prevent burning through tokens or timing out
+  (minuet-set-optional-options minuet-codestral-options :max_tokens 256)
+  (minuet-set-optional-options minuet-codestral-options :stop ["\n\n"])
+
+  ;; Keybindings for Evil mode
+  (map! :map prog-mode-map
+        "M-y" #'minuet-complete-with-minibuffer
+        "M-i" #'minuet-show-suggestion
+        "C-c m" #'minuet-configure-provider)
+
+  (map! :map minuet-active-mode-map
+        "M-p" #'minuet-previous-suggestion
+        "M-n" #'minuet-next-suggestion
+        "M-A" #'minuet-accept-suggestion
+        "M-a" #'minuet-accept-suggestion-line
+        "M-e" #'minuet-dismiss-suggestion))
 
 (setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
 (setopt bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))
