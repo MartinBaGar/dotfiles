@@ -11,6 +11,10 @@ block_postfix = "*>"
 input_path = '~/.config/matugen/templates/waybar.css'
 output_path = '~/.config/waybar/style.css'
 
+[templates.fuzzel]
+input_path = '~/.config/matugen/templates/fuzzel.ini'
+output_path = '~/.config/fuzzel/fuzzel.ini'
+
 [templates.qtct]
 input_path = '~/.config/matugen/templates/qtct-colors.conf'
 output_path = '~/.config/qt5ct/colors/qtct-colors.conf'

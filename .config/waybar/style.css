@@ -8,8 +8,8 @@
 #window,
 #workspaces button,
 window#waybar {
-  background: alpha(#1a1111, 0.0);
-  color: #f0dede;
+  background: alpha(#111318, 0.0);
+  color: #e2e2e9;
 }
 
 /* ---------- Common Button Styling ---------- */
@@ -27,13 +27,13 @@ window#waybar {
   border: 1px solid;
   border-radius: 4px;
   font-weight: 600;
-  background: alpha(#1a1111, 0.9);
+  background: alpha(#111318, 0.9);
 }
 
 /* ---------- Workspaces ---------- */
 #workspaces button.active {
-  background-color: #f0dede;
-  color: #1a1111;
+  background-color: #e2e2e9;
+  color: #111318;
   border: 0;
 }
 
@@ -52,7 +52,7 @@ window#waybar {
   letter-spacing: 1px;
   font-size: 25px;
     padding: 0px 12px;
-  background: alpha(#1a1111, 0.9);
+  background: alpha(#111318, 0.9);
 }
 
 /* ---------- Media Player ---------- */

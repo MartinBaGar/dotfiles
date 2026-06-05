@@ -490,6 +490,7 @@ binds {
     Mod+Alt+O { spawn-sh "~/scripts/bash/fuzzel-file-actions.sh"; }
     Mod+Alt+V { spawn-sh "~/scripts/bash/fuzzel-clipboard.sh"; }
     Mod+Alt+P { spawn-sh "~/scripts/bash/fuzzel-powermenu.sh"; }
+    Mod+Alt+S { spawn-sh "~/scripts/bash/fuzzel-kanshi-profiles.sh"; }
     Mod+Alt+W { spawn-sh "~/scripts/bash/reload_waybar.sh"; }
     Mod+Alt+K { spawn "niri" "msg" "action" "switch-layout" "next"; }
     Mod+Alt+T { spawn-sh "~/scripts/bash/niri_switch_theme.sh"; }
@@ -678,4 +679,16 @@ binds {
 
     XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "s" "+10%"; }
     XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "s" "10%-"; }
+}
+
+layer-rule {
+    // match namespace="^launcher$"
+    // match namespace="^fuzzel$"
+
+    background-effect {
+        blur true
+    }
+    geometry-corner-radius 20
+
+
 }
