@@ -870,34 +870,86 @@ Works on selected region if active, otherwise on whole buffer."
         (delete-file pdf-file))
         ))))
 
-(defun my/new-exp-from-current-file ()
-  "Create a new eLabFTW experiment from the current Org buffer."
+(defun my/sync-current-exp ()
+  "Create a new eLabFTW experiment from the current Org buffer or update existing."
   (interactive)
-  (let ((title (org-get-title (current-buffer))))
-    
-    ;; 1. Fast check: Abort immediately if it exists (no files created)
-    (when (elabftw--get-id-by-title title)
-      (user-error "Experiment '%s' already exists" title))
-    
-    ;; 2. Heavy work: Only runs if the check passed
-    (let* ((body (org-export-as 'html nil nil t))
-           (temp-file (make-temp-file "elabftw-new-" nil ".json"))
-           (json-data (json-encode `((title . ,title) (body . ,body)))))
-      
-      (with-temp-file temp-file
-        (insert json-data))
-      
-      (message "Creating new experiment '%s'..." title)
-      (shell-command (format "elapi post experiments -d %s" (shell-quote-argument temp-file)))
-      
-      (delete-file temp-file)
-      (message "New experiment created successfully!"))))
+  (let ((title (org-get-title (current-buffer)))
+        (id (elabftw--get-id-by-title (org-get-title (current-buffer)))))
+    (if id
+        (progn
+          (my/update-elabftw-exp-pdf)
+          (my/update-elabftw-exp-body)
+          (my/sync-attachments)) ;; <-- Added here
+      (let* ((body (org-export-as 'html nil nil t))
+             (temp-file (make-temp-file "elabftw-new-" nil ".json"))
+             (json-data (json-encode `((title . ,title) (body . ,body)))))
+        (with-temp-file temp-file
+          (insert json-data))
+        (message "Creating new experiment '%s'..." title)
+        (shell-command (format "elapi post experiments -d %s" (shell-quote-argument temp-file)))
+        (delete-file temp-file)
+        (message "New experiment created successfully!")
+        (my/sync-attachments))))) ;; <-- And here
+
+(defun elabftw--get-attach-files ()
+  "Return a list of file paths from Org links strictly under headings tagged :ELABFTW_SYNC:."
+  (let (files
+        ;; Disable tag inheritance locally to prevent duplicate parsing
+        ;; if child headings accidentally inherit the tag.
+        (org-use-tag-inheritance nil))
+
+    (org-map-entries
+     (lambda ()
+       (save-restriction
+         (org-narrow-to-subtree)
+         (org-element-map (org-element-parse-buffer) 'link
+           (lambda (link)
+             (when (string= (org-element-property :type link) "file")
+               ;; Expand to absolute paths to handle relative links smoothly
+               (push (expand-file-name (org-element-property :path link)) files))))))
+     "ELABFTW_SYNC")
+
+    ;; Remove any duplicate links to ensure we don't upload the same file twice
+    (delete-dups (nreverse files))))
+
+(defun my/sync-attachments ()
+  "Sync all declared attachments to the matching eLabFTW experiment."
+  (interactive)
+  (let* ((title (org-get-title (current-buffer)))
+         (exp-id (elabftw--get-id-by-title title))
+         (files (elabftw--get-attach-files)))
+    (if (not exp-id)
+        (message "Error: No experiment found with title '%s'" title)
+      (if (null files)
+          (message "No files found under a :ELABFTW_SYNC: tagged heading.")
+        (dolist (file files)
+          (if (not (file-exists-p file))
+              (message "Warning: Skipping missing file: %s" file)
+            (let* ((fname (file-name-nondirectory file))
+                   (upload-id (elabftw--get-upload-id exp-id fname)))
+
+              ;; Delete the old version on eLabFTW if it exists
+              (when upload-id
+                (message "Deleting old version of %s..." fname)
+                (shell-command
+                 (format "elapi delete experiments -i %s --sub uploads --sub-id %s"
+                         exp-id upload-id)))
+
+              ;; Upload the new version
+              (message "Uploading %s..." fname)
+              (shell-command
+               (format "elapi experiments upload-attachment --id %s --path %s --comment %s"
+                       exp-id
+                       (shell-quote-argument file)
+                       (shell-quote-argument "Synced via Emacs")))
+              (message "Successfully uploaded %s!" fname))))))))
 
 (map! :leader
       (:prefix ("e" . "elab")
        :desc "Sync pdf"           "p" #'my/update-elabftw-exp-pdf
        :desc "Sync body"          "b" #'my/update-elabftw-exp-body
-       :desc "New exp from buffer" "n" #'my/new-exp-from-current-file
+       :desc "Sync attachments"   "a" #'my/sync-attachments
+       :desc "New exp from buffer" "s" #'my/sync-current-exp
        :desc "Open ElabFTW in browser" "o" #'my/open-elab-in-browser))
 
 (load! "treesit-predicate-rewrite")
