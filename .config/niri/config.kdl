@@ -682,8 +682,8 @@ binds {
      spawn "playerctl" "play-pause";
     }
 
-    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "s" "+10%"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "s" "10%-"; }
+    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "s" "+5%"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "s" "5%-"; }
 }
 
 layer-rule {
