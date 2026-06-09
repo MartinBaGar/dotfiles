@@ -485,12 +485,12 @@ binds {
     Mod+Space hotkey-overlay-title="Application Launcher" {
         spawn "fuzzel";
     }
-    // Mod+Alt+Space { spawn "bash" "~/scripts/bash/niri-window-switcher.sh"; }
     Mod+Alt+Space { spawn-sh "~/scripts/bash/niri-window-switcher.sh"; }
     Mod+Alt+O { spawn-sh "~/scripts/bash/fuzzel-file-actions.sh"; }
     Mod+Alt+V { spawn-sh "~/scripts/bash/fuzzel-clipboard.sh"; }
     Mod+Alt+P { spawn-sh "~/scripts/bash/fuzzel-powermenu.sh"; }
     Mod+Alt+S { spawn-sh "~/scripts/bash/fuzzel-kanshi-profiles.sh"; }
+    Mod+Shift+S { spawn-sh "~/scripts/bash/fuzzel-screenshot.sh"; }
     Mod+Alt+W { spawn-sh "~/scripts/bash/reload_waybar.sh"; }
     Mod+Alt+K { spawn "niri" "msg" "action" "switch-layout" "next"; }
     Mod+Alt+T { spawn-sh "~/scripts/bash/niri_switch_theme.sh"; }
@@ -649,18 +649,6 @@ binds {
     Mod+Equal { set-column-width "+10%"; }
     Mod+Shift+Minus { set-window-height "-10%"; }
     Mod+Shift+Equal { set-window-height "+10%"; }
-
-    // === Screenshots ===
-
-    // We use \" inside the command to escape the quotes for slurp
-    Mod+Shift+S { spawn "bash" "-c" "grim -g \"$(slurp -d)\" - | satty -f -"; }
-
-    // 2. Full Screen -> Edit in Swappy (Replaces Ctrl+Print)
-    // Ctrl+Mod+Shift+S { screenshot-screen; }
-    // Ctrl+Mod+Shift+S { spawn "bash" "-c" "niri msg action screenshot-window -d false && wl-paste | satty -f -"; }
-    // Ctrl+Mod+Shift+S { spawn "zsh" "-c" "/home/mabagar/.local/bin/my_screenshot"; }
-    Ctrl+Mod+Shift+S { spawn "/home/mabagar/.local/bin/my_screenshot_screen"; }
-    Alt+Mod+Shift+S { spawn "/home/mabagar/.local/bin/my_screenshot_window"; }
 
     // === System Controls ===
     Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
