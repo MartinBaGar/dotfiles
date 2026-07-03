@@ -1,8 +1,8 @@
-output "Lenovo Group Limited P27QD-40 VNAC7V6Z" {
+output HDMI-A-1 {
     alias $monitor
 }
 
-output "LG Display 0x06E2 Unknown" {
+output eDP-1 {
     alias $laptop
 }
 
@@ -15,8 +15,8 @@ output "LG Display 0x06E2 Unknown" {
 # position = 1477
 
 profile docked {
-    output $monitor enable scale 1.1 position 1281,0 
-    output $laptop enable scale 1.5 position 0,0
+    output $monitor enable scale 1.3
+    output $laptop enable scale 1.5
 }
 
 profile undocked {

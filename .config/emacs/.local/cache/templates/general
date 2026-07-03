@@ -12,7 +12,53 @@ fundamental-mode text-mode
 (CG "Coarse-Grain")
 (AA "All-Atom")
 (MD "Molecular Dynamics")
+(ara "/Arabidopsis thaliana/")
 
+org-mode
+
+(org-smart-var
+ (p "Variable Name (e.g. sys): " name noinsert)
+ (p "Value (e.g. \"RoRC\"): " val noinsert)
+ 
+ ;; 1. Insert the property using the prefixed variable
+ (eval (progn 
+         (org-set-property "header-args:sh+" 
+                           (format ":var %s=(eval %s-%s)" 
+                                   (upcase name) 
+                                   (file-name-base (buffer-file-name)) 
+                                   name))
+         "")) 
+ 
+ ;; 2. Send the variable to the Local Variables block
+ (local-var name val))
+
+(hprop
+ (p "Property Name (e.g., SYS): " name noinsert)
+ (eval (progn 
+         (org-set-property "header-args:sh+" 
+                           (format ":var %s=(org-entry-get nil \"%s\" t)" 
+                                   (upcase name) 
+                                   (upcase name))
+                           ))))
+
+(pprop
+ (p "Property Name (e.g., SYS): " name noinsert)
+ (p "Value (e.g., RoRC): " val noinsert)
+ 
+ (eval (progn 
+         (org-set-property (upcase name) val)
+         "")) 
+ (eval (progn
+         (save-excursion
+           (ignore-errors (org-back-to-heading t))
+           (let ((range (org-get-property-block)))
+             (when range
+               (goto-char (cdr range))
+               (insert (format ":header-args:sh+: :var %s=(org-entry-get nil \"%s\" t)\n" 
+                               (upcase name) (upcase name))))))
+         ""))) ;; Return empty string to Tempel
+
+(mprop "{{{property(" p ")}}}"q)
 
 ;; Local Variables:
 ;; mode: lisp-data
