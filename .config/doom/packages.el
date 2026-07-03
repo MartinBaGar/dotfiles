@@ -58,16 +58,16 @@
 (package! org-transclusion)
 (package! savefold :recipe (:host github :repo "jcfk/savefold.el"))
 (package! ox-typst)
+(package! ox-ipynb :recipe (:host github :repo "jkitchin/ox-ipynb"))
 (package! ox-hugo)
 (package! gnuplot :pin "7138b139d2dca9683f1a81325c643b2744aa1ea3")
 
 ;; AI
-(package! copilot
-  :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el")))
 (package! whisper :recipe (:host github :repo "natrys/whisper.el"))
 (package! gptel-prompts :recipe (:host github :repo "jwiegley/gptel-prompts"))
 (package! gptel-commit :recipe (:host github :repo "lakkiy/gptel-commit"))
 (package! gptel-agent)
+(package! minuet)
 
 ;; Editor
 (package! jinx)
@@ -85,11 +85,11 @@
 (package! gnuplot-mode :pin "601f6392986f0cba332c87678d31ae0d0a496ce7")
 
 ;; Hard dependencies for jupyter
-(package! zmq)
-(package! websocket)
-(package! simple-httpd)
-;; The jupyter package itself
-(package! emacs-jupyter :recipe (:host github :repo "emacs-jupyter/jupyter"))
+;; (package! zmq)
+;; (package! websocket)
+;; (package! simple-httpd)
+;; ;; The jupyter package itself
+;; (package! emacs-jupyter :recipe (:host github :repo "emacs-jupyter/jupyter"))
 
 ;; My packages
 (package! org-img :recipe (:host github :repo "MartinBaGar/org-img"))
