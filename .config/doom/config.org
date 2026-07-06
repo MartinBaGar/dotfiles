@@ -18,6 +18,10 @@
 (with-eval-after-load 'evil-escape
   (setq evil-escape-key-sequence "fd"))
 #+end_src
+* Pass
+#+begin_src emacs-lisp
+(setopt epg-pinentry-mode 'loopback)
+#+end_src
 * Editor
 ** Completion
 #+begin_src emacs-lisp
@@ -690,6 +694,10 @@ Works on selected region if active, otherwise on whole buffer."
 (map! :leader
       (:prefix "g l"
       :desc "update" "u" #'my/update-magit-repos))
+
+;; (use-package! magit-todos
+;;   :after magit
+;;   :config (magit-todos-mode 1))
 #+end_src
 * Language
 ** Translation

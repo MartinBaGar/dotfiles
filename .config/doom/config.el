@@ -13,6 +13,8 @@
 (with-eval-after-load 'evil-escape
   (setq evil-escape-key-sequence "fd"))
 
+(setopt epg-pinentry-mode 'loopback)
+
 (with-eval-after-load 'emacs
   ;; Enable indentation+completion using the TAB key
   (setq tab-always-indent 'complete)
@@ -642,6 +644,10 @@ Works on selected region if active, otherwise on whole buffer."
 (map! :leader
       (:prefix "g l"
       :desc "update" "u" #'my/update-magit-repos))
+
+;; (use-package! magit-todos
+;;   :after magit
+;;   :config (magit-todos-mode 1))
 
 (use-package gt
   :config

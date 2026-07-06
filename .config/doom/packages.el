@@ -74,7 +74,7 @@
 (package! tempel-collection :recipe (:host github :repo "Crandel/tempel-collection"))
 (package! eglot-tempel :recipe (:host github :repo "fejfighter/eglot-tempel"))
 (package! gt)
-(package! magit-todos)
+;; (package! magit-todos)
 
 ;; Modes
 (package! typst-ts-mode :recipe (:host nil :repo "https://git.sr.ht/~meow_king/typst-ts-mode"))
