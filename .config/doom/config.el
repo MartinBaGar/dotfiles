@@ -790,6 +790,11 @@ Works on selected region if active, otherwise on whole buffer."
           (insert (format "[[%s]]" choice)))
       (message "No #+name: targets found in this buffer."))))
 
+(map! :after org
+      :map org-mode-map
+      :localleader
+      :desc "Insert Typst/Name reference" "l f" #'my/org-insert-typst-ref)
+
 (defun elabftw--get-id-by-title (title)
   "Get the eLabFTW experiment ID matching TITLE."
   ;; We use `jq --arg t` to safely pass the title without breaking bash quotes
