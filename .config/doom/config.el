@@ -173,14 +173,21 @@
   :after org)
 
 (use-package! ox-ipynb
-  :after ox)
+  :after ox
+  :config
+  (add-to-list 'ox-ipynb-kernelspecs
+  '(python . (kernelspec . ((display_name . "Python 3")
+                            (language . "python")
+                            (name . "python3")))))
 
-(after! org
-  ;; Tell Org to use python-mode for syntax highlighting and the C-c ' edit buffer
-  (add-to-list 'org-src-lang-modes '("jupyter-python" . python))
-
-  ;; Tell Org-babel to execute jupyter-python blocks using the standard Python engine
-  (defalias 'org-babel-execute:jupyter-python 'org-babel-execute:python))
+  (add-to-list 'ox-ipynb-language-infos
+    '(python . (language_info . ((codemirror_mode . ((name . ipython) (version . 3)))
+                                 (file_extension . ".py")
+                                 (mimetype . "text/x-python")
+                                 (name . "python")
+                                 (pygments_lexer . "ipython3")
+                                 (version . "3.11.0")))))
+)
 
 ;; Load ox-hugo after the ox exporter framework is loaded
 (use-package! ox-hugo
@@ -652,7 +659,7 @@ Works on selected region if active, otherwise on whole buffer."
          :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
          :engines (list
                    (gt-bing-engine :if 'word)
-                   (gt-deepl-engine :if 'not-word))
+                   (gt-google-engine :if 'not-word))
          :render (gt-insert-render :type 'replace)))
   
   (setq gt-preset-translators
@@ -660,13 +667,13 @@ Works on selected region if active, otherwise on whole buffer."
          :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
          :engines (list
                    (gt-bing-engine :if 'word)
-                   (gt-deepl-engine :if 'not-word))
+                   (gt-google-engine :if 'not-word))
          :render (gt-insert-render :type 'replace)))
         (translator . ,(gt-translator
                   :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
                   :engines (list
                           (gt-google-engine :if 'word)
-                          (gt-deepl-engine :if 'not-word))
+                          (gt-google-engine :if 'not-word))
                   :render (list
                             (gt-overlay-render :type 'replace :if 'not-word)
                             (gt-buffer-render :if 'word)
@@ -767,6 +774,21 @@ Works on selected region if active, otherwise on whole buffer."
   (typst-ts-mode-enable-raw-blocks-highlight t)
   :config
   (keymap-set typst-ts-mode-map "C-c C-c" #'typst-ts-tmenu))
+
+(defun my/org-insert-typst-ref ()
+  "Fuzzy find and insert a link to a #+name: target in the current buffer."
+  (interactive)
+  (let ((names '()))
+    (save-excursion
+      (goto-char (point-min))
+      ;; Use regex to find all lines starting with #+name: or #+NAME:
+      (while (re-search-forward "^[ \t]*#\\+\\(name\\|NAME\\):[ \t]+\\(.*\\)$" nil t)
+        (push (match-string 2) names)))
+    (if names
+        ;; Prompt the user with built-in completion UI
+        (let ((choice (completing-read "Insert reference: " (reverse names))))
+          (insert (format "[[%s]]" choice)))
+      (message "No #+name: targets found in this buffer."))))
 
 (defun elabftw--get-id-by-title (title)
   "Get the eLabFTW experiment ID matching TITLE."
