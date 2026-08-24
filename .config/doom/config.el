@@ -790,6 +790,12 @@ Works on selected region if active, otherwise on whole buffer."
           (insert (format "[[%s]]" choice)))
       (message "No #+name: targets found in this buffer."))))
 
+(with-eval-after-load 'ox-typst
+  (setq org-typst-inline-image-rules
+        '(("file" . "\\.\\(?:gif\\|jp\\(?:e?g\\)\\|png\\|svg\\|webp\\|pdf\\)\\'")
+          ("https" . "\\.\\(?:gif\\|jp\\(?:e?g\\)\\|png\\|svg\\|webp\\|pdf\\)\\'"))
+        ))
+
 (map! :after org
       :map org-mode-map
       :localleader
