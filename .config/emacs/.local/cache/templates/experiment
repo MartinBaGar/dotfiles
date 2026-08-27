@@ -13,4 +13,6 @@ org-mode
      "#+INCLUDE: \"~/org/org_rules/html/styles.css\" export html" n
      "#+BEGIN_EXPORT html" n
      "</style>" n
-     "#+END_EXPORT" n)
+     "#+END_EXPORT" n
+     "* Data & Attachments :ELABFTW_SYNC:" n
+     )
