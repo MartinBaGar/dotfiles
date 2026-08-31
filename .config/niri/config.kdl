@@ -503,8 +503,8 @@ binds {
 
     // === Security ===
      Mod+Alt+L hotkey-overlay-title="Lock Screen" {
-        // spawn "swaylock" "-l" "--color" "000000";
-        spawn-sh "dunstctl set-paused true && swaylock -l --color 000000 && dunstctl set-paused false";
+        spawn "swaylock" "-l" "--color" "000000";
+        // spawn-sh "dunstctl set-paused true && swaylock -l --color 000000 && dunstctl set-paused false";
     }
     Ctrl+Alt+Delete hotkey-overlay-title="Task Manager" {
         spawn "kitty" "-o" "window_padding_width=0" "--class" "btop-float" "btop" "--preset" "1" ; }
