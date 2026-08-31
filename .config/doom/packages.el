@@ -54,7 +54,6 @@
                                         ;            :files ("*.el" "filters" "preprocessors")))
 
 ;; Org mode
-(package! org-modern)
 (package! org-transclusion)
 (package! savefold :recipe (:host github :repo "jcfk/savefold.el"))
 (package! ox-typst)

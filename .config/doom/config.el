@@ -246,8 +246,14 @@
 (setq +zen-text-scale 0.5)
 
 (with-eval-after-load 'org
-  (add-hook! 'org-mode-hook #'org-modern-mode)
-  (add-hook! 'org-mode-hook #'+org-pretty-mode)
+  (defun +org-drawer-strip-emphasis (limit)
+    "Undo Org's emphasis concealment inside property drawers."
+    (when (re-search-forward org-property-drawer-re limit t)
+      (remove-text-properties (match-beginning 0) (match-end 0)
+                               '(invisible nil display nil))
+      t))
+  (font-lock-add-keywords 'org-mode '((+org-drawer-strip-emphasis)) 'append)
+
   (add-hook! 'org-mode-hook #'+zen/toggle)
 
   ;; TODOs
@@ -269,11 +275,11 @@
   (setq org-attach-id-dir "~/org/.attach")
   (setq org-agenda-files (list "~/org"))
   (setq org-timestamp-formats '("%Y-%m-%d %a" . "%Y-%m-%d %a %H:%M"))
-  
+
   (org-link-set-parameters "zotero"
-                           :follow (lambda (path) 
+                           :follow (lambda (path)
                                      (browse-url (concat "zotero:" path))))
-  
+
   (add-to-list 'org-capture-templates
                '("a" "Appointment" entry (file+headline "~/org/agenda.org" "Inbox")
                  "* %?\n  SCHEDULED: %^T\n  %a" :prepend t))
@@ -1290,3 +1296,39 @@ FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
 ;;         "f" #'cape-babel-or-file)
 ;;   (map! :map evil-insert-state-map
 ;;         "C-x C-f" #'cape-babel-or-file))
+
+(defun my/org-get-src-vars ()
+  "Gather and return all source block variables defined in property drawers."
+  (interactive)
+  (let ((my-dict (make-hash-table :test 'equal))
+        (tree (org-element-parse-buffer))
+        (result-lines nil))
+
+    ;; --- THE GATHER PHASE ---
+    (org-element-map tree 'node-property
+      (lambda (node)
+        (let ((key (org-element-property :key node))
+              (val (org-element-property :value node)))
+          (when (string-prefix-p "header-args" key)
+            (let ((language (replace-regexp-in-string "header-args:?\\|\\+" "" key)))
+              (push val (gethash language my-dict)))))))
+
+    ;; --- THE FORMAT PHASE ---
+    (maphash
+     (lambda (lang vars-list)
+       (if (string= "" lang)
+        (push "*** **General**" result-lines)
+        (push (format "*** **%s**" (capitalize lang)) result-lines)
+           )
+
+       ;; Loop through the variables (using reverse so they appear in top-to-bottom document order)
+       (dolist (var (reverse vars-list))
+         ;; Strip the literal ":var " from the front so it looks cleaner
+         (let ((clean-var (replace-regexp-in-string "\\`:var\\s-*" "" var)))
+           ;; Add the variable as a sub-bullet, wrapped in ~code~ markers
+           (push (format "  - ~%s~" clean-var) result-lines))))
+     my-dict)
+
+    ;; --- THE EXPORT PHASE ---
+    ;; Reverse the lines (since push adds to the front) and glue them together with line breaks
+    (string-join (reverse result-lines) "\n")))

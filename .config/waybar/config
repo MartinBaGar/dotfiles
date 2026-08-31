@@ -14,7 +14,7 @@
     "bluetooth",
     "mpris",
     "pulseaudio",
-    "custom/dunst",
+    "custom/notification",
   ],
   // Widgets config
   "niri/workspaces": {
@@ -35,12 +35,26 @@
             "format-full": "  100%",
             "format-icons": ["  ", "  ", "  ", "  ", "  "] 
 	},
-    "custom/dunst": {
-        "exec": "~/scripts/bash/dunst.sh",
+    "custom/notification": {
+        "tooltip": true,
+        "format": "<span size='16pt'>{icon}</span>",
+        "format-icons": {
+        "notification": "󱅫",
+        "none": "󰂜",
+        "dnd-notification": "󰂠",
+        "dnd-none": "󰪓",
+        "inhibited-notification": "󰂛",
+        "inhibited-none": "󰪑",
+        "dnd-inhibited-notification": "󰂛",
+        "dnd-inhibited-none": "󰪑"
+        },
         "return-type": "json",
-        "on-click": "dunstctl history-pop",
-        "on-click-right": "dunstctl set-paused toggle"
-    },
+        "exec-if": "which swaync-client",
+        "exec": "swaync-client -swb",
+        "on-click": "swaync-client -t -sw",
+        "on-click-right": "swaync-client -d -sw",
+        "escape": true
+  },
     "mpris": {
         "format": "{player_icon} {artist} - {title}",
         "format-paused": "{status_icon} <i>{dynamic}</i>",

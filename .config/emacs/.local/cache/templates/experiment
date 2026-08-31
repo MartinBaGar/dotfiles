@@ -5,7 +5,10 @@ org-mode
      "#+OPTIONS: title:nil " n
      "#+OPTIONS: html-postamble:nil " n
      "* Final Protocol :pdf_only:ignore:" n
-     "#+INCLUDE: \"~/org/org_rules/typst/exp-setup.typ\" export typst" n n
+     "#+INCLUDE: \"~/org/org_rules/typst/exp-setup.typ\" export typst" n
+     "#+begin_src emacs-lisp :results raw :exports results" n
+     "(my/org-get-src-vars)" n
+     "#+end_src" n
      "* Logs :html_only:ignore:" n
      "#+BEGIN_EXPORT html" n
      "<style>" n
