@@ -704,7 +704,7 @@ Works on selected region if active, otherwise on whole buffer."
          :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
          :engines (list
                    (gt-bing-engine :if 'word)
-                   (gt-deepl-engine :if 'not-word))
+                   (gt-google-engine :if 'not-word))
          :render (gt-insert-render :type 'replace)))
   
   (setq gt-preset-translators
@@ -712,13 +712,13 @@ Works on selected region if active, otherwise on whole buffer."
          :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
          :engines (list
                    (gt-bing-engine :if 'word)
-                   (gt-deepl-engine :if 'not-word))
+                   (gt-google-engine :if 'not-word))
          :render (gt-insert-render :type 'replace)))
         (translator . ,(gt-translator
                   :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
                   :engines (list
                           (gt-google-engine :if 'word)
-                          (gt-deepl-engine :if 'not-word))
+                          (gt-google-engine :if 'not-word))
                   :render (list
                             (gt-overlay-render :type 'replace :if 'not-word)
                             (gt-buffer-render :if 'word)
@@ -1330,4 +1330,27 @@ FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
 ;;         "f" #'cape-babel-or-file)
 ;;   (map! :map evil-insert-state-map
 ;;         "C-x C-f" #'cape-babel-or-file))
+#+end_src
+* Reproducibility
+#+begin_src emacs-lisp
+;; --- Custom Org Babel Language: fastplot ---
+(with-eval-after-load 'ob-python
+  ;; 1. Map execution and session initiation to Python
+  (defalias 'org-babel-execute:fastplot 'org-babel-execute:python)
+  (defalias 'org-babel-prep-session:fastplot 'org-babel-prep-session:python)
+
+  ;; 2. Map syntax highlighting and Tree-sitter
+  (add-to-list 'org-src-lang-modes '("fastplot" . python))
+
+  ;; 3. The dedicated edit-buffer preparation
+  (defun org-babel-edit-prep:fastplot (info)
+    (let* ((params (nth 2 info))
+           (session (cdr (assq :session params)))
+           (python-cmd (cdr (assq :python params))))
+      ;; Connect ElDoc to the live session
+      (when (and session (not (string= session "none")))
+        (setq-local python-shell-buffer-name session))
+      ;; Force local REPL to use the project's Python interpreter
+      (when python-cmd
+        (setq-local python-shell-interpreter python-cmd)))))
 #+end_src
