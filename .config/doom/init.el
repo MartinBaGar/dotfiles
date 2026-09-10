@@ -151,12 +151,12 @@
        (latex +cdlatex +latexmk +lsp) ; writing papers in Emacs has never been so fun
        ;;lean              ; for folks with too much to prove
        ;;ledger            ; be audit you can be
-       (lua +lsp +tree-sitter)               ; one-based indices? one-based indices
+       ;; (lua +lsp +tree-sitter)               ; one-based indices? one-based indices
        (markdown +tree-sitter)          ; writing docs for people to ignore
        ;;nim               ; python + lisp at the speed of c
        ;;nix               ; I hereby declare "nix geht mehr!"
        ;;ocaml             ; an objective camel
-       (org +pretty +dragndrop +roam +tree-sitter +pandoc +gnuplot +present)               ; organize your plain life in plain text
+       (org +pretty +dragndrop +roam +tree-sitter +pandoc +present)               ; organize your plain life in plain text
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
        ;;graphviz          ; diagrams for confusing yourself even more
@@ -181,7 +181,7 @@
        ;;zig               ; C, but simpler
 
        :email
-       (mu4e +org +gmail +mbsync)
+       ;; (mu4e +org +gmail +mbsync)
        ;;notmuch
        ;;(wanderlust +gmail)
 

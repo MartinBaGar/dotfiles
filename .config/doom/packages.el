@@ -54,12 +54,9 @@
                                         ;            :files ("*.el" "filters" "preprocessors")))
 
 ;; Org mode
-(package! org-modern)
 (package! org-transclusion)
-(package! savefold :recipe (:host github :repo "jcfk/savefold.el"))
 (package! ox-typst)
 (package! ox-hugo)
-(package! gnuplot :pin "7138b139d2dca9683f1a81325c643b2744aa1ea3")
 
 ;; AI
 (package! whisper :recipe (:host github :repo "natrys/whisper.el"))
@@ -74,21 +71,13 @@
 (package! tempel-collection :recipe (:host github :repo "Crandel/tempel-collection"))
 (package! eglot-tempel :recipe (:host github :repo "fejfighter/eglot-tempel"))
 (package! gt)
-;; (package! magit-todos)
 
 ;; Modes
 (package! typst-ts-mode :recipe (:host nil :repo "https://git.sr.ht/~meow_king/typst-ts-mode"))
 (package! typst-preview :recipe (:host github :repo "havarddj/typst-preview.el"))
-(package! popper :recipe (:host github :repo "karthink/popper"))
 (package! code-cells :recipe (:host github :repo "astoff/code-cells.el"))
-(package! gnuplot-mode :pin "601f6392986f0cba332c87678d31ae0d0a496ce7")
-
-;; Hard dependencies for jupyter
-(package! zmq)
-(package! websocket)
-(package! simple-httpd)
-;; The jupyter package itself
-(package! emacs-jupyter :recipe (:host github :repo "emacs-jupyter/jupyter"))
+(package! svelte-ts-mode :recipe (:host github :repo "leafOfTree/svelte-ts-mode"))
+(package! svelte-mode)
 
 ;; My packages
 (package! org-img :recipe (:host github :repo "MartinBaGar/org-img"))
