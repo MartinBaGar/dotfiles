@@ -17,6 +17,10 @@
 (with-eval-after-load 'evil-escape
   (setq evil-escape-key-sequence "fd"))
 #+end_src
+* Pass
+#+begin_src emacs-lisp
+(setopt epg-pinentry-mode 'loopback)
+#+end_src
 * Editor
 ** Completion
 #+begin_src emacs-lisp
@@ -131,7 +135,7 @@
   :bind (("M-+" . tempel-complete)
          ("M-*" . tempel-insert))
   :init
-  
+
   (defun tempel-setup-capf ()
     (setq-local completion-at-point-functions
                 (cons #'tempel-expand completion-at-point-functions)))
@@ -162,7 +166,6 @@
 
 (add-to-list 'tempel-user-elements #'tempel-case-match)
 #+end_src
-
 ** Misc
 #+begin_src emacs-lisp
 (+global-word-wrap-mode +1)
@@ -192,28 +195,23 @@
 (use-package! ox-typst
   :after org)
 
-(use-package! ox-ipynb
-  :after ox
-  :config
-  (add-to-list 'ox-ipynb-kernelspecs
-  '(python . (kernelspec . ((display_name . "Python 3")
-                            (language . "python")
-                            (name . "python3")))))
+;; Fix the main .typ file path passed to org-compile-file
+(defun my/org-typst-fix-tramp-compile (orig-fun typst-file &rest args)
+  (apply orig-fun (file-local-name (expand-file-name typst-file)) args))
 
-  (add-to-list 'ox-ipynb-language-infos
-    '(python . (language_info . ((codemirror_mode . ((name . ipython) (version . 3)))
-                                 (file_extension . ".py")
-                                 (mimetype . "text/x-python")
-                                 (name . "python")
-                                 (pygments_lexer . "ipython3")
-                                 (version . "3.11.0")))))
-)
+(advice-add 'org-typst-compile :around #'my/org-typst-fix-tramp-compile)
+
+;; Fix all paths inside the generated typst command (images, root, etc.)
+(defun my/org-typst-fix-tramp-command (orig-fun typst-file &rest args)
+  (let ((default-directory (file-local-name default-directory)))
+    (apply orig-fun (file-local-name (expand-file-name typst-file)) args)))
+
+(advice-add 'org-typst--generate-command :around #'my/org-typst-fix-tramp-command)
 
 ;; Load ox-hugo after the ox exporter framework is loaded
 (use-package! ox-hugo
   :after ox)
 #+end_src
-
 * Aesthetic
 *** Theme & Fonts
 #+begin_src emacs-lisp
@@ -231,14 +229,12 @@
 (setq doom-symbol-font (font-spec :family "Symbols Nerd Font Mono" :size 18))
 
 (add-to-list 'default-frame-alist '(undecorated . t))
-;; (add-to-list 'default-frame-alist '(alpha-background . 96))
 
 (setq display-line-numbers nil)
 (setq display-line-numbers-type nil)
 #+end_src
 *** Dashboard
 #+begin_src emacs-lisp
-;; (remove-hook '+dashboard-functions #'dashboard-widget-banner)
 (setq +dashboard-functions
       (remove '+dashboard-widget-banner +dashboard-functions))
 #+end_src
@@ -276,14 +272,6 @@
 (setq +zen-text-scale 0.5)
 
 (with-eval-after-load 'org
-  (defun +org-drawer-strip-emphasis (limit)
-    "Undo Org's emphasis concealment inside property drawers."
-    (when (re-search-forward org-property-drawer-re limit t)
-      (remove-text-properties (match-beginning 0) (match-end 0)
-                               '(invisible nil display nil))
-      t))
-  (font-lock-add-keywords 'org-mode '((+org-drawer-strip-emphasis)) 'append)
-
   (add-hook! 'org-mode-hook #'+zen/toggle)
 
   ;; TODOs
@@ -295,14 +283,7 @@
   (setq-default org-display-custom-times t)
   (setq org-time-stamp-formats '("<%Y-%m-%d %a %H:%M>" . "<%Y-%m-%d %a %H:%M>"))
 
-  ;; Folding persistence via savefold.el
-  (setq org-startup-folded 'showeverything) ; default fold behavior
-  (setq savefold-backends '(org))
-  (setq savefold-directory (locate-user-emacs-file "savefold"))
-  (savefold-mode 1)
-
   ;; Attach
-  (setq org-attach-id-dir "~/org/.attach")
   (setq org-agenda-files (list "~/org"))
   (setq org-timestamp-formats '("%Y-%m-%d %a" . "%Y-%m-%d %a %H:%M"))
 
@@ -420,7 +401,7 @@ Operates directly on the Org AST."
 (with-eval-after-load 'org-download
   ;; Fix the underscore prefix issue
   (setq org-download-timestamp "%Y%m%d-%H%M%S")
-  (setq org-download-screenshot-method "flameshot gui --raw > %s")
+  ;; (setq org-download-screenshot-method "flameshot gui --raw > %s")
 
   ;; Add a custom function to prompt for a filename
   (defun my/org-download-screenshot ()
@@ -467,55 +448,6 @@ Operates directly on the Org AST."
 ;   (setq org-img-dir "~/org/img/"
 ;   (add-hook 'org-mode-hook #'org-img-mode)))
 #+end_src
-* Terminal
-#+begin_src emacs-lisp
-(defun vterm-dired-other-window ()
-  "Open dired in the current working directory of vterm in another window."
-  (interactive)
-  (when (derived-mode-p 'vterm-mode)
-    (let* ((proc (get-buffer-process (current-buffer)))
-           (pid (and proc (process-id proc)))
-           (cwd (and pid
-                     (file-symlink-p (format "/proc/%d/cwd" pid)))))
-      (dired-other-window (or cwd default-directory)))))
-
-(map! :leader
-      (:prefix-map ("d" . "dired")
-       :desc "Dired vterm-cwd in new win" "v" #'vterm-dired-other-window))
-#+end_src
-* Layout
-#+begin_src emacs-lisp
-(defun toggle-window-split ()
-  "Toggle between horizontal and vertical split with two windows."
-  (interactive)
-  (if (= (count-windows) 2)
-      (let* ((this-win-buffer (window-buffer))
-             (next-win-buffer (window-buffer (next-window)))
-             (this-win-edges (window-edges (selected-window)))
-             (next-win-edges (window-edges (next-window)))
-             (this-win-2nd (not (and (<= (car this-win-edges)
-                                         (car next-win-edges))
-                                     (<= (cadr this-win-edges)
-                                         (cadr next-win-edges)))))
-             (splitter
-              (if (= (car this-win-edges)
-                     (car (window-edges (next-window))))
-                  'split-window-horizontally
-                'split-window-vertically)))
-        (delete-other-windows)
-        (let ((first-win (selected-window)))
-          (funcall splitter)
-          (if this-win-2nd (other-window 1))
-          (set-window-buffer (selected-window) this-win-buffer)
-          (set-window-buffer (next-window) next-win-buffer)
-          (select-window first-win)
-          (if this-win-2nd (other-window 1))))))
-
-;; Bind the function to a key
-(map! :leader
-      (:prefix-map ("t" . "toggle")
-       :desc "Toggle window split" "W" #'toggle-window-split))
-#+end_src
 * LLM
 ** Gptel
 #+begin_src emacs-lisp
@@ -559,19 +491,6 @@ Operates directly on the Org AST."
   :custom
   (gptel-commit-stream t))
 #+end_src
-** Copilot
-#+begin_src emacs-lisp
-;; accept completion from copilot and fallback to company
-;; (use-package copilot
-;;   :hook (prog-mode . copilot-mode)
-;;   :bind (:map copilot-completion-map
-;;               ("<tab>" . 'copilot-accept-completion)
-;;               ("TAB" . 'copilot-accept-completion)
-;;               ("C-TAB" . 'copilot-accept-completion-by-word)
-;;               ("C-<tab>" . 'copilot-accept-completion-by-word)))
-
-;; (add-hook 'prog-mode-hook 'copilot-mode)
-#+end_src
 ** Minuet
 #+begin_src emacs-lisp
 (use-package! minuet
@@ -605,7 +524,6 @@ Operates directly on the Org AST."
 #+end_src
 * Bibliography
 #+begin_src emacs-lisp
-(setq org-cite-csl-styles-dir "/mnt/c/Users/martb/Documents/zotero-system/styles")
 (setopt bibtex-completion-bibliography '("~/zotero-lib/referenciator.bib"))
 (setopt bibtex-completion-library-path '("~/zotero-lib/referenciator.bib"))
 
@@ -622,22 +540,6 @@ Operates directly on the Org AST."
     (interactive)
     (let ((citekey (citar-select-ref)))
       (citar-open-entry-in-zotero citekey))))
-
-(defun markdown-to-org-links ()
-  "Convert markdown links [text](url) to org links [[url][text]]
-Works on selected region if active, otherwise on whole buffer."
-  (interactive)
-  (save-excursion
-    (if (region-active-p)
-        (save-restriction
-          (narrow-to-region (region-beginning) (region-end))
-          (goto-char (point-min))
-          (while (re-search-forward "\\[\\([^]]+\\)\\](\\([^)]+\\))" nil t)
-            (replace-match "[[\\2][\\1]]")))
-      (progn
-        (goto-char (point-min))
-        (while (re-search-forward "\\[\\([^]]+\\)\\](\\([^)]+\\))" nil t)
-          (replace-match "[[\\2][\\1]]"))))))
 
 (defun my/insert-zotero-notes ()
   "Select a citation via Citar, fetch its notes via Python, and insert at point."
@@ -679,34 +581,6 @@ Works on selected region if active, otherwise on whole buffer."
   '(markdown-header-face-4 :inherit outline-4)
   '(markdown-header-face-5 :inherit outline-5)
   '(markdown-header-face-3 :inherit outline-6))
-
-#+end_src
-* Projects
-#+begin_src emacs-lisp
-(with-eval-after-load 'projectile
-  (setopt magit-repository-directories
-         (mapcar (lambda (dir) (cons dir 0))
-                 projectile-known-projects)))
-
-(defun my/update-magit-repos ()
-  "Update magit-repository-directories from projectile-known-projects."
-  (interactive)
-  (setq magit-repository-directories
-        (mapcar (lambda (dir) (cons dir 0))
-                projectile-known-projects)))
-
-(setopt magit-repolist-columns
-      '(("Name"    25 magit-repolist-column-ident                  ())
-        ("Flags"    5 magit-repolist-column-flags                  ())
-        ("Branch"  15 magit-repolist-column-branch                 ())
-        ("↓"        3 magit-repolist-column-unpulled-from-upstream ((:right-align t) (:sort <)))
-        ("↑"        3 magit-repolist-column-unpushed-to-upstream   ((:right-align t) (:sort <)))
-        ("Path"    99 magit-repolist-column-path                   ())))
-
-
-(map! :leader
-      (:prefix "g l"
-      :desc "update" "u" #'my/update-magit-repos))
 #+end_src
 * Language
 ** Translation
@@ -744,12 +618,6 @@ Works on selected region if active, otherwise on whole buffer."
     :desc "Dismiss overlays" "d" #'gt-delete-render-overlays
     :desc "Translate" "t" #'gt-translate))
 #+end_src
-
-** Grammar
-#+begin_src emacs-lisp
-;; (setq langtool-language-tool-jar "~/LanguageTool-6.6/languagetool-commandline.jar")
-;; (require 'langtool)
-#+end_src
 ** Spell
 #+begin_src emacs-lisp
 (use-package jinx
@@ -785,19 +653,6 @@ Works on selected region if active, otherwise on whole buffer."
 #+end_src
 * Default-Apps
 #+begin_src emacs-lisp
-(defun my/vscode-open-path-at-point ()
-  "Open the file at point with VS Code."
-  (interactive)
-  (let ((path (thing-at-point 'filename t)))
-    (if (and path (file-exists-p path))
-        (start-process "vscode" nil "code" (expand-file-name path))
-      (message "No valid file path at point."))))
-
-(map! :leader
-      :prefix "o"
-      :desc "Open file at point in VS Code"
-      "v" #'my/vscode-open-path-at-point)
-
 ;; TODO: solidify the link handling. Didn't work on tranclusion links
 (defun my/xdg-open-path-at-point ()
   "Open the file at point with xdg-open."
@@ -846,32 +701,6 @@ Works on selected region if active, otherwise on whole buffer."
   (typst-ts-mode-enable-raw-blocks-highlight t)
   :config
   (keymap-set typst-ts-mode-map "C-c C-c" #'typst-ts-tmenu))
-
-(defun my/org-insert-typst-ref ()
-  "Fuzzy find and insert a link to a #+name: target in the current buffer."
-  (interactive)
-  (let ((names '()))
-    (save-excursion
-      (goto-char (point-min))
-      ;; Use regex to find all lines starting with #+name: or #+NAME:
-      (while (re-search-forward "^[ \t]*#\\+\\(name\\|NAME\\):[ \t]+\\(.*\\)$" nil t)
-        (push (match-string 2) names)))
-    (if names
-        ;; Prompt the user with built-in completion UI
-        (let ((choice (completing-read "Insert reference: " (reverse names))))
-          (insert (format "[[%s]]" choice)))
-      (message "No #+name: targets found in this buffer."))))
-
-(with-eval-after-load 'ox-typst
-  (setq org-typst-inline-image-rules
-        '(("file" . "\\.\\(?:gif\\|jp\\(?:e?g\\)\\|png\\|svg\\|webp\\|pdf\\)\\'")
-          ("https" . "\\.\\(?:gif\\|jp\\(?:e?g\\)\\|png\\|svg\\|webp\\|pdf\\)\\'"))
-        ))
-
-(map! :after org
-      :map org-mode-map
-      :localleader
-      :desc "Insert Typst/Name reference" "l f" #'my/org-insert-typst-ref)
 #+end_src
 ** ElabFTW
 #+begin_src emacs-lisp
@@ -1073,7 +902,18 @@ Works on selected region if active, otherwise on whole buffer."
                                           "tinymist"
                                           "typst-lsp")))))
   (add-to-list 'eglot-server-programs
-               '((web-mode) . ("vscode-html-language-server" "--stdio"))))
+               '((web-mode) . ("vscode-html-language-server" "--stdio")))
+  (add-to-list 'eglot-server-programs
+               '((svelte-mode svelte-ts-mode) . ("svelteserver" "--stdio"))))
+
+(add-to-list 'auto-mode-alist '("\\.svelte\\'" . svelte-ts-mode))
+;; (add-to-list 'auto-mode-alist '("\\.svelte\\'" . svelte-mode))
+
+(use-package! svelte-ts-mode
+  :hook (svelte-ts-mode . eglot-ensure)
+  :config
+  (add-to-list 'treesit-language-source-alist
+               '(svelte "https://github.com/tree-sitter-grammars/tree-sitter-svelte")))
 
 (with-eval-after-load 'cc-mode
   (set-eglot-client! 'cc-mode '("clangd" "-j=3" "--clang-tidy")))
@@ -1081,332 +921,43 @@ Works on selected region if active, otherwise on whole buffer."
 (with-eval-after-load 'python
   (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server"))
   (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
-
-;; (defun my/fix-org-src-eglot-docs ()
-;;   "Give org-src buffers a valid Python file name so the LSP can resolve docs."
-;;   (when (and (derived-mode-p 'python-mode 'python-ts-mode)
-;;              (not buffer-file-name))
-;;     ;; Generate a fake .py file path in the same directory as the org file
-;;     (setq-local buffer-file-name
-;;                 (concat (expand-file-name (make-temp-name "org-src-")
-;;                                           default-directory)
-;;                         ".py"))))
-
-;; ;; Attach it to the org-src-mode hook
-;; (add-hook 'org-src-mode-hook #'my/fix-org-src-eglot-docs)
-#+end_src
-* Wayland
-#+begin_src emacs-lisp
-;; For niri to toggle a notepad
-(defun toggle-named-frame (frame-name &rest frame-params)
-  "Toggle a frame with FRAME-NAME. Create if doesn't exist, delete if exists.
-When created, opens a persistent Doom scratch buffer in writeroom-mode.
-FRAME-PARAMS are additional frame parameters passed as keyword-value pairs."
-  (let ((target-frame (seq-find 
-                       (lambda (f) 
-                         (string= (frame-parameter f 'name) frame-name))
-                       (frame-list))))
-    (if target-frame
-        (delete-frame target-frame)
-      (let ((frame (make-frame (append `((name . ,frame-name)) frame-params))))
-        (with-selected-frame frame
-          (let ((scratch-buf (doom-scratch-buffer nil nil default-directory frame-name)))
-            (switch-to-buffer scratch-buf)
-            (org-mode)
-            (writeroom-mode 1)))
-        frame))))
-#+end_src
-* Test
-#+begin_src emacs-lisp
-;; ;; =============================================================================
-;; ;; Org-Babel JIT Path & File Completion (Powered by Cape)
-;; ;; =============================================================================
-
-;; (require 'cape)
-;; (require 'org)
-
-;; ;; -----------------------------------------------------------------------------
-;; ;; 1. Variable Resolver
-;; ;; -----------------------------------------------------------------------------
-
-;; (defun my/org-babel-get-sh-var-path (var-name)
-;;   "Resolve VAR-NAME to its path via babel params then property drawer.
-;; Uses the src block heading as anchor so inherited properties resolve
-;; correctly even when point is inside the block body.
-;; Guards against infinite loops with a depth limit of 5."
-;;   (let* ((block-pos (org-babel-where-is-src-block-head))
-;;          ;; Use babel's own param parser — handles all header-args forms
-;;          ;; (:var on #+begin_src, #+header:, property drawers with
-;;          ;; header-args:sh+, etc.)
-;;          (params    (when block-pos
-;;                       (nth 2 (org-babel-get-src-block-info t))))
-;;          ;; :var entries arrive as ((sym . val) ...) under the :var key
-;;          (vars      (when params
-;;                       (mapcar (lambda (v) (if (consp v) v (cons v nil)))
-;;                               (ensure-list (alist-get :var params)))))
-;;          (val       (or
-;;                      (cdr (assoc (intern var-name) vars))
-;;                      (cdr (assoc (intern (upcase var-name)) vars))
-;;                      ;; Fallback: raw property drawer lookup
-;;                      (when block-pos
-;;                        (org-with-point-at block-pos
-;;                          (or (org-entry-get (point) var-name t)
-;;                              (org-entry-get (point) (upcase var-name) t)))))))
-;;     ;; Recursively dereference (org-entry-get ...) expressions with depth guard
-;;     (let ((depth 0))
-;;       (while (and val (< depth 5)
-;;                   (string-match "(org-entry-get [^ ]+ \"\\([^\"]+\\)\".*)" val))
-;;         (cl-incf depth)
-;;         (setq val (when block-pos
-;;                     (org-with-point-at block-pos
-;;                       (org-entry-get (point) (match-string 1 val) t))))))
-;;     (when val (string-trim val "\"" "\""))))
-
-;; ;; -----------------------------------------------------------------------------
-;; ;; 2. Path-start detector
-;; ;; -----------------------------------------------------------------------------
-
-;; (defun my/org-babel--find-path-start ()
-;;   "Return the buffer position where a shell path expression starts.
-;; Extends backward through embedded spaces that belong to the same path,
-;; e.g. ./Music/Flying Zodd/ or \"$VAR\"/some dir/.
-
-;; Logic: after the initial char-skip we cross each space and check whether
-;; the token on the other side either ends with '/' (so we are continuing a
-;; path component) or starts with a path-like character [$~/.]."
-;;   (save-excursion
-;;     (let ((path-chars "-a-zA-Z0-9_./$\"{}~':@+=%"))
-;;       (skip-chars-backward path-chars)
-;;       (let (done)
-;;         (while (not done)
-;;           (if (and (> (point) (line-beginning-position))
-;;                    (eq (char-before) ?\ ))
-;;               (let ((saved (point))
-;;                     (extended
-;;                      (save-excursion
-;;                        (backward-char)            ; cross the space
-;;                        (skip-chars-backward path-chars)
-;;                        (point))))
-;;                 ;; Keep the extension when the preceding token ends with /
-;;                 ;; (continuing an in-progress path) or begins with a path-like
-;;                 ;; sigil (start of a new absolute/relative/home path)
-;;                 (if (or (eq (char-before extended) ?/)
-;;                         (progn (goto-char extended)
-;;                                (looking-at-p "[$~/.]")))
-;;                     (goto-char extended)   ; accepted — loop again
-;;                   (goto-char saved)        ; rejected — stop here
-;;                   (setq done t)))
-;;             (setq done t))))
-;;       (point))))
-
-;; ;; -----------------------------------------------------------------------------
-;; ;; 3. Raw CAPF
-;; ;; -----------------------------------------------------------------------------
-
-;; (defun my/org-babel-sh-path-capf-raw ()
-;;   "CAPF for file paths inside sh/bash org-babel blocks.
-
-;; Handles:
-;;   - $VAR/path and ${VAR}/path resolved via babel params / property drawers
-;;   - \"$VAR\"suffix  (variable immediately followed by a literal suffix)
-;;   - /absolute, ./relative, ~/home-relative paths
-;;   - Paths whose components contain spaces (e.g. ./Music/Flying Zodd/)
-;;   - TRAMP remote buffers
-;;   - :dir header-arg for relative path resolution
-
-;; Filters . and .. from all candidate lists."
-;;   (when (and (org-in-src-block-p)
-;;              (member (car (org-babel-get-src-block-info)) '("sh" "bash")))
-;;     (let* ((end (point))
-;;            (beg (my/org-babel--find-path-start))
-;;            (raw-input (and (< beg end)
-;;                            (buffer-substring-no-properties beg end))))
-
-;;       ;; Fire when content looks like a path:
-;;       ;;   - contains a $VAR reference, OR
-;;       ;;   - starts with /, ~, or . (absolute / home-relative / relative paths,
-;;       ;;     including those with spaces that would defeat cape-file)
-;;       (when (and raw-input
-;;                  (string-match-p "\\$\\|\\`[~/.]" raw-input))
-;;         (let* (;; Respect :dir header-arg for relative path expansion
-;;                (params    (nth 2 (org-babel-get-src-block-info t)))
-;;                (babel-dir (alist-get :dir params))
-;;                (default-directory (or babel-dir default-directory))
-;;                (eval-path raw-input)
-;;                (temp      raw-input))
-
-;;           ;; Step 1: expand org/babel variables.
-;;           ;; Two explicit branches for ${VAR} and $VAR — the previous
-;;           ;; \\1? backreference made the closing } optional, matching ${FOO
-;;           ;; without consuming the }.
-;;           (while (string-match
-;;                   "\\$\\({\\([[:alnum:]_]+\\)}\\|\\([[:alnum:]_]+\\)\\)"
-;;                   temp)
-;;             (let* ((var-full (match-string 0 temp))
-;;                    (var-name (or (match-string 2 temp)
-;;                                  (match-string 3 temp)))
-;;                    (m-end    (match-end 0))
-;;                    (val      (save-match-data
-;;                                (my/org-babel-get-sh-var-path var-name))))
-;;               (when val
-;;                 (setq eval-path
-;;                       (replace-regexp-in-string
-;;                        (regexp-quote var-full) val eval-path t t)))
-;;               (setq temp (substring temp m-end))))
-
-;;           ;; Step 2: resolve standard env vars ($HOME etc.).
-;;           ;; Wrapped in condition-case — substitute-in-file-name throws an
-;;           ;; error when a variable is absent from the environment (e.g. an
-;;           ;; org-only var like $SYS not found in step 1), which would
-;;           ;; previously kill the entire capf silently.
-;;           (setq eval-path
-;;                 (condition-case nil
-;;                     (substitute-in-file-name eval-path)
-;;                   (error eval-path)))
-
-;;           ;; Step 3: strip shell quoting now that variables are safely expanded
-;;           (setq eval-path (replace-regexp-in-string "[\"']" "" eval-path))
-
-;;           ;; Step 4: inject TRAMP prefix when the org buffer is remote
-;;           ;; but the resolved path is still a bare local path
-;;           (let ((remote (file-remote-p (or (buffer-file-name) default-directory))))
-;;             (when (and remote (not (file-remote-p eval-path)))
-;;               (setq eval-path (concat remote eval-path))))
-
-;;           ;; Step 5: expand ~ — expand-file-name is TRAMP-aware
-;;           (setq eval-path (expand-file-name eval-path))
-
-;;           ;; Step 6: build candidates, always filtering out . and ..
-;;           (let* ((raw-dir   (file-name-directory raw-input))
-;;                  (eval-dir  (file-name-directory eval-path))
-;;                  (eval-file (file-name-nondirectory eval-path))
-;;                  (drop-dot  (lambda (files)
-;;                               (cl-remove-if
-;;                                (lambda (f)
-;;                                  (member (directory-file-name f) '("." "..")))
-;;                                files)))
-;;                  candidates)
-
-;;             (if (not raw-dir)
-;;                 (cond
-;;                  ;; Resolved to a directory but no trailing slash yet —
-;;                  ;; offer to enter it
-;;                  ((file-directory-p eval-path)
-;;                   (setq candidates (list (concat raw-input "/"))))
-
-;;                  ;; Partial filename — complete against its parent directory
-;;                  ((and (file-exists-p (file-name-directory eval-path))
-;;                        (not (string-empty-p eval-file)))
-;;                   (let ((files (condition-case nil
-;;                                    (funcall drop-dot
-;;                                             (file-name-all-completions
-;;                                              eval-file
-;;                                              (file-name-directory eval-path)))
-;;                                  (error nil))))
-;;                     (when files
-;;                       (setq candidates
-;;                             (mapcar (lambda (f)
-;;                                       (concat (or (file-name-directory raw-input) "") f))
-;;                                     files))))))
-
-;;               ;; Slash already present — complete inside the resolved directory
-;;               (when (and eval-dir (file-directory-p eval-dir))
-;;                 (let ((files (condition-case nil
-;;                                  (funcall drop-dot
-;;                                           (file-name-all-completions eval-file eval-dir))
-;;                                (error nil))))
-;;                   (when files
-;;                     (setq candidates
-;;                           (mapcar (lambda (f) (concat raw-dir f)) files))))))
-
-;;             (when candidates
-;;               (list beg end candidates))))))))
-
-;; ;; -----------------------------------------------------------------------------
-;; ;; 4. Cape Wrappers (public API only)
-;; ;; -----------------------------------------------------------------------------
-
-;; ;; Single capf alias: babel-aware completion merged with standard cape-file.
-;; ;; cape-capf-prefix-length 1 prevents flooding the popup immediately on "$VAR/"
-;; ;; before any filename character has been entered.
-;; (defalias 'my/cape-babel-or-file
-;;   (cape-capf-prefix-length
-;;    (cape-capf-choose
-;;     (cape-capf-properties
-;;      ;; cape-capf-noninterruptible protects against slow TRAMP mounts
-;;      (cape-capf-noninterruptible #'my/org-babel-sh-path-capf-raw)
-;;      :exclusive 'no
-;;      :category 'file
-;;      :company-kind (lambda (_) 'file)
-;;      :annotation-function
-;;      (lambda (candidate)
-;;        ;; Show the resolved variable value rather than a static tag —
-;;        ;; useful when several $VARs are in scope simultaneously
-;;        (when (string-match "\\$\\([A-Za-z_][A-Za-z0-9_]*\\)" candidate)
-;;          (let ((resolved (my/org-babel-get-sh-var-path (match-string 1 candidate))))
-;;            (when resolved
-;;              (concat "  " (truncate-string-to-width resolved 48 nil nil "…")))))))
-;;     #'cape-file)
-;;    1))
-
-;; ;; Interactive command for explicit keybinding invocation
-;; (defalias 'cape-babel-or-file
-;;   (cape-capf-interactive #'my/cape-babel-or-file)
-;;   "Complete Org-Babel $VAR paths, falling back to standard file completion.")
-
-;; ;; -----------------------------------------------------------------------------
-;; ;; 5. Integration
-;; ;; -----------------------------------------------------------------------------
-
-;; ;; my/cape-babel-or-file is the raw capf — goes on the hook
-;; (add-hook 'org-mode-hook
-;;           (lambda ()
-;;             (add-hook 'completion-at-point-functions
-;;                       #'my/cape-babel-or-file nil t)))
-
-;; ;; cape-babel-or-file is the interactive command — goes on keys
-;; (after! cape
-;;   (map! :map cape-prefix-map
-;;         "f" #'cape-babel-or-file)
-;;   (map! :map evil-insert-state-map
-;;         "C-x C-f" #'cape-babel-or-file))
 #+end_src
 * Reproducibility
-This will print
 #+begin_src emacs-lisp
-(defun my/org-get-src-vars ()
-  "Gather and return all source block variables defined in property drawers."
-  (interactive)
-  (let ((my-dict (make-hash-table :test 'equal))
-        (tree (org-element-parse-buffer))
-        (result-lines nil))
+(after! org
+  (require 'ob-python)
 
-    ;; --- THE GATHER PHASE ---
-    (org-element-map tree 'node-property
-      (lambda (node)
-        (let ((key (org-element-property :key node))
-              (val (org-element-property :value node)))
-          (when (string-prefix-p "header-args" key)
-            (let ((language (replace-regexp-in-string "header-args:?\\|\\+" "" key)))
-              (push val (gethash language my-dict)))))))
+  (defmacro def-python-babel-preset! (name &rest header-args)
+    "Register NAME as a Babel language alias for python with default HEADER-ARGS."
+    (let* ((name-str (symbol-name name))
+           (execute-sym      (intern (format "org-babel-execute:%s" name-str)))
+           (expand-sym       (intern (format "org-babel-expand-body:%s" name-str)))
+           (prep-session-sym (intern (format "org-babel-prep-session:%s" name-str)))
+           (edit-prep-sym    (intern (format "org-babel-edit-prep:%s" name-str)))
+           (header-args-sym  (intern (format "org-babel-header-args:%s" name-str)))
+           (default-sym      (intern (format "org-babel-default-header-args:%s" name-str))))
+      `(progn
+         (defalias ',execute-sym      #'org-babel-execute:python)
+         (defalias ',expand-sym       #'org-babel-expand-body:python)
+         (defalias ',prep-session-sym #'org-babel-prep-session:python)
+         (when (fboundp 'org-babel-edit-prep:python)
+           (defalias ',edit-prep-sym #'org-babel-edit-prep:python))
+         (defvaralias ',header-args-sym 'org-babel-header-args:python)
+         (add-to-list 'org-src-lang-modes (cons ,name-str 'python))
+         (add-to-list 'org-babel-tangle-lang-exts (cons ,name-str "py"))
+         (setf (alist-get ',name +org-babel-mode-alist) 'python)
+         (defvar ,default-sym ',header-args)
+         (put ',default-sym 'safe-local-variable #'listp)
+         (add-to-list 'org-structure-template-alist (cons ,name-str ,(format "src %s" name-str))))))
 
-    ;; --- THE FORMAT PHASE ---
-    (maphash
-     (lambda (lang vars-list)
-       (if (string= "" lang)
-        (push "*** **General**" result-lines)
-        (push (format "*** **%s**" (capitalize lang)) result-lines)
-           )
+  ;; --- presets, one line of intent each ---
+  (def-python-babel-preset! pyplot
+    (:session  . "pyplot-session")
+    (:results  . "output raw")
+    (:epilogue . "print(f'[[file:{fname}]]')"))
 
-       ;; Loop through the variables (using reverse so they appear in top-to-bottom document order)
-       (dolist (var (reverse vars-list))
-         ;; Strip the literal ":var " from the front so it looks cleaner
-         (let ((clean-var (replace-regexp-in-string "\\`:var\\s-*" "" var)))
-           ;; Add the variable as a sub-bullet, wrapped in ~code~ markers
-           (push (format "  - ~%s~" clean-var) result-lines))))
-     my-dict)
-
-    ;; --- THE EXPORT PHASE ---
-    ;; Reverse the lines (since push adds to the front) and glue them together with line breaks
-    (string-join (reverse result-lines) "\n")))
+  (def-python-babel-preset! pyops
+    (:session . "pyops-session")
+    (:results . "output")
+    (:exports . "code")))
 #+end_src
