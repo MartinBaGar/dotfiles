@@ -169,7 +169,7 @@
 #+end_src
 ** Misc
 #+begin_src emacs-lisp
-;; (+global-word-wrap-mode +1)
+(+global-word-wrap-mode +1)
 ;; (add-hook 'writeroom-mode-hook #'+word-wrap-mode)
 #+end_src
 ** Revealjs
@@ -290,28 +290,6 @@
   (org-link-set-parameters "zotero"
                            :follow (lambda (path)
                                      (browse-url (concat "zotero:" path))))
-
-  ;; 1. Wakes up the Python engine immediately when Org-mode starts
-  (require 'ob-async)
-  (require 'ob-python)
-
-  ;; 2. Teach Org's internal linter that :async is a valid header argument
-  (add-to-list 'org-babel-header-arg-names 'async)
-
-  ;; 3. Setup the fastplot language aliases and Tree-sitter
-  (defalias 'org-babel-execute:fastplot 'org-babel-execute:python)
-  (defalias 'org-babel-prep-session:fastplot 'org-babel-prep-session:python)
-  (add-to-list 'org-src-lang-modes '("fastplot" . python))
-
-  ;; 4. The dedicated edit-buffer preparation for remote paths
-  (defun org-babel-edit-prep:fastplot (info)
-    (let* ((params (nth 2 info))
-           (session (cdr (assq :session params)))
-           (python-cmd (cdr (assq :python params))))
-      (when (and session (not (string= session "none")))
-        (setq-local python-shell-buffer-name session))
-      (when python-cmd
-        (setq-local python-shell-interpreter python-cmd))))
   )
 
 ;; 2. Exclude Tags Function
@@ -840,7 +818,7 @@ Operates directly on the Org AST."
         (shell-command (format "elapi post experiments -d %s" (shell-quote-argument temp-file)))
         (delete-file temp-file)
         (message "New experiment created successfully!")
-        (my/sync-attachments))))) ;; <-- And here
+        (my/sync-attachments)))))
 
 (defun elabftw--get-attach-files ()
   "Return a list of file paths from Org links strictly under headings tagged :ELABFTW_SYNC:."
@@ -934,4 +912,43 @@ Operates directly on the Org AST."
 (with-eval-after-load 'python
   (set-eglot-client! '(python-mode python-ts-mode) '("ty" "server"))
   (set-formatter! 'ruff :modes '(python-mode python-ts-mode)))
+#+end_src
+* Reproducibility
+#+begin_src emacs-lisp
+(after! org
+  (require 'ob-python)
+
+  (defmacro def-python-babel-preset! (name &rest header-args)
+    "Register NAME as a Babel language alias for python with default HEADER-ARGS."
+    (let* ((name-str (symbol-name name))
+           (execute-sym      (intern (format "org-babel-execute:%s" name-str)))
+           (expand-sym       (intern (format "org-babel-expand-body:%s" name-str)))
+           (prep-session-sym (intern (format "org-babel-prep-session:%s" name-str)))
+           (edit-prep-sym    (intern (format "org-babel-edit-prep:%s" name-str)))
+           (header-args-sym  (intern (format "org-babel-header-args:%s" name-str)))
+           (default-sym      (intern (format "org-babel-default-header-args:%s" name-str))))
+      `(progn
+         (defalias ',execute-sym      #'org-babel-execute:python)
+         (defalias ',expand-sym       #'org-babel-expand-body:python)
+         (defalias ',prep-session-sym #'org-babel-prep-session:python)
+         (when (fboundp 'org-babel-edit-prep:python)
+           (defalias ',edit-prep-sym #'org-babel-edit-prep:python))
+         (defvaralias ',header-args-sym 'org-babel-header-args:python)
+         (add-to-list 'org-src-lang-modes (cons ,name-str 'python))
+         (add-to-list 'org-babel-tangle-lang-exts (cons ,name-str "py"))
+         (setf (alist-get ',name +org-babel-mode-alist) 'python)
+         (defvar ,default-sym ',header-args)
+         (put ',default-sym 'safe-local-variable #'listp)
+         (add-to-list 'org-structure-template-alist (cons ,name-str ,(format "src %s" name-str))))))
+
+  ;; --- presets, one line of intent each ---
+  (def-python-babel-preset! pyplot
+    (:session  . "pyplot-session")
+    (:results  . "output raw")
+    (:epilogue . "print(f'[[file:{fname}]]')"))
+
+  (def-python-babel-preset! pyops
+    (:session . "pyops-session")
+    (:results . "output")
+    (:exports . "code")))
 #+end_src
