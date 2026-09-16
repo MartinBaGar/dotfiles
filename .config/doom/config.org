@@ -13,7 +13,6 @@
 
 (setq doom-modeline-project-name t)
 (setq-default tab-width 4)
-(define-key evil-insert-state-map (kbd "C-q") 'backward-delete-char)
 
 (with-eval-after-load 'evil-escape
   (setq evil-escape-key-sequence "fd"))
@@ -136,7 +135,7 @@
   :bind (("M-+" . tempel-complete)
          ("M-*" . tempel-insert))
   :init
-  
+
   (defun tempel-setup-capf ()
     (setq-local completion-at-point-functions
                 (cons #'tempel-expand completion-at-point-functions)))
@@ -291,6 +290,11 @@
                            :follow (lambda (path)
                                      (browse-url (concat "zotero:" path))))
   )
+
+;; 1. Register ADTOC
+(with-eval-after-load 'ox
+  (add-to-list 'org-export-options-alist
+               '(:adtoc "ADTOC" "adtoc" nil t)))
 
 ;; 2. Exclude Tags Function
 (defun my-dynamic-export-exclude-tags (info backend)
@@ -695,191 +699,17 @@ Operates directly on the Org AST."
 #+end_src
 ** ElabFTW
 #+begin_src emacs-lisp
-(defun elabftw--get-id-by-title (title)
-  "Get the eLabFTW experiment ID matching TITLE."
-  ;; We use `jq --arg t` to safely pass the title without breaking bash quotes
-  (let* ((cmd (format "elapi get experiments --format json | jq -r --arg t %s '.[] | select(.title==$t) | .id'"
-                      (shell-quote-argument title)))
-         (res (string-trim (shell-command-to-string cmd))))
-    (if (string= res "") nil res)))
-
-(defun elabftw--get-upload-id (exp-id file-name)
-  "Get the upload ID for a file named FILE-NAME in experiment EXP-ID."
-  (let* ((cmd (format "elapi get experiments --id %s --format json | jq -r --arg f %s '.uploads[] | select(.real_name==$f) | .id'"
-                      exp-id
-                      (shell-quote-argument file-name)))
-         (res (string-trim (shell-command-to-string cmd))))
-    (if (string= res "") nil res)))
-
-;; ==========================================
-;; MAIN INTERACTIVE FUNCTIONS
-;; ==========================================
-(defun my/open-elab-in-browser ()
-  (interactive)
-  (let* ((raw (ansi-color-filter-apply (shell-command-to-string "elapi whoami")))
-         (server (when (string-match "Server ?:? +\\([^ \n\t]+\\)" raw)
-                   (match-string 1 raw))))
-    (if server
-        (progn
-          (message "Opening %s" server)
-          (browse-url-xdg-open server))
-      (message "Could not find Server URL in output"))))
-
-(defun my/get-match-exp ()
-  "Check if an experiment matching the current buffer's title exists."
-  (interactive)
-  (let* ((title (org-get-title (current-buffer)))
-         (exp-id (elabftw--get-id-by-title title)))
-    (if exp-id
-        (message "Found experiment '%s' with ID: %s" title exp-id)
-      (message "No experiment found matching title: '%s'" title))))
-
-(defun my/update-elabftw-exp-body ()
-  "Update the body of the eLabFTW experiment matching the current buffer's title."
-  (interactive)
-  (let* ((title (org-get-title (current-buffer)))
-         (exp-id (elabftw--get-id-by-title title)))
-    (if (not exp-id)
-        (message "Error: No experiment found with title '%s'" title)
-      
-      (let* ((body (org-export-as 'html nil nil t))
-             ;; Create a temp file and encode the HTML payload directly into JSON
-             (temp-file (make-temp-file "elabftw-body-" nil ".json"))
-             (json-data (json-encode `((body . ,body)))))
-        
-        ;; Write JSON to file to bypass bash quoting hell
-        (with-temp-file temp-file
-          (insert json-data))
-        
-        (message "Updating experiment '%s' (ID: %s)..." title exp-id)
-        
-        ;; Pass the JSON file directly to elapi using the -d flag
-        (shell-command (format "elapi patch experiments --id %s -d %s" 
-                               exp-id 
-                               (shell-quote-argument temp-file)))
-        
-        ;; Cleanup
-        (delete-file temp-file)
-        (message "Body updated successfully!")))))
-
-(defun my/update-elabftw-exp-pdf ()
-  "Exports the current Org buffer to PDF and smart-syncs it to eLabFTW."
-  (interactive)
-  (let* ((title (org-get-title (current-buffer)))
-         (exp-id (elabftw--get-id-by-title title)))
-    (if (not exp-id)
-        (message "Error: No experiment found with title '%s'" title)
-      
-      (message "Exporting to PDF...")
-      (let* ((pdf-file (org-typst-export-to-pdf))
-             (pdf-name (file-name-nondirectory pdf-file))
-             (f-name-base (file-name-base pdf-file))
-             (typ-file (concat (file-name-base pdf-file) ".typ"))
-             (upload-id (elabftw--get-upload-id exp-id pdf-name)))
-        
-        (when (and typ-file 
-             (string-suffix-p ".typ" typ-file) 
-             (file-exists-p typ-file))
-        (delete-file typ-file))
-        
-        ;; Smart PDF Sync logic: If PDF already exists, delete it first to keep the archive clean
-        (when upload-id
-          (message "Deleting old PDF (Upload ID: %s)..." upload-id)
-          (shell-command (format "elapi delete experiments -i %s --sub uploads --sub-id %s" exp-id upload-id)))
-        
-        (message "Uploading new PDF...")
-        (shell-command (format "elapi experiments upload-attachment --id %s --path %s --comment %s"
-                               exp-id
-                               (shell-quote-argument pdf-file)
-                               (shell-quote-argument "Uploaded via Emacs")))
-        (message "PDF synced successfully!")
-        (when (and pdf-file 
-             (string-suffix-p ".pdf" pdf-file) 
-             (file-exists-p pdf-file))
-        (delete-file pdf-file))
-        ))))
-
-(defun my/sync-current-exp ()
-  "Create a new eLabFTW experiment from the current Org buffer or update existing."
-  (interactive)
-  (let ((title (org-get-title (current-buffer)))
-        (id (elabftw--get-id-by-title (org-get-title (current-buffer)))))
-    (if id
-        (progn
-          (my/update-elabftw-exp-pdf)
-          (my/update-elabftw-exp-body)
-          (my/sync-attachments)) ;; <-- Added here
-      (let* ((body (org-export-as 'html nil nil t))
-             (temp-file (make-temp-file "elabftw-new-" nil ".json"))
-             (json-data (json-encode `((title . ,title) (body . ,body)))))
-        (with-temp-file temp-file
-          (insert json-data))
-        (message "Creating new experiment '%s'..." title)
-        (shell-command (format "elapi post experiments -d %s" (shell-quote-argument temp-file)))
-        (delete-file temp-file)
-        (message "New experiment created successfully!")
-        (my/sync-attachments)))))
-
-(defun elabftw--get-attach-files ()
-  "Return a list of file paths from Org links strictly under headings tagged :ELABFTW_SYNC:."
-  (let (files
-        ;; Disable tag inheritance locally to prevent duplicate parsing
-        ;; if child headings accidentally inherit the tag.
-        (org-use-tag-inheritance nil))
-
-    (org-map-entries
-     (lambda ()
-       (save-restriction
-         (org-narrow-to-subtree)
-         (org-element-map (org-element-parse-buffer) 'link
-           (lambda (link)
-             (when (string= (org-element-property :type link) "file")
-               ;; Expand to absolute paths to handle relative links smoothly
-               (push (expand-file-name (org-element-property :path link)) files))))))
-     "ELABFTW_SYNC")
-
-    ;; Remove any duplicate links to ensure we don't upload the same file twice
-    (delete-dups (nreverse files))))
-
-(defun my/sync-attachments ()
-  "Sync all declared attachments to the matching eLabFTW experiment."
-  (interactive)
-  (let* ((title (org-get-title (current-buffer)))
-         (exp-id (elabftw--get-id-by-title title))
-         (files (elabftw--get-attach-files)))
-    (if (not exp-id)
-        (message "Error: No experiment found with title '%s'" title)
-      (if (null files)
-          (message "No files found under a :ELABFTW_SYNC: tagged heading.")
-        (dolist (file files)
-          (if (not (file-exists-p file))
-              (message "Warning: Skipping missing file: %s" file)
-            (let* ((fname (file-name-nondirectory file))
-                   (upload-id (elabftw--get-upload-id exp-id fname)))
-
-              ;; Delete the old version on eLabFTW if it exists
-              (when upload-id
-                (message "Deleting old version of %s..." fname)
-                (shell-command
-                 (format "elapi delete experiments -i %s --sub uploads --sub-id %s"
-                         exp-id upload-id)))
-
-              ;; Upload the new version
-              (message "Uploading %s..." fname)
-              (shell-command
-               (format "elapi experiments upload-attachment --id %s --path %s --comment %s"
-                       exp-id
-                       (shell-quote-argument file)
-                       (shell-quote-argument "Synced via Emacs")))
-              (message "Successfully uploaded %s!" fname))))))))
+(use-package elabftw-sync
+  :custom
+  (elabftw-sync-pdf-export-function 'org-typst-export-to-pdf))
 
 (map! :leader
       (:prefix ("e" . "elab")
-       :desc "Sync pdf"           "p" #'my/update-elabftw-exp-pdf
-       :desc "Sync body"          "b" #'my/update-elabftw-exp-body
-       :desc "Sync attachments"   "a" #'my/sync-attachments
-       :desc "New exp from buffer" "s" #'my/sync-current-exp
-       :desc "Open ElabFTW in browser" "o" #'my/open-elab-in-browser))
+       :desc "Sync pdf"                "p" #'elabftw-sync-pdf
+       :desc "Sync body"               "b" #'elabftw-sync-body
+       :desc "Sync attachments"        "a" #'elabftw-sync-attachments
+       :desc "New/update exp"          "s" #'elabftw-sync-current-experiment
+       :desc "Open ElabFTW in browser" "o" #'elabftw-sync-open-in-browser))
 #+end_src
 * LSP / Formater
 #+begin_src emacs-lisp

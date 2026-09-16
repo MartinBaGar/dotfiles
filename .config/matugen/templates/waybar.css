@@ -13,9 +13,10 @@ window#waybar {
 }
 
 /* ---------- Common Button Styling ---------- */
+#bluetooth,
 #mpris,
 #pulseaudio,
-#custom-dunst,
+#custom-notification,
 #battery,
 #language,
 #window,

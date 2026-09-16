@@ -11,10 +11,11 @@
     "clock"
   ],
   "modules-right": [
-  "mpris",
-  "pulseaudio",
-  "custom/dunst",
-  "battery",
+    "bluetooth",
+    "mpris",
+    "pulseaudio",
+    "custom/notification",
+    "battery",
   ],
   // Widgets config
   "niri/workspaces": {
@@ -35,41 +36,63 @@
             "format-full": "  100%",
             "format-icons": ["  ", "  ", "  ", "  ", "  "] 
 	},
-"custom/dunst": {
-    "exec": "~/scripts/bash/dunst.sh",
-    "return-type": "json",
-    "on-click": "dunstctl history-pop",
-    "on-click-right": "dunstctl set-paused toggle"
-},
-"mpris": {
-	"format": "{player_icon} {artist} - {title}",
-    "format-paused": "{status_icon} <i>{dynamic}</i>",
-	"player-icons": {
-		"default": "▶",
-		
-	},
-	"status-icons": {
-		"paused": "⏸"
-	},
-	
-},
-  "clock": {
-    "format": "{:%H:%M}",
-    "format-alt": "{:%Y-%m-%d}",
-    "tooltip-format": "<tt><small>{calendar}</small></tt>",
-    "calendar": {
-      "mode": "year",
-      "mode-mon-col": 3,
-      "weeks-pos": "right",
-      "on-scroll": 1,
-      "format": {
-        "months": "<span color='#ffead3'><b>{}</b></span>",
-        "days": "<span color='#ecc6d9'><b>{}</b></span>",
-        "weeks": "<span color='#99ffdd'><b>W{}</b></span>",
-        "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
-        "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
-      }
-    }
+    "custom/notification": {
+        "tooltip": true,
+        "format": "<span size='16pt'>{icon}</span>",
+        "format-icons": {
+        "notification": "󱅫",
+        "none": "󰂜",
+        "dnd-notification": "󰂠",
+        "dnd-none": "󰪓",
+        "inhibited-notification": "󰂛",
+        "inhibited-none": "󰪑",
+        "dnd-inhibited-notification": "󰂛",
+        "dnd-inhibited-none": "󰪑"
+        },
+        "return-type": "json",
+        "exec-if": "which swaync-client",
+        "exec": "swaync-client -swb",
+        "on-click": "swaync-client -t -sw",
+        "on-click-right": "swaync-client -d -sw",
+        "escape": true
+  },
+    "mpris": {
+        "format": "{player_icon} {artist} - {title}",
+        "format-paused": "{status_icon} <i>{dynamic}</i>",
+        "player-icons": {
+            "default": "▶ ",
+        },
+        "status-icons": {
+            "paused": "⏸ "
+        },
+    },
+    "clock": {
+        "format": "{:%H:%M}",
+        "format-alt": "{:%Y-%m-%d}",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "calendar": {
+        "mode": "year",
+        "mode-mon-col": 3,
+        "weeks-pos": "right",
+        "on-scroll": 1,
+        "format": {
+            "months": "<span color='#ffead3'><b>{}</b></span>",
+            "days": "<span color='#ecc6d9'><b>{}</b></span>",
+            "weeks": "<span color='#99ffdd'><b>W{}</b></span>",
+            "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
+            "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
+        }
+        }
+    },
+    "bluetooth": {
+        // "controller": "controller1", // specify the alias of the controller if there are more than 1 on the system
+        "format": " {status}",
+        "format-disabled": "", // an empty format will hide the module
+        "format-connected": " {num_connections} connected",
+        "on-click": "blueman-manager",
+        "tooltip-format": "{controller_alias}\t{controller_address}",
+        "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}"
     },
     "pulseaudio": {
         "format": "{volume}% {icon}",

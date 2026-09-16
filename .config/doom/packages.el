@@ -56,6 +56,7 @@
 ;; Org mode
 (package! org-transclusion)
 (package! ox-typst)
+(package! ox-ipynb :recipe (:host github :repo "jkitchin/ox-ipynb"))
 (package! ox-hugo)
 
 ;; AI
@@ -81,8 +82,7 @@
 
 ;; My packages
 (package! org-img :recipe (:host github :repo "MartinBaGar/org-img"))
-;; (package! org-typst :recipe (:host github :repo "MartinBaGar/org-typst"))
+(package! elabftw-sync :recipe (:host github :repo "MartinBaGar/elabftw-sync"))
 (package! blender :recipe (:host github :repo "MartinBaGar/blender.el" :files ("*.el" "*.py")))
+;; (package! org-typst :recipe (:host github :repo "MartinBaGar/org-typst"))
 ;; (package! gdoc-handler :recipe (:host github :repo "MartinBaGar/gdoc-handler"))
-
-;; Waiting for approval
