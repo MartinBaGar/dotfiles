@@ -520,14 +520,14 @@ binds {
 
     // === Security ===
      Mod+Alt+L hotkey-overlay-title="Lock Screen" {
-        // spawn "swaylock" "-l" "--color" "000000";
-        spawn-sh "dunstctl set-paused true && swaylock -l --color 000000 && dunstctl set-paused false";
+        spawn "swaylock" "-l" "--color" "000000";
+        // spawn-sh "dunstctl set-paused true && swaylock -l --color 000000 && dunstctl set-paused false";
     }
     Ctrl+Alt+Delete hotkey-overlay-title="Task Manager" {
         spawn "kitty" "-o" "window_padding_width=0" "--class" "btop-float" "btop" "--preset" "1" ; }
     Mod+Shift+E { quit; }
 
-// === Audio Controls ===
+    // === Audio Controls ===
     XF86AudioRaiseVolume allow-when-locked=true {
         spawn "wpctl" "set-volume" "-l" "1.5" "@DEFAULT_AUDIO_SINK@" "5%+"
     }
@@ -690,9 +690,9 @@ layer-rule {
     // match namespace="^launcher$"
     // match namespace="^fuzzel$"
 
-    background-effect {
-        blur true
-    }
+    // background-effect {
+        // blur true
+    // }
     geometry-corner-radius 20
 
 
