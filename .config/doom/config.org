@@ -767,6 +767,14 @@ talk to the live REPL. Self-contained: doesn't depend on
                         (org-babel-python-without-earmuffs session)
                       (string-trim session "\\*" "\\*"))))))
 
+  (defun +org-babel-remote-dir (path host)
+    "Return PATH as-is on HOST, or its
+/ssh:HOST: tramp form otherwise. Used in :dir header-args to make
+Babel blocks work identically whether running locally or over SSH."
+      (if (string= system-name host)
+          path
+        (format "/ssh:%s:%s" host path)))
+
   (defmacro def-python-babel-preset! (name &rest header-args)
     (let* ((name-str (symbol-name name))
            (execute-sym      (intern (format "org-babel-execute:%s" name-str)))
@@ -795,6 +803,11 @@ talk to the live REPL. Self-contained: doesn't depend on
 
   (def-python-babel-preset! pyops
     (:session . "pyops-session")
+    (:results . "output")
+    (:exports . "code"))
+
+  (def-python-babel-preset! pyviz
+    (:session . "pyviz-session")
     (:results . "output")
     (:exports . "code")))
 #+end_src

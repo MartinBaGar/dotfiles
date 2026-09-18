@@ -1,5 +1,7 @@
 !.config
-!.oh-my-zsh
+.config/waybar/style.css
+.config/doom/config.el
+.config/doom/custom.el
+.config/fuzzel/fuzzel.ini
+.config/kitty/themes/kitty-colors.conf
 /.config/kitty/kitty.conf.bak
-/.config/waybar/style.css
-.config/kitty/kitty.conf.bak
