@@ -5,3 +5,8 @@
 .config/fuzzel/fuzzel.ini
 .config/kitty/themes/kitty-colors.conf
 /.config/kitty/kitty.conf.bak
+.config/emacs-vanilla/*
+!.config/emacs-vanilla/config.org
+!.config/emacs-vanilla/init.el
+!.config/emacs-vanilla/early-init.el
+!.config/emacs-vanilla/themes
