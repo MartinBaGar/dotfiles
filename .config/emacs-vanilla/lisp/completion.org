@@ -151,7 +151,42 @@ act on a completion candidate without visiting it first.
 * Corfu / Cape
 Completion-at-point UI.
 #+begin_src emacs-lisp
-(use-package corfu
-  :init
-  (global-corfu-mode))
+  (use-package corfu
+    :custom
+    ;; Enable auto-completion!
+    (corfu-auto t)
+    ;; Delay before the popup appears (in seconds). Lower is faster.
+    (corfu-auto-delay 0.2)
+    ;; Minimum number of characters typed before popup appears
+    (corfu-auto-prefix 2)
+    ;; Optional: Quit the popup if you move the cursor away
+    (corfu-quit-at-boundary t)
+    (corfu-quit-no-match t)
+
+    :init
+    (global-corfu-mode))
+
+  ;; Add extensions
+  (use-package cape
+    ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+    ;; Press C-c p ? to for help.
+    :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+    ;; Alternatively bind Cape commands individually.
+    ;; :bind (("C-c p d" . cape-dabbrev)
+    ;;        ("C-c p h" . cape-history)
+    ;;        ("C-c p f" . cape-file)
+    ;;        ...)
+    :init
+    ;; Add to the global default value of `completion-at-point-functions' which is
+    ;; used by `completion-at-point'.  The order of the functions matters, the
+    ;; first function returning a result wins.  Note that the list of buffer-local
+    ;; completion functions takes precedence over the global list.
+
+    (add-hook 'completion-at-point-functions #'cape-dabbrev)
+    (add-hook 'completion-at-point-functions #'cape-elisp-block)
+    (add-hook 'completion-at-point-functions #'cape-file)
+    (add-hook 'completion-at-point-functions #'tempel-complete)
+    ;; (add-hook 'completion-at-point-functions #'cape-history)
+    ;; ...
+    )
 #+end_src

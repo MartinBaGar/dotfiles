@@ -14,7 +14,7 @@
   (setq spacious-padding-widths
         '( :internal-border-width 15
            :header-line-width 4
-           :mode-line-width 6
+           :mode-line-width 4
            :tab-width 4
            :right-divider-width 30
            :scroll-bar-width 8))
@@ -49,4 +49,75 @@ appearance settings.
                      :family "Montserrat"
                      :height 130
                      :weight 'semi-bold)
+#+end_src
+
+* Modeline
+#+begin_src emacs-lisp
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode 1)
+    :custom
+    ;; Play nicely with spacious-padding
+    (doom-modeline-height 25)
+    (doom-modeline-bar-width 4)
+    
+    ;; Icon integration
+    (doom-modeline-icon t)
+    (doom-modeline-major-mode-icon t)
+    (doom-modeline-major-mode-color-icon t)
+    
+    ;; Clean path display (e.g., project/src/main.py instead of full path)
+    (doom-modeline-buffer-file-name-style 'truncate-upto-project))
+#+end_src
+
+* Tabs
+#+begin_src emacs-lisp
+  ;; 1. Configure the native Tab Bar
+  (use-package tab-bar
+    :ensure nil
+    :custom
+    (tab-bar-show 1)                        ; Only show the bar if > 1 tab is open
+    (tab-bar-close-button-show nil)         ; Hide the [X] for a cleaner UI
+    (tab-bar-new-tab-choice "*scratch*")    ; New tabs start clean
+    (tab-bar-format '(tab-bar-format-tabs tab-bar-format-align-right tab-bar-format-global))
+    :config
+    (tab-bar-mode 1))
+
+  ;; 2. Tabspaces: Isolate buffers per tab (The "Workspace" magic)
+  (use-package tabspaces
+    :ensure t
+    ;; Filter consult-buffer to only show buffers in the current tab's workspace
+    :hook (after-init . tabspaces-mode)
+    :custom
+    (tabspaces-use-filtered-buffers-as-default t)
+    (tabspaces-default-tab "Default")
+    (tabspaces-remove-to-default t)
+    (tabspaces-include-buffers '("*scratch*"))
+    ;; Tell project.el to open new projects in a brand new tab automatically
+    (project-switch-commands '((project-find-file "Find file")
+                               (project-dired "Dired")
+                               (project-vc-dir "VC-Dir")
+                               (project-eshell "Eshell")))
+    :config
+    (defalias 'project-other-tab-command 'tabspaces-open-or-create-project-and-workspace))
+
+  ;; 3. Meow Integration (Mirroring Doom's SPC TAB and SPC TAB .)
+  (with-eval-after-load 'meow
+    (defvar-keymap my/workspace-map
+      :doc "Workspaces/Tabs"
+      "." #'tab-bar-switch-to-tab
+      "n" #'tab-new
+      "c" #'tab-close
+      "R" #'tab-rename
+      "h" #'tab-previous
+      "l" #'tab-next)
+      
+    (fset 'my/workspace-map my/workspace-map)
+
+    (meow-leader-define-key
+     ;; SPC TAB cycles to the next tab (like Doom)
+     '("TAB" . tab-next)
+     
+     ;; SPC t opens the full workspace menu
+     '("t" . my/workspace-map)))
 #+end_src

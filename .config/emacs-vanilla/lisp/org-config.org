@@ -2,28 +2,28 @@
 #+PROPERTY: header-args:emacs-lisp :tangle org-config.el :results none
 
 #+begin_src emacs-lisp
-;;; org-config.el --- Org mode settings and appearance -*- lexical-binding: t; -*-
+  ;;; org-config.el --- Org mode settings and appearance -*- lexical-binding: t; -*-
 #+end_src
 
 * Core settings
 #+begin_src emacs-lisp
-(with-eval-after-load 'org
-  (setq
-   ;; Edit settings
-   org-auto-align-tags nil
-   org-tags-column 0
-   org-catch-invisible-edits 'show-and-error
-   org-special-ctrl-a/e t
-   org-insert-heading-respect-content t
+  (with-eval-after-load 'org
+    (setq
+     ;; Edit settings
+     org-auto-align-tags nil
+     org-tags-column 0
+     org-fold-catch-invisible-edits 'show-and-error
+     org-special-ctrl-a/e t
+     org-insert-heading-respect-content t
 
-   ;; Org styling, hide markup etc.
-   org-hide-emphasis-markers t
-   org-pretty-entities t
-   org-agenda-tags-column 0
-   org-ellipsis "…"
+     ;; Org styling, hide markup etc.
+     org-hide-emphasis-markers t
+     ;; org-pretty-entities t
+     ;; org-agenda-tags-column 0
+     org-ellipsis "…"
 
-   ;; CRITICAL: org-modern-indent requires org-indent to be enabled globally
-   org-startup-indented t))
+     ;; CRITICAL: org-modern-indent requires org-indent to be enabled globally
+     org-startup-indented t))
 #+end_src
 
 * Appearance (org-modern)
@@ -66,4 +66,10 @@ to live in the hook.
     (set-face-attribute face nil :inherit 'fixed-pitch)))
 
 (add-hook 'org-mode-hook #'variable-pitch-mode)
+#+end_src
+
+* Org-roam
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :ensure t)
 #+end_src

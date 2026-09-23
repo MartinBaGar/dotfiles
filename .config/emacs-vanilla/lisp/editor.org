@@ -14,22 +14,41 @@
 
 * Snippets
 #+begin_src emacs-lisp
-(use-package tempel
-  :bind (("M-+" . tempel-complete)
-         ("M-*" . tempel-insert))
-  :init
-  (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'. `tempel-expand'
-    ;; only triggers on exact matches. We add it *before* the main
-    ;; programming mode Capf, so it's tried first.
-    (setq-local completion-at-point-functions
-                (cons #'tempel-expand completion-at-point-functions)))
+  (use-package tempel
+    :bind (("M-+" . tempel-complete)
+           ("M-*" . tempel-insert))
+    :init
+    (defun tempel-setup-capf ()
+      ;; Add the Tempel Capf to `completion-at-point-functions'. `tempel-expand'
+      ;; only triggers on exact matches. We add it *before* the main
+      ;; programming mode Capf, so it's tried first.
+      (setq-local completion-at-point-functions
+    		(cons #'tempel-expand completion-at-point-functions))
+      (setopt tempel-path (concat (expand-file-name "templates" user-emacs-directory) "/*"))
+      )
 
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf))
+    (add-hook 'conf-mode-hook 'tempel-setup-capf)
+    (add-hook 'prog-mode-hook 'tempel-setup-capf)
+    (add-hook 'text-mode-hook 'tempel-setup-capf))
 
-(use-package tempel-collection)
+  (use-package tempel-collection)
+
+  (defun tempel-case-match (elt fields)
+    (pcase elt
+      (`(c ,text)
+       (let ((at-start (save-excursion
+                         (skip-chars-backward " \t")
+                         (or (bobp)
+                             (bolp)
+                             (memq (char-before) '(?. ?? ?!))
+                             (looking-back "^\\s-*[*\\-]+" (line-beginning-position))))))
+         (if (and at-start (> (length text) 0))
+             (concat (upcase (substring text 0 1)) (substring text 1))
+           text)))))
+
+  (defun my/open-tempel-templates ()
+    (interactive)
+    (find-file (f-dirname tempel-path)))
 #+end_src
 
 * Meow
@@ -162,3 +181,168 @@
 (with-eval-after-load 'which-key
   (which-key-add-key-based-replacements "SPC w" "Windows"))
 #+end_src
+* LLM
+** Gptel
+#+begin_src emacs-lisp
+(use-package gptel
+  :config
+  (gptel-make-openai "Mistral"
+  :host "api.mistral.ai"
+  :endpoint "/v1/chat/completions"
+  :models '("mistral-small-latest" "mistral-large-latest" "codestral-latest" "ministral-8b-latest")
+  :key #'gptel-api-key-from-auth-source)
+
+   ;; OpenRouter offers an OpenAI compatible API
+  (gptel-make-openai "OpenRouter"
+  :host "openrouter.ai"
+  :endpoint "/api/v1/chat/completions"
+  :stream t
+  :key #'gptel-api-key-from-auth-source
+  :models '(openai/gpt-oss-120b:free
+            tngtech/deepseek-r1t2-chimera:free))
+
+  ;; Default model + backend
+  (setopt gptel-backend (gptel-get-backend "Mistral"))
+  (setopt gptel-model 'mistral-large-latest)
+  (setopt gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
+  (setopt gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
+  (setopt gptel-default-mode 'org-mode))
+
+(use-package gptel-prompts
+  :after (gptel)
+  :demand t
+  :config
+  (setq gptel-prompts-directory "~/org/gptel_prompts")
+  (gptel-prompts-update)
+  ;; Ensure prompts are updated if prompt files change
+  (gptel-prompts-add-update-watchers)
+  )
+
+(use-package gptel-commit
+  :ensure t
+  :after (gptel magit)
+  :custom
+  (gptel-commit-stream t))
+#+end_src
+** Minuet
+#+begin_src emacs-lisp
+(use-package minuet
+    :bind
+    (("M-y" . #'minuet-complete-with-minibuffer) ;; use minibuffer for completion
+     ("M-i" . #'minuet-show-suggestion) ;; use overlay for completion
+     ("C-c m" . #'minuet-configure-provider)
+     :map minuet-active-mode-map
+     ;; These keymaps activate only when a minuet suggestion is displayed in the current buffer
+     ("M-p" . #'minuet-previous-suggestion) ;; invoke completion or cycle to next completion
+     ("M-n" . #'minuet-next-suggestion) ;; invoke completion or cycle to previous completion
+     ("M-A" . #'minuet-accept-suggestion) ;; accept whole completion
+     ;; Accept the first line of completion, or N lines with a numeric-prefix:
+     ;; e.g. C-u 2 M-a will accepts 2 lines of completion.
+     ("M-a" . #'minuet-accept-suggestion-line)
+     ;; Accept the first word of completion, or N words with a numeric-prefix:
+     ;; e.g. C-u 2 M-w will accepts 2 words of completion.
+     ("M-w" . #'minuet-accept-suggestion-word)
+     ("M-e" . #'minuet-dismiss-suggestion))
+  :hook (prog-mode . minuet-auto-suggestion-mode)
+  :config
+  ;; Tell Minuet to use Codestral
+  (setq minuet-provider 'codestral)
+
+  ;; Use gptel's built-in function to extract the key.
+  ;; We use a lambda so it is evaluated only when Minuet needs it.
+  (plist-put minuet-codestral-options :api-key
+             (lambda () (gptel-api-key-from-auth-source "api.codestral.ai")))
+
+  ;; Recommended limits to prevent burning through tokens or timing out
+  (minuet-set-optional-options minuet-codestral-options :max_tokens 256)
+  (minuet-set-optional-options minuet-codestral-options :stop ["\n\n"])
+#+end_src
+* Language
+** Translation
+#+begin_src emacs-lisp
+  (use-package gt
+    :config
+    (setq gt-default-translator
+          (gt-translator
+           :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
+           :engines (list
+                     (gt-bing-engine :if 'word)
+                     (gt-google-engine :if 'not-word))
+           :render (gt-insert-render :type 'replace)))
+    
+    (setq gt-preset-translators
+        `((replacer . ,(gt-translator
+           :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
+           :engines (list
+                     (gt-bing-engine :if 'word)
+                     (gt-google-engine :if 'not-word))
+           :render (gt-insert-render :type 'replace)))
+          (translator . ,(gt-translator
+                    :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
+                    :engines (list
+                            (gt-google-engine :if 'word)
+                            (gt-google-engine :if 'not-word))
+                    :render (list
+                              (gt-overlay-render :type 'replace :if 'not-word)
+                              (gt-buffer-render :if 'word)
+                             ))))))
+
+  ;; (map! :leader
+  ;;     (:prefix ("t t" . "translate")
+  ;;     :desc "Switch translator" "s" #'gt-switch-translator
+  ;;     :desc "Dismiss overlays" "d" #'gt-delete-render-overlays
+  ;;     :desc "Translate" "t" #'gt-translate))
+#+end_src
+** Spell
+#+begin_src emacs-lisp
+(use-package jinx
+  ;; :hook (emacs-startup . global-jinx-mode)
+  :bind (("M-$" . jinx-correct)
+         ("C-M-$" . jinx-languages)))
+
+(with-eval-after-load 'jinx
+  ;; Limitations:
+  ;; 1. since raw block highlighting let the local parser highlights the area,
+  ;; some area doesn't contain face (like `bash-ts-mode'), and those areas will
+  ;; be checked by jinx
+  (add-to-list
+   'jinx-exclude-faces
+   '(typst-ts-mode
+     ;; not included font lock faces
+     ;; `font-lock-comment-face', `font-lock-string-face', `font-lock-doc-face'
+     ;; `font-lock-doc-markup-face'
+     font-lock-warning-face font-lock-function-name-face font-lock-function-call-face
+     font-lock-variable-name-face font-lock-variable-use-face font-lock-keyword-face
+     font-lock-comment-delimiter-face font-lock-type-face font-lock-constant-face
+     font-lock-builtin-face font-lock-preprocessor-face
+     font-lock-negation-char-face font-lock-escape-face font-lock-number-face
+     font-lock-operator-face font-lock-property-use-face font-lock-punctuation-face
+     font-lock-bracket-face font-lock-delimiter-face font-lock-misc-punctuation-face
+     ;; typst-ts-mode created faces
+     typst-ts-markup-item-indicator-face typst-ts-markup-term-indicator-face
+     typst-ts-markup-rawspan-indicator-face typst-ts-markup-rawspan-blob-face
+     typst-ts-markup-rawblock-indicator-face typst-ts-markup-rawblock-lang-face
+     typst-ts-markup-rawblock-blob-face
+     typst-ts-error-face typst-ts-shorthand-face typst-ts-markup-linebreak-face
+     typst-ts-markup-quote-face typst-ts-markup-url-face typst-ts-math-indicator-face)))
+#+end_src
+* Default-Apps
+#+begin_src emacs-lisp
+  ;; TODO: solidify the link handling. Didn't work on tranclusion links
+  (defun my/xdg-open-path-at-point ()
+    "Open the file at point with xdg-open."
+    (interactive)
+    (let ((path (or (org-element-property :path (org-element-context))
+                    (thing-at-point 'filename t))))
+      (cond
+       ((and path (file-exists-p path))
+        (start-process "xdg-open" nil "xdg-open" (expand-file-name path)))
+       (t
+        (message "No valid file ;; path at point.")))))
+
+  ;; (map! :leader
+  ;;       :prefix "o"
+  ;;       :desc "Open file at point with default app"
+  ;;       "x" #'my/xdg-open-path-at-point)
+#+end_src
+

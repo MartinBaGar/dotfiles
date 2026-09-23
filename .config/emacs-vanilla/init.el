@@ -9,29 +9,43 @@
 (defvar my/config-dir (expand-file-name "lisp" user-emacs-directory)
   "Directory holding the split literate config files.")
 
-(defun my/load-literate-config (file)
+(defun my/load-literate-config (file &optional compile)
   "Tangle FILE (an org file under `my/config-dir') if stale, then load it.
 Each file tangles to its own same-named .el, independently of the
-others -- no #+INCLUDE, no shared tangle target."
+others -- no #+INCLUDE, no shared tangle target.
+
+When COMPILE is non-nil, byte-compile on (re)tangle, and prefer the
+.elc on the cached path too. Pass nil (the default) for files whose
+top-level code defines and immediately uses a macro within that same
+file -- e.g. Elpaca's bootstrap, which defines the `elpaca' macro and
+calls it in the same breath. Byte-compiling that sequence compiles
+the call before the macro is known to exist, turning it into a plain
+function call and breaking at runtime with `invalid-function'."
   (let* ((org-file (expand-file-name file my/config-dir))
          (el-file  (expand-file-name
-                    (concat (file-name-base file) ".el")
-                    my/config-dir)))
+                     (concat (file-name-base file) ".el")
+                     my/config-dir)))
     (if (and (file-exists-p el-file)
              (file-newer-than-file-p el-file org-file))
-        (load (file-name-sans-extension el-file))
-      (org-babel-load-file org-file t))))
+        (if compile
+            (load (file-name-sans-extension el-file))
+          (load-file el-file))
+      (org-babel-load-file org-file compile))))
 
-;; Order matters: bootstrap.org (Elpaca) must load first. Everything
-;; after it can be reordered freely.
-(dolist (file '("bootstrap.org"
-                "completion.org"
-                "editor.org"
-                "ui.org"
-                "org-config.org"
-                "file-management.org"
-                "programming.org"))
-  (my/load-literate-config file))
+;; bootstrap.org must load first, and never compiled -- see the
+;; docstring above.
+(my/load-literate-config "bootstrap.org")
+
+;; Everything else can be reordered freely, and is safe to compile:
+;; by the time these load, Elpaca and use-package are already fully
+;; loaded as real macros, not autoloaded stubs.
+(dolist (file '("completion.org"
+                 "editor.org"
+                 "ui.org"
+                 "org-config.org"
+                 "file-management.org"
+                 "programming.org"))
+  (my/load-literate-config file t))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
