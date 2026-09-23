@@ -1,0 +1,69 @@
+#+TITLE: Org
+#+PROPERTY: header-args:emacs-lisp :tangle org-config.el :results none
+
+#+begin_src emacs-lisp
+;;; org-config.el --- Org mode settings and appearance -*- lexical-binding: t; -*-
+#+end_src
+
+* Core settings
+#+begin_src emacs-lisp
+(with-eval-after-load 'org
+  (setq
+   ;; Edit settings
+   org-auto-align-tags nil
+   org-tags-column 0
+   org-catch-invisible-edits 'show-and-error
+   org-special-ctrl-a/e t
+   org-insert-heading-respect-content t
+
+   ;; Org styling, hide markup etc.
+   org-hide-emphasis-markers t
+   org-pretty-entities t
+   org-agenda-tags-column 0
+   org-ellipsis "…"
+
+   ;; CRITICAL: org-modern-indent requires org-indent to be enabled globally
+   org-startup-indented t))
+#+end_src
+
+* Appearance (org-modern)
+org-modern owns stars, tags, lists and checkboxes on its own -- no
+separate bullets package needed alongside it.
+#+begin_src emacs-lisp
+(use-package org-modern
+  :custom
+  (org-modern-star '("◉" "○" "●" "○" "●"))
+  ;; Disable org-modern table styling if you prefer standard Org tables
+  (org-modern-table nil)
+  (org-modern-list
+   '(;; (?- . "-")
+     (?* . "•")
+     (?+ . "‣")))
+  :hook
+  (org-mode . org-modern-mode)
+  (org-agenda-finalize . org-modern-agenda))
+
+;; Source blocks and indentation structure
+(use-package org-modern-indent
+  :ensure (org-modern-indent :host github :repo "jdtsmith/org-modern-indent")
+  :config
+  ;; The '90' ensures this hook runs very late, after org-modern and org-indent
+  (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+#+end_src
+
+* Fonts: prose vs. code
+These faces are set globally, once -- not inside a per-buffer hook,
+since `set-face-attribute' without a frame argument changes the face
+everywhere, and re-running it on every org buffer you open is pure
+waste. Only the buffer-local minor mode (`variable-pitch-mode') needs
+to live in the hook.
+#+begin_src emacs-lisp
+(with-eval-after-load 'org
+  (dolist (face '(org-table org-code org-verbatim org-block
+                   org-meta-line org-drawer org-special-keyword
+                   org-property-value org-document-info-keyword
+                   org-date org-tag))
+    (set-face-attribute face nil :inherit 'fixed-pitch)))
+
+(add-hook 'org-mode-hook #'variable-pitch-mode)
+#+end_src

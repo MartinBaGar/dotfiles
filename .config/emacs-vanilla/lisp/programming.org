@@ -1,0 +1,22 @@
+#+TITLE: Programming
+#+PROPERTY: header-args:emacs-lisp :tangle programming.el :results none
+
+#+begin_src emacs-lisp
+;;; programming.el --- Language-agnostic dev tools -*- lexical-binding: t; -*-
+#+end_src
+
+* Magit
+#+begin_src emacs-lisp
+(use-package magit)
+#+end_src
+
+* envrc
+=envrc-global-mode= has to be called explicitly -- installing the
+package alone does nothing. Hooking it to =after-init= enables it late,
+which is what envrc's own README recommends (so it initializes in each
+buffer before other minor modes that might look for project-specific
+executables).
+#+begin_src emacs-lisp
+(use-package envrc
+  :hook (after-init . envrc-global-mode))
+#+end_src

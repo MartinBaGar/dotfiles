@@ -10,3 +10,4 @@
 !.config/emacs-vanilla/init.el
 !.config/emacs-vanilla/early-init.el
 !.config/emacs-vanilla/themes
+!.config/emacs-vanilla/lisp

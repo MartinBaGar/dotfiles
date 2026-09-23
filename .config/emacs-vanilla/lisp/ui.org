@@ -1,0 +1,52 @@
+#+TITLE: UI
+#+PROPERTY: header-args:emacs-lisp :tangle ui.el :results none
+
+#+begin_src emacs-lisp
+;;; ui.el --- General appearance, icons, fonts -*- lexical-binding: t; -*-
+#+end_src
+
+* General
+#+begin_src emacs-lisp
+(add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
+
+(use-package spacious-padding
+  :config
+  (setq spacious-padding-widths
+        '( :internal-border-width 15
+           :header-line-width 4
+           :mode-line-width 6
+           :tab-width 4
+           :right-divider-width 30
+           :scroll-bar-width 8))
+  (spacious-padding-mode 1))
+
+(use-package nerd-icons
+  :custom
+  (nerd-icons-font-family "Symbols Nerd Font Mono"))
+;; One-time manual step, not run on every boot:
+;;   M-x nerd-icons-install-fonts
+#+end_src
+
+* Fonts
+Base faces only. The org-specific fixed-pitch overrides (tables, code
+blocks, etc) live in org-config.org, next to the rest of the org
+appearance settings.
+#+begin_src emacs-lisp
+;; Fixed-pitch (code, and the "default" face everything falls back to)
+(set-face-attribute 'default nil
+                     :family "Iosevka"
+                     :height 120        ; height is in 1/10 pt, so 120 = 12pt
+                     :weight 'medium)
+
+;; fixed-pitch should usually just mirror default
+(set-face-attribute 'fixed-pitch nil
+                     :family "Iosevka"
+                     :height 120
+                     :weight 'medium)
+
+;; Variable-pitch (org-mode prose, markdown, UI elements)
+(set-face-attribute 'variable-pitch nil
+                     :family "Montserrat"
+                     :height 130
+                     :weight 'semi-bold)
+#+end_src

@@ -82,18 +82,21 @@
 
    ;; Org Mode
    `(org-document-title ((t (:foreground ,blue :weight bold :height 1.2))))
-   `(org-block ((t (:background ,org-block-bg :extend t))))
-   `(org-block-begin-line ((t (:foreground ,base4 :slant italic :background ,org-meta-bg :extend t))))
-   `(org-block-end-line ((t (:foreground ,base4 :slant italic :background ,org-meta-bg :extend t))))
+   `(org-block ((t (:inherit fixed-pitch :background ,org-block-bg :extend t))))
+   `(org-block-begin-line ((t (:inherit fixed-pitch :foreground ,base4 :slant italic :background ,org-meta-bg :extend t))))
+   `(org-block-end-line ((t (:inherit fixed-pitch :foreground ,base4 :slant italic :background ,org-meta-bg :extend t))))
    `(org-quote ((t (:background ,base2 :extend t :slant italic))))
    `(org-ellipsis ((t (:foreground ,red :underline nil))))
    `(org-hide ((t (:foreground ,bg))))
+   `(org-code ((t (:inherit fixed-pitch :foreground ,green))))
+   `(org-verbatim ((t (:inherit fixed-pitch :foreground ,green))))
+   `(org-table ((t (:inherit fixed-pitch :foreground ,blue))))
 
    ;; Markdown Mode
    `(markdown-markup-face ((t (:foreground ,base5))))
    `(markdown-header-face ((t (:inherit bold :foreground ,red))))
-   `(markdown-code-face ((t (:background ,org-meta-bg))))
-
+   `(markdown-code-face ((t (:inherit fixed-pitch :background ,org-meta-bg))))
+   
    ;; CSS Mode
    `(css-proprietary-property ((t (:foreground ,orange))))
    `(css-property ((t (:foreground ,fg))))

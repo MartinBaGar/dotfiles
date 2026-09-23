@@ -1,6 +1,12 @@
-;; -*- lexical-binding: t; -*-
+;;; early-init.el --- Early initialization -*- lexical-binding: t; -*-
+
+;; Raise the GC threshold for the *entire* startup sequence (Elpaca
+;; bootstrap, package loads, org tangling in init.el) and only reset it
+;; once startup has fully finished, via `emacs-startup-hook'. Resetting
+;; it synchronously here, before init.el even runs, would defeat the
+;; whole point of raising it in the first place.
 (setq gc-cons-threshold most-positive-fixnum
-      gc-cons-percentage 0.5)
+      gc-cons-percentage 0.6)
 
 ;; Disable package.el to let elpaca operate
 (setq package-enable-at-startup nil)
@@ -24,4 +30,9 @@
       inhibit-startup-echo-area-message user-login-name ; read the docstring
       inhibit-startup-buffer-menu t)
 
-(setq gc-cons-threshold (* 16 1024 1024))     ; reset after load
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold (* 16 1024 1024)
+                  gc-cons-percentage 0.1)))
+
+;;; early-init.el ends here

@@ -1,0 +1,35 @@
+#+TITLE: File Management
+#+PROPERTY: header-args:emacs-lisp :tangle file-management.el :results none
+
+#+begin_src emacs-lisp
+;;; file-management.el --- Dirvish -*- lexical-binding: t; -*-
+#+end_src
+
+* Dirvish
+#+begin_src emacs-lisp
+(use-package dirvish
+  :init
+  ;; Let Dirvish take over Dired globally
+  (dirvish-override-dired-mode)
+
+  :custom
+  ;; Subtree visual indicators: 'subtree-state' is required to show
+  ;; the [+]/[-] icons, alongside a few other useful attributes.
+  (dirvish-attributes '(vc-state subtree-state nerd-icons collapse git-msg))
+  (dirvish-side-width 35)
+
+  :config
+  ;; Persistent sidebar & follow mode: highlights the current buffer's
+  ;; file and jumps to project roots when you switch projects.
+  (dirvish-side-follow-mode 1)
+  (setq dirvish-subtree-always-show-state t)
+
+  :bind
+  (("C-c d" . dirvish-side)
+   :map dirvish-mode-map
+   ("TAB" . dirvish-subtree-toggle)))
+#+end_src
+
+# Note: the Dired/Dirvish Meow keybindings we discussed earlier
+# (h/l navigation, motion-state j/k) aren't in here yet -- add them
+# under a new heading in this file whenever you're ready to wire them in.
