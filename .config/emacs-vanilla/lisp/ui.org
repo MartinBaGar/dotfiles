@@ -7,24 +7,26 @@
 
 * General
 #+begin_src emacs-lisp
-(add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
+  (add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
+  (load-theme 'spacegrey-light t)
+  (global-visual-line-mode 1)
 
-(use-package spacious-padding
-  :config
-  (setq spacious-padding-widths
-        '( :internal-border-width 15
-           :header-line-width 4
-           :mode-line-width 4
-           :tab-width 4
-           :right-divider-width 30
-           :scroll-bar-width 8))
-  (spacious-padding-mode 1))
+  (use-package spacious-padding
+    :config
+    (setq spacious-padding-widths
+          '( :internal-border-width 15
+             :header-line-width 4
+             :mode-line-width 4
+             :tab-width 4
+             :right-divider-width 30
+             :scroll-bar-width 8))
+    (spacious-padding-mode 1))
 
-(use-package nerd-icons
-  :custom
-  (nerd-icons-font-family "Symbols Nerd Font Mono"))
-;; One-time manual step, not run on every boot:
-;;   M-x nerd-icons-install-fonts
+  (use-package nerd-icons
+    :custom
+    (nerd-icons-font-family "Symbols Nerd Font Mono"))
+  ;; One-time manual step, not run on every boot:
+  ;;   M-x nerd-icons-install-fonts
 #+end_src
 
 * Fonts
@@ -32,23 +34,43 @@ Base faces only. The org-specific fixed-pitch overrides (tables, code
 blocks, etc) live in org-config.org, next to the rest of the org
 appearance settings.
 #+begin_src emacs-lisp
-;; Fixed-pitch (code, and the "default" face everything falls back to)
-(set-face-attribute 'default nil
-                     :family "Iosevka"
-                     :height 120        ; height is in 1/10 pt, so 120 = 12pt
-                     :weight 'medium)
+  ;; Fixed-pitch (code, and the "default" face everything falls back to)
+  (set-face-attribute 'default nil
+                      :family "Iosevka"
+                      :height 120        ; height is in 1/10 pt, so 120 = 12pt
+                      :weight 'medium)
 
-;; fixed-pitch should usually just mirror default
-(set-face-attribute 'fixed-pitch nil
-                     :family "Iosevka"
-                     :height 120
-                     :weight 'medium)
+  ;; fixed-pitch should usually just mirror default
+  (set-face-attribute 'fixed-pitch nil
+                      :family "Iosevka"
+                      :height 120
+                      :weight 'medium)
 
-;; Variable-pitch (org-mode prose, markdown, UI elements)
-(set-face-attribute 'variable-pitch nil
-                     :family "Montserrat"
-                     :height 130
-                     :weight 'semi-bold)
+  ;; Variable-pitch (org-mode prose, markdown, UI elements)
+  (set-face-attribute 'variable-pitch nil
+                      :family "Montserrat"
+                      :height 130
+                      :weight 'semi-bold)
+
+  ;; 1. The main bar: inherit the background color from the inactive mode-line
+  (set-face-attribute 'tab-bar nil 
+                      :background 'unspecified 
+                      :inherit 'mode-line-inactive 
+                      :box nil)
+
+  ;; 2. Active tab: inherit the exact foreground color of default text
+  (set-face-attribute 'tab-bar-tab nil 
+                      :background 'unspecified
+                      :inherit 'default 
+                      :weight 'bold
+                      :box nil)
+
+  ;; 3. Inactive tabs: inherit from 'shadow' (which all themes map to a faded grey)
+  (set-face-attribute 'tab-bar-tab-inactive nil 
+                      :background 'unspecified
+                      :inherit 'shadow 
+                      :weight 'normal
+                      :box nil)
 #+end_src
 
 * Modeline
@@ -78,8 +100,11 @@ appearance settings.
     :custom
     (tab-bar-show 1)                        ; Only show the bar if > 1 tab is open
     (tab-bar-close-button-show nil)         ; Hide the [X] for a cleaner UI
-    (tab-bar-new-tab-choice "*scratch*")    ; New tabs start clean
-    (tab-bar-format '(tab-bar-format-tabs tab-bar-format-align-right tab-bar-format-global))
+    (tab-bar-new-tab-choice 'list-bookmarks)    ; New tabs start clean
+    (tab-bar-tab-hints t)
+    (tab-bar-format '(tab-bar-format-tabs 
+                      tab-bar-format-align-right 
+                      tab-bar-format-global))
     :config
     (tab-bar-mode 1))
 
@@ -100,24 +125,4 @@ appearance settings.
                                (project-eshell "Eshell")))
     :config
     (defalias 'project-other-tab-command 'tabspaces-open-or-create-project-and-workspace))
-
-  ;; 3. Meow Integration (Mirroring Doom's SPC TAB and SPC TAB .)
-  (with-eval-after-load 'meow
-    (defvar-keymap my/workspace-map
-      :doc "Workspaces/Tabs"
-      "." #'tab-bar-switch-to-tab
-      "n" #'tab-new
-      "c" #'tab-close
-      "R" #'tab-rename
-      "h" #'tab-previous
-      "l" #'tab-next)
-      
-    (fset 'my/workspace-map my/workspace-map)
-
-    (meow-leader-define-key
-     ;; SPC TAB cycles to the next tab (like Doom)
-     '("TAB" . tab-next)
-     
-     ;; SPC t opens the full workspace menu
-     '("t" . my/workspace-map)))
 #+end_src

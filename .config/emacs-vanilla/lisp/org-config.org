@@ -70,6 +70,40 @@ to live in the hook.
 
 * Org-roam
 #+begin_src emacs-lisp
-  (use-package org-roam
-    :ensure t)
+(use-package org-roam
+  :ensure t
+  :custom
+  ;; Replace this string with the exact path to your Syncthing directory
+  (org-roam-directory (file-truename "~/org/roam"))
+  
+  ;; Enables completion for node insertion anywhere
+  (org-roam-completion-everywhere t)
+  :config
+  ;; This is the magic line. It automatically parses all your existing files
+  ;; and builds the SQLite database so everything links up immediately.
+  (org-roam-db-autosync-mode 1))
+
+(with-eval-after-load 'meow
+  ;; Recreate Doom's Notes submap -- SPC n ...
+  (defvar-keymap my/notes-map
+    :doc "Org-Roam / Notes"
+    "f" #'org-roam-node-find       ; Find or create a node
+    "i" #'org-roam-node-insert     ; Insert a link to a node
+    "c" #'org-roam-capture         ; Capture a new node instantly
+    "l" #'org-roam-buffer-toggle   ; Toggle the backlinks buffer
+    "t" #'org-roam-tag-add)        ; Add a tag to the current node
+    
+  (meow-leader-define-key (cons "n" my/notes-map)))
+#+end_src
+
+* Org-babel
+#+begin_src emacs-lisp
+  (with-eval-after-load 'org
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((shell . t)
+       (python . t)    ;; Added this since you use Python blocks
+       (emacs-lisp . t))))
+
+  (setq org-confirm-babel-evaluate nil)
 #+end_src

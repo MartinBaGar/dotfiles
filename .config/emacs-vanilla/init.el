@@ -1,5 +1,6 @@
 ;;; init.el --- Bootstrapper -*- lexical-binding: t; -*-
 
+(setq load-prefer-newer t)
 ;; Pre-authorize the one `eval' dir-local form used in lisp/.dir-locals.el
 ;; (auto-tangle-on-save for every literate file under lisp/), so Emacs
 ;; doesn't prompt for confirmation every time a new file there is opened.
@@ -23,8 +24,8 @@ the call before the macro is known to exist, turning it into a plain
 function call and breaking at runtime with `invalid-function'."
   (let* ((org-file (expand-file-name file my/config-dir))
          (el-file  (expand-file-name
-                     (concat (file-name-base file) ".el")
-                     my/config-dir)))
+                    (concat (file-name-base file) ".el")
+                    my/config-dir)))
     (if (and (file-exists-p el-file)
              (file-newer-than-file-p el-file org-file))
         (if compile
@@ -40,11 +41,11 @@ function call and breaking at runtime with `invalid-function'."
 ;; by the time these load, Elpaca and use-package are already fully
 ;; loaded as real macros, not autoloaded stubs.
 (dolist (file '("completion.org"
-                 "editor.org"
-                 "ui.org"
-                 "org-config.org"
-                 "file-management.org"
-                 "programming.org"))
+                "editor.org"
+                "ui.org"
+                "org-config.org"
+                "file-management.org"
+                "programming.org"))
   (my/load-literate-config file t))
 
 (custom-set-variables
@@ -57,7 +58,96 @@ function call and breaking at runtime with `invalid-function'."
      "30b34b5d8b19449406cdbe70dd6aa2d5edb0504df027cd028cbe35faf8353649"
      "c1ec19bedfe30cc2cef61c72ff8cbd1593857dcbae89f6649a0c80c3d26213e8"
      "9ec9cb6b3fea5ecc1530eb9d24bce05b26f2e0398dd66a3b5628f560ba4e955c"
-     default)))
+     default))
+ '(safe-local-variable-values
+   '((eval let
+	   ((prologue
+	     "from mbg_common import reload\12reload.reload_mbg()"))
+	   (setq-local org-babel-default-header-args:pyplot
+		       `((:results . "output raw")
+			 (:session . "pyanalysis-session")
+			 (:python
+			  . "/home/mabagar/git-repos/mabagage/.pixi/envs/analysis/bin/python")
+			 (:prologue \, prologue)))
+	   (setq-local org-babel-default-header-args:pyops
+		       `((:results . "output output")
+			 (:session . "pyanalysis-session")
+			 (:python
+			  . "/home/mabagar/git-repos/mabagage/.pixi/envs/analysis/bin/python")
+			 (:prologue \, prologue)))
+	   (setq-local org-babel-default-header-args:pyviz
+		       `((:results . "output raw")
+			 (:session . "pyviz-session")
+			 (:python
+			  . "/home/mabagar/git-repos/mabagage/.pixi/envs/visuals/bin/python")
+			 (:prologue
+			  . "import os\12from mbg_common import reload\12from pymol import cmd\12reload.reload_mbg()\12cmd.run(os.path.expanduser(\"~/scripts/python/pymol/mylib.py\"))"))))
+     (eval let
+	   ((prologue
+	     "from mbg_common import reload\12reload.reload_mbg()"))
+	   (setq-local org-babel-default-header-args:pyplot
+		       `((:results . "output raw")
+			 (:session . "pyanalysis-session")
+			 (:python
+			  . "/home/mabagar/git-repos/mabagage/.pixi/envs/visuals/bin/python")
+			 (:prologue \, prologue)))
+	   (setq-local org-babel-default-header-args:pyops
+		       `((:results . "output output")
+			 (:session . "pyanalysis-session")
+			 (:python
+			  . "/home/mabagar/git-repos/mabagage/.pixi/envs/visuals/bin/python")
+			 (:prologue \, prologue)))
+	   (setq-local org-babel-default-header-args:pyviz
+		       `((:results . "output raw")
+			 (:session . "pyviz-session")
+			 (:python
+			  . "/home/mabagar/git-repos/mabagage/.pixi/envs/visuals/bin/python")
+			 (:prologue
+			  . "import os\12from mbg_common import reload\12from pymol import cmd\12reload.reload_mbg()\12cmd.run(os.path.expanduser(\"~/scripts/python/pymol/mylib.py\"))"))))
+     (eval let
+	   ((prologue
+	     "from mbg_common import reload\12reload.reload_mbg()"))
+	   (setq-local org-babel-default-header-args:pyplot
+		       `((:results . "output raw")
+			 (:session . "pyanalysis-session")
+			 (:python
+			  . "/data/bari-garnier/git_repos/mabagage/.pixi/envs/analysis/bin/python")
+			 (:prologue \, prologue)))
+	   (setq-local org-babel-default-header-args:pyops
+		       `((:results . "output output")
+			 (:session . "pyanalysis-session")
+			 (:python
+			  . "/data/bari-garnier/git_repos/mabagage/.pixi/envs/analysis/bin/python")
+			 (:prologue \, prologue)))
+	   (setq-local org-babel-default-header-args:pyviz
+		       `((:results . "output raw")
+			 (:session . "pyviz-session")
+			 (:python
+			  . "/home/mabagar/git-repos/mabagage/.pixi/envs/visuals/bin/python")
+			 (:prologue
+			  . "import os\12from mbg_common import reload\12from pymol import cmd\12reload.reload_mbg()\12cmd.run(os.path.expanduser(\"~/scripts/python/pymol/mylib.py\"))"))))
+     (eval let
+	   ((prologue
+	     "from mbg_common import reload\12reload.reload_mbg()"))
+	   (setq-local org-babel-default-header-args:pyplot
+		       `((:results . "output raw")
+			 (:session . "pyanalysis-session")
+			 (:python
+			  . "/data/bari-garnier/git_repos/mabagage/.pixi/envs/analysis/bin/python")
+			 (:prologue \, prologue)))
+	   (setq-local org-babel-default-header-args:pyops
+		       `((:results . "output output")
+			 (:session . "pyanalysis-session")
+			 (:python
+			  . "/data/bari-garnier/git_repos/mabagage/.pixi/envs/analysis/bin/python")
+			 (:prologue \, prologue)))
+	   (setq-local org-babel-default-header-args:pyviz
+		       `((:results . "output raw")
+			 (:session . "pyviz-session")
+			 (:python
+			  . "/data/bari-garnier/git_repos/mabagage/.pixi/envs/visuals/bin/python")
+			 (:prologue
+			  . "import os\12from mbg_common import reload\12from pymol import cmd\12reload.reload_mbg()\12cmd.run(os.path.expanduser(\"~/scripts/python/pymol/mylib.py\"))")))))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

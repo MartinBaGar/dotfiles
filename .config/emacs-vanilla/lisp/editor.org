@@ -7,9 +7,16 @@
 
 * Formatting
 #+begin_src emacs-lisp
-(use-package apheleia
-  :config
-  (apheleia-global-mode +1))
+  (use-package apheleia
+    :config
+    (apheleia-global-mode +1))
+
+  (use-package smartparens
+    :ensure smartparens  ;; install the package
+    :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
+    :config
+    ;; load default config
+    (require 'smartparens-config))
 #+end_src
 
 * Snippets
@@ -53,116 +60,140 @@
 
 * Meow
 #+begin_src emacs-lisp
-(use-package meow
-  :config
-  (defun meow-setup ()
-    (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-    (meow-motion-define-key
-     '("j" . meow-next)
-     '("k" . meow-prev)
-     '("<escape>" . ignore))
-    (meow-leader-define-key
-     ;; Use SPC (0-9) for digit arguments.
-     '("1" . meow-digit-argument)
-     '("2" . meow-digit-argument)
-     '("3" . meow-digit-argument)
-     '("4" . meow-digit-argument)
-     '("5" . meow-digit-argument)
-     '("6" . meow-digit-argument)
-     '("7" . meow-digit-argument)
-     '("8" . meow-digit-argument)
-     '("9" . meow-digit-argument)
-     '("0" . meow-digit-argument)
-     '("/" . meow-keypad-describe-key)
-     '("?" . meow-cheatsheet))
-    (meow-normal-define-key
-     '("0" . meow-expand-0)
-     '("9" . meow-expand-9)
-     '("8" . meow-expand-8)
-     '("7" . meow-expand-7)
-     '("6" . meow-expand-6)
-     '("5" . meow-expand-5)
-     '("4" . meow-expand-4)
-     '("3" . meow-expand-3)
-     '("2" . meow-expand-2)
-     '("1" . meow-expand-1)
-     '("-" . negative-argument)
-     '(";" . meow-reverse)
-     '("," . meow-inner-of-thing)
-     '("." . meow-bounds-of-thing)
-     '("[" . meow-beginning-of-thing)
-     '("]" . meow-end-of-thing)
-     '("a" . meow-append)
-     '("A" . meow-open-below)
-     '("b" . meow-back-word)
-     '("B" . meow-back-symbol)
-     '("c" . meow-change)
-     '("d" . meow-delete)
-     '("D" . meow-backward-delete)
-     '("e" . meow-next-word)
-     '("E" . meow-next-symbol)
-     '("f" . meow-find)
-     '("g" . meow-cancel-selection)
-     '("G" . meow-grab)
-     '("h" . meow-left)
-     '("H" . meow-left-expand)
-     '("i" . meow-insert)
-     '("I" . meow-open-above)
-     '("j" . meow-next)
-     '("J" . meow-next-expand)
-     '("k" . meow-prev)
-     '("K" . meow-prev-expand)
-     '("l" . meow-right)
-     '("L" . meow-right-expand)
-     '("m" . meow-join)
-     '("n" . meow-search)
-     '("o" . meow-block)
-     '("O" . meow-to-block)
-     '("p" . meow-yank)
-     '("q" . meow-quit)
-     '("Q" . meow-goto-line)
-     '("r" . meow-replace)
-     '("R" . meow-swap-grab)
-     '("s" . meow-kill)
-     '("t" . meow-till)
-     '("u" . meow-undo)
-     '("U" . meow-undo-in-selection)
-     '("v" . meow-visit)
-     '("w" . meow-mark-word)
-     '("W" . meow-mark-symbol)
-     '("x" . meow-line)
-     '("X" . meow-goto-line)
-     '("y" . meow-save)
-     '("Y" . meow-sync-grab)
-     '("z" . meow-pop-selection)
-     '("'" . repeat)
-     '("<escape>" . ignore)))
-  (meow-setup)
+  (use-package meow
+    :config
+    (defun meow-setup ()
+      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+      (meow-motion-define-key
+       '("j" . meow-next)
+       '("k" . meow-prev)
+       '("<escape>" . ignore))
+      (meow-leader-define-key
+       ;; Use SPC (0-9) for digit arguments.
+       '("1" . meow-digit-argument)
+       '("2" . meow-digit-argument)
+       '("3" . meow-digit-argument)
+       '("4" . meow-digit-argument)
+       '("5" . meow-digit-argument)
+       '("6" . meow-digit-argument)
+       '("7" . meow-digit-argument)
+       '("8" . meow-digit-argument)
+       '("9" . meow-digit-argument)
+       '("0" . meow-digit-argument)
+       '("/" . meow-keypad-describe-key)
+       '("?" . meow-cheatsheet))
+      (meow-normal-define-key
+       '("0" . meow-expand-0)
+       '("9" . meow-expand-9)
+       '("8" . meow-expand-8)
+       '("7" . meow-expand-7)
+       '("6" . meow-expand-6)
+       '("5" . meow-expand-5)
+       '("4" . meow-expand-4)
+       '("3" . meow-expand-3)
+       '("2" . meow-expand-2)
+       '("1" . meow-expand-1)
+       '("-" . negative-argument)
+       '(";" . meow-reverse)
+       '("," . meow-inner-of-thing)
+       '("." . meow-bounds-of-thing)
+       '("[" . meow-beginning-of-thing)
+       '("]" . meow-end-of-thing)
+       '("a" . meow-append)
+       '("A" . meow-open-below)
+       '("b" . meow-back-word)
+       '("B" . meow-back-symbol)
+       '("c" . meow-change)
+       '("d" . meow-delete)
+       '("D" . meow-backward-delete)
+       '("e" . meow-next-word)
+       '("E" . meow-next-symbol)
+       '("f" . meow-find)
+       '("g" . meow-cancel-selection)
+       '("G" . meow-grab)
+       '("h" . meow-left)
+       '("H" . meow-left-expand)
+       '("i" . meow-insert)
+       '("I" . meow-open-above)
+       '("j" . meow-next)
+       '("J" . meow-next-expand)
+       '("k" . meow-prev)
+       '("K" . meow-prev-expand)
+       '("l" . meow-right)
+       '("L" . meow-right-expand)
+       '("m" . meow-join)
+       '("n" . meow-search)
+       '("o" . meow-block)
+       '("O" . meow-to-block)
+       '("p" . meow-yank)
+       '("q" . meow-quit)
+       '("Q" . meow-goto-line)
+       '("r" . meow-replace)
+       '("R" . meow-swap-grab)
+       '("s" . meow-kill)
+       '("t" . meow-till)
+       '("u" . meow-undo)
+       '("U" . meow-undo-in-selection)
+       '("v" . meow-visit)
+       '("w" . meow-mark-word)
+       '("W" . meow-mark-symbol)
+       '("x" . meow-line)
+       '("X" . meow-goto-line)
+       '("y" . meow-save)
+       '("Y" . meow-sync-grab)
+       '("z" . meow-pop-selection)
+       '("'" . repeat)
+       '("<escape>" . ignore)))
+    (meow-setup)
 
-  ;; Window management submap -- SPC w ...
-  (defvar-keymap my/window-map
-    :doc "Windows"
-    "w" #'other-window
-    "v" #'split-window-right
-    "s" #'split-window-below
-    "c" #'delete-window
-    "o" #'delete-other-windows
-    "=" #'balance-windows
-    "h" #'windmove-left
-    "j" #'windmove-down
-    "k" #'windmove-up
-    "l" #'windmove-right
-    "H" #'windmove-swap-states-left
-    "J" #'windmove-swap-states-down
-    "K" #'windmove-swap-states-up
-    "L" #'windmove-swap-states-right
-    "u" #'winner-undo
-    "U" #'winner-redo)
-  ;; `cons' (not a quoted list) so Meow evaluates the variable into the
-  ;; actual keymap object rather than binding the bare symbol.
-  (meow-leader-define-key (cons "w" my/window-map))
+    ;; Window management submap -- SPC w ...
+    (defvar-keymap my/window-map
+      :doc "Windows"
+      "w" #'other-window
+      "v" #'split-window-right
+      "s" #'split-window-below
+      "c" #'delete-window
+      "o" #'delete-other-windows
+      "=" #'balance-windows
+      "h" #'windmove-left
+      "j" #'windmove-down
+      "k" #'windmove-up
+      "l" #'windmove-right
+      "H" #'windmove-swap-states-left
+      "J" #'windmove-swap-states-down
+      "K" #'windmove-swap-states-up
+      "L" #'windmove-swap-states-right
+      "u" #'winner-undo
+      "U" #'winner-redo)
+    
+    (defvar-keymap my/tabs-map
+      :doc "Workspaces/Tabs"
+      "." #'tab-bar-switch-to-tab
+      "n" #'tab-new
+      "c" #'tab-close
+      "R" #'tab-rename
+      "h" #'tab-previous
+      "l" #'tab-next)
+    
+    ;; Buffer management submap -- SPC b ...
+    (defvar-keymap my/buffer-map
+      :doc "Buffers"
+      "b" #'switch-to-buffer          ; Switch to another buffer
+      "k" #'kill-current-buffer       ; Kill current buffer
+      "d" #'kill-current-buffer       ; Alias for kill (Doom uses both k and d)
+      "n" #'next-buffer               ; Cycle to next buffer
+      "p" #'previous-buffer           ; Cycle to previous buffer
+      "s" #'scratch-buffer            ; Instantly jump to the *scratch* buffer
+      "r" #'revert-buffer             ; Reload the current buffer from disk
+      "S" #'save-some-buffers)        ; Save all modified buffers
 
-  (meow-global-mode 1))
+    ;; `cons' (not a quoted list) so Meow evaluates the variable into the
+    ;; actual keymap object rather than binding the bare symbol.
+    (meow-leader-define-key (cons "w" my/window-map)
+  			  (cons "t" my/tabs-map)
+  			  (cons "b" my/buffer-map))
+
+    (meow-global-mode 1))
 #+end_src
 
 * Windows (built-in support)
@@ -184,45 +215,45 @@
 * LLM
 ** Gptel
 #+begin_src emacs-lisp
-(use-package gptel
-  :config
-  (gptel-make-openai "Mistral"
-  :host "api.mistral.ai"
-  :endpoint "/v1/chat/completions"
-  :models '("mistral-small-latest" "mistral-large-latest" "codestral-latest" "ministral-8b-latest")
-  :key #'gptel-api-key-from-auth-source)
+  (use-package gptel
+    :config
+    (gptel-make-openai "Mistral"
+    :host "api.mistral.ai"
+    :endpoint "/v1/chat/completions"
+    :models '("mistral-small-latest" "mistral-large-latest" "codestral-latest" "ministral-8b-latest")
+    :key #'gptel-api-key-from-auth-source)
 
-   ;; OpenRouter offers an OpenAI compatible API
-  (gptel-make-openai "OpenRouter"
-  :host "openrouter.ai"
-  :endpoint "/api/v1/chat/completions"
-  :stream t
-  :key #'gptel-api-key-from-auth-source
-  :models '(openai/gpt-oss-120b:free
-            tngtech/deepseek-r1t2-chimera:free))
+     ;; OpenRouter offers an OpenAI compatible API
+    (gptel-make-openai "OpenRouter"
+    :host "openrouter.ai"
+    :endpoint "/api/v1/chat/completions"
+    :stream t
+    :key #'gptel-api-key-from-auth-source
+    :models '(openai/gpt-oss-120b:free
+              tngtech/deepseek-r1t2-chimera:free))
 
-  ;; Default model + backend
-  (setopt gptel-backend (gptel-get-backend "Mistral"))
-  (setopt gptel-model 'mistral-large-latest)
-  (setopt gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
-  (setopt gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
-  (setopt gptel-default-mode 'org-mode))
+    ;; Default model + backend
+    (setopt gptel-backend (gptel-get-backend "Mistral"))
+    (setopt gptel-model 'mistral-large-latest)
+    (setopt gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
+    (setopt gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
+    (setopt gptel-default-mode 'org-mode))
 
-(use-package gptel-prompts
-  :after (gptel)
-  :demand t
-  :config
-  (setq gptel-prompts-directory "~/org/gptel_prompts")
-  (gptel-prompts-update)
-  ;; Ensure prompts are updated if prompt files change
-  (gptel-prompts-add-update-watchers)
-  )
+  ;; (use-package gptel-prompts
+  ;;   :after (gptel)
+  ;;   :demand t
+  ;;   :config
+  ;;   (setq gptel-prompts-directory "~/org/gptel_prompts")
+  ;;   (gptel-prompts-update)
+  ;;   ;; Ensure prompts are updated if prompt files change
+  ;;   (gptel-prompts-add-update-watchers)
+  ;;   )
 
-(use-package gptel-commit
-  :ensure t
-  :after (gptel magit)
-  :custom
-  (gptel-commit-stream t))
+  (use-package gptel-commit
+    :ensure t
+    :after (gptel magit)
+    :custom
+    (gptel-commit-stream t))
 #+end_src
 ** Minuet
 #+begin_src emacs-lisp
@@ -255,7 +286,7 @@
 
   ;; Recommended limits to prevent burning through tokens or timing out
   (minuet-set-optional-options minuet-codestral-options :max_tokens 256)
-  (minuet-set-optional-options minuet-codestral-options :stop ["\n\n"])
+  (minuet-set-optional-options minuet-codestral-options :stop ["\n\n"]))
 #+end_src
 * Language
 ** Translation
@@ -345,4 +376,68 @@
   ;;       :desc "Open file at point with default app"
   ;;       "x" #'my/xdg-open-path-at-point)
 #+end_src
+* Keys
+#+begin_src emacs-lisp
+    (use-package key-chord
+        :ensure t
+        :config
+        (key-chord-mode 1)
+        
+        ;; Optional but highly recommended: tweak the delay so it doesn't 
+        ;; trigger accidentally when you are typing fast. (0.15 is a sweet spot).
+        (setq key-chord-two-keys-delay 0.15)
+        
+        (with-eval-after-load 'meow
+          ;; Only bind 'fd' to exit insert mode, and ONLY when in insert mode.
+          (key-chord-define meow-insert-state-keymap "fd" #'meow-insert-exit)))
 
+    (defun my/meow-surround ()
+      "Surround the current active region with a pair of characters."
+      (interactive)
+      (if (region-active-p)
+          (let* ((char (read-char "Surround with: "))
+                 ;; Map opening/closing brackets to their pairs. 
+                 ;; Any other character (like quotes or asterisks) is paired with itself.
+                 (pair (pcase char
+                         ((or ?\( ?\)) '(?\( . ?\)))
+                         ((or ?\[ ?\]) '(?\[ . ?\]))
+                         ((or ?\{ ?\}) '(?\{ . ?\}))
+                         ((or ?\< ?\>) '(?\< . ?\>))
+                         (_ (cons char char))))
+                 (beg (region-beginning))
+                 (end (region-end)))
+            (save-excursion
+              (goto-char end)
+              (insert (cdr pair))
+              (goto-char beg)
+              (insert (car pair)))
+            ;; Drop back to normal state after wrapping
+            (meow-cancel-selection))
+        (message "No active region to surround.")))
+
+    (defun my/copy-file-path (&optional arg)
+    "Copy the current buffer's file path to the clipboard.
+  If in a Dired/Dirvish buffer, copy the path of the file at point.
+  If the buffer is not saved to a file, copy the default directory.
+  With a prefix argument (e.g., `SPC 1`), copy ONLY the filename instead of the full path."
+    (interactive "P")
+    (let ((path (if (derived-mode-p 'dired-mode)
+                    (dired-get-filename nil t)
+                  (or buffer-file-name default-directory))))
+      (if (not path)
+          (message "No file path associated with this buffer.")
+        (let ((text (if arg (file-name-nondirectory path) path)))
+          (kill-new text)
+          (message "Copied path: %s" text)))))
+
+  (with-eval-after-load 'meow
+  (defvar-keymap my/file-map
+    :doc "Files"
+    "f" #'find-file             ; Standard file search
+    "s" #'save-buffer           ; Save current file
+    "y" #'my/copy-file-path)    ; Our custom copy-path function
+
+  (meow-leader-define-key 
+   ;; ... your other maps like "w" and "t"
+   (cons "f" my/file-map)))
+#+end_src
