@@ -8,7 +8,6 @@
 * General
 #+begin_src emacs-lisp
   (add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
-  (load-theme 'spacegrey-light t)
   (global-visual-line-mode 1)
 
   (use-package spacious-padding
@@ -25,52 +24,92 @@
   (use-package nerd-icons
     :custom
     (nerd-icons-font-family "Symbols Nerd Font Mono"))
-  ;; One-time manual step, not run on every boot:
-  ;;   M-x nerd-icons-install-fonts
+
+  (use-package olivetti
+    :ensure t
+    :hook (org-mode . olivetti-mode)
+    :config
+    (setq-default olivetti-body-width 100))
 #+end_src
 
 * Fonts
 Base faces only. The org-specific fixed-pitch overrides (tables, code
 blocks, etc) live in org-config.org, next to the rest of the org
 appearance settings.
+
+These are wrapped in a function and hooked to =enable-theme-functions=
+rather than run as bare top-level code. Themes sit *above* plain
+=set-face-attribute= calls in Emacs's face-priority stack, so a theme
+that defines anything for =default=/=fixed-pitch=/=variable-pitch=
+(or the tab-bar faces) will silently reset these on every
+=load-theme= call after the first -- switching themes mid-session,
+not just startup. Re-applying via a function on the hook makes it
+reapply automatically every time, including the very first load,
+since =load-theme= internally calls =enable-theme=, which is what
+this hook actually fires on.
 #+begin_src emacs-lisp
+(defun my/apply-face-overrides (&rest _)
+  "(Re)apply font and tab-bar face overrides after any theme is enabled."
   ;; Fixed-pitch (code, and the "default" face everything falls back to)
   (set-face-attribute 'default nil
-                      :family "Iosevka"
-                      :height 120        ; height is in 1/10 pt, so 120 = 12pt
-                      :weight 'medium)
+                       :family "Iosevka"
+                       :height 120        ; height is in 1/10 pt, so 120 = 12pt
+                       :weight 'medium)
 
   ;; fixed-pitch should usually just mirror default
   (set-face-attribute 'fixed-pitch nil
-                      :family "Iosevka"
-                      :height 120
-                      :weight 'medium)
+                       :family "Iosevka"
+                       :height 120
+                       :weight 'medium)
 
   ;; Variable-pitch (org-mode prose, markdown, UI elements)
   (set-face-attribute 'variable-pitch nil
-                      :family "Montserrat"
-                      :height 130
-                      :weight 'semi-bold)
+                       :family "Montserrat"
+                       :height 130
+                       :weight 'semi-bold)
 
-  ;; 1. The main bar: inherit the background color from the inactive mode-line
-  (set-face-attribute 'tab-bar nil 
-                      :background 'unspecified 
-                      :inherit 'mode-line-inactive 
-                      :box nil)
+  ;; 1. The tab-bar itself: blend into the mode-line, no box
+  (set-face-attribute 'tab-bar nil
+                       :background 'unspecified
+                       :inherit 'mode-line-inactive
+                       :box nil)
 
-  ;; 2. Active tab: inherit the exact foreground color of default text
-  (set-face-attribute 'tab-bar-tab nil 
-                      :background 'unspecified
-                      :inherit 'default 
-                      :weight 'bold
-                      :box nil)
+  ;; 2. Active tab: real background contrast + a colored underline
+  ;;    pulled from the theme's own link/accent face, so it adapts
+  ;;    automatically to whatever theme is currently loaded
+  (set-face-attribute 'tab-bar-tab nil
+                       :inherit 'mode-line
+                       :weight 'bold
+                       :box nil
+                       :underline `(:color ,(face-attribute 'link :foreground nil t)
+                                    :style line :position t))
 
-  ;; 3. Inactive tabs: inherit from 'shadow' (which all themes map to a faded grey)
-  (set-face-attribute 'tab-bar-tab-inactive nil 
-                      :background 'unspecified
-                      :inherit 'shadow 
-                      :weight 'normal
-                      :box nil)
+  ;; 3. Inactive tabs: unchanged
+  (set-face-attribute 'tab-bar-tab-inactive nil
+                       :background 'unspecified
+                       :inherit 'shadow
+                       :weight 'normal
+                       :box nil))
+
+;; Register the hook *before* the initial load-theme call below, so
+;; the first load benefits too, not just subsequent switches.
+(add-hook 'enable-theme-functions #'my/apply-face-overrides)
+
+;; Load the theme synchronously and immediately -- this is what makes
+;; startup look right from the very first frame paint, with no
+;; dependency on any later hook actually firing.
+(load-theme 'spacegrey-light t)
+
+;; The one narrow thing that genuinely needs a real, fully-realized
+;; frame is the underline color computed via `face-attribute' inside
+;; `my/apply-face-overrides' -- at cold startup that can resolve as
+;; unspecified. Re-running the same (idempotent) function once more,
+;; one-shot, once a real frame is guaranteed to exist, corrects just
+;; that -- without deferring the theme, fonts, or modeline the way an
+;; earlier, broader fix did.
+(if (daemonp)
+    (add-hook 'server-after-make-frame-hook #'my/apply-face-overrides)
+  (add-hook 'window-setup-hook #'my/apply-face-overrides))
 #+end_src
 
 * Modeline
@@ -82,12 +121,12 @@ appearance settings.
     ;; Play nicely with spacious-padding
     (doom-modeline-height 25)
     (doom-modeline-bar-width 4)
-    
+
     ;; Icon integration
     (doom-modeline-icon t)
     (doom-modeline-major-mode-icon t)
     (doom-modeline-major-mode-color-icon t)
-    
+
     ;; Clean path display (e.g., project/src/main.py instead of full path)
     (doom-modeline-buffer-file-name-style 'truncate-upto-project))
 #+end_src
@@ -100,10 +139,10 @@ appearance settings.
     :custom
     (tab-bar-show 1)                        ; Only show the bar if > 1 tab is open
     (tab-bar-close-button-show nil)         ; Hide the [X] for a cleaner UI
-    (tab-bar-new-tab-choice 'list-bookmarks)    ; New tabs start clean
+    (tab-bar-new-tab-choice "*scratch*")    ; New tabs start clean
     (tab-bar-tab-hints t)
-    (tab-bar-format '(tab-bar-format-tabs 
-                      tab-bar-format-align-right 
+    (tab-bar-format '(tab-bar-format-tabs
+                      tab-bar-format-align-right
                       tab-bar-format-global))
     :config
     (tab-bar-mode 1))

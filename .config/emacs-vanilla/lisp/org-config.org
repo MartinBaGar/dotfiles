@@ -68,7 +68,8 @@ to live in the hook.
 (add-hook 'org-mode-hook #'variable-pitch-mode)
 #+end_src
 
-* Org-roam
+* Sub-modes
+** Org-roam
 #+begin_src emacs-lisp
 (use-package org-roam
   :ensure t
@@ -96,7 +97,7 @@ to live in the hook.
   (meow-leader-define-key (cons "n" my/notes-map)))
 #+end_src
 
-* Org-babel
+** Org-babel
 #+begin_src emacs-lisp
   (with-eval-after-load 'org
     (org-babel-do-load-languages
@@ -106,4 +107,13 @@ to live in the hook.
        (emacs-lisp . t))))
 
   (setq org-confirm-babel-evaluate nil)
+#+end_src
+** Org-img
+#+begin_src emacs-lisp
+  (use-package org-img
+    :ensure (org-img :host github :repo "MartinBaGar/org-img")
+    :after org
+    :hook (org-mode . org-img-mode)
+    :config
+    (setq-default org-img-dir "~/org/img/"))
 #+end_src

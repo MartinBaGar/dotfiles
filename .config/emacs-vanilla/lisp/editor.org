@@ -187,10 +187,18 @@
       "r" #'revert-buffer             ; Reload the current buffer from disk
       "S" #'save-some-buffers)        ; Save all modified buffers
 
+    ;; Text management -- SPC t ...
+    (defvar-keymap my/text-map
+      :doc "Text"
+      "t" #'gt-translate         
+      "s" #'gt-switch-translator
+      "d" #'gt-delete-render-overlays)   
+
     ;; `cons' (not a quoted list) so Meow evaluates the variable into the
     ;; actual keymap object rather than binding the bare symbol.
     (meow-leader-define-key (cons "w" my/window-map)
-  			  (cons "t" my/tabs-map)
+  			  (cons "TAB" my/tabs-map)
+  			  (cons "t" my/text-map)
   			  (cons "b" my/buffer-map))
 
     (meow-global-mode 1))
@@ -317,12 +325,6 @@
                               (gt-overlay-render :type 'replace :if 'not-word)
                               (gt-buffer-render :if 'word)
                              ))))))
-
-  ;; (map! :leader
-  ;;     (:prefix ("t t" . "translate")
-  ;;     :desc "Switch translator" "s" #'gt-switch-translator
-  ;;     :desc "Dismiss overlays" "d" #'gt-delete-render-overlays
-  ;;     :desc "Translate" "t" #'gt-translate))
 #+end_src
 ** Spell
 #+begin_src emacs-lisp
@@ -378,44 +380,44 @@
 #+end_src
 * Keys
 #+begin_src emacs-lisp
-    (use-package key-chord
-        :ensure t
-        :config
-        (key-chord-mode 1)
-        
-        ;; Optional but highly recommended: tweak the delay so it doesn't 
-        ;; trigger accidentally when you are typing fast. (0.15 is a sweet spot).
-        (setq key-chord-two-keys-delay 0.15)
-        
-        (with-eval-after-load 'meow
-          ;; Only bind 'fd' to exit insert mode, and ONLY when in insert mode.
-          (key-chord-define meow-insert-state-keymap "fd" #'meow-insert-exit)))
+  (use-package key-chord
+    :ensure t
+    :config
+    (key-chord-mode 1)
+    
+    ;; Optional but highly recommended: tweak the delay so it doesn't 
+    ;; trigger accidentally when you are typing fast. (0.15 is a sweet spot).
+    (setq key-chord-two-keys-delay 0.15)
+    
+    (with-eval-after-load 'meow
+      ;; Only bind 'fd' to exit insert mode, and ONLY when in insert mode.
+      (key-chord-define meow-insert-state-keymap "fd" #'meow-insert-exit)))
 
-    (defun my/meow-surround ()
-      "Surround the current active region with a pair of characters."
-      (interactive)
-      (if (region-active-p)
-          (let* ((char (read-char "Surround with: "))
-                 ;; Map opening/closing brackets to their pairs. 
-                 ;; Any other character (like quotes or asterisks) is paired with itself.
-                 (pair (pcase char
-                         ((or ?\( ?\)) '(?\( . ?\)))
-                         ((or ?\[ ?\]) '(?\[ . ?\]))
-                         ((or ?\{ ?\}) '(?\{ . ?\}))
-                         ((or ?\< ?\>) '(?\< . ?\>))
-                         (_ (cons char char))))
-                 (beg (region-beginning))
-                 (end (region-end)))
-            (save-excursion
-              (goto-char end)
-              (insert (cdr pair))
-              (goto-char beg)
-              (insert (car pair)))
-            ;; Drop back to normal state after wrapping
-            (meow-cancel-selection))
-        (message "No active region to surround.")))
+  (defun my/meow-surround ()
+    "Surround the current active region with a pair of characters."
+    (interactive)
+    (if (region-active-p)
+        (let* ((char (read-char "Surround with: "))
+               ;; Map opening/closing brackets to their pairs. 
+               ;; Any other character (like quotes or asterisks) is paired with itself.
+               (pair (pcase char
+                       ((or ?\( ?\)) '(?\( . ?\)))
+                       ((or ?\[ ?\]) '(?\[ . ?\]))
+                       ((or ?\{ ?\}) '(?\{ . ?\}))
+                       ((or ?\< ?\>) '(?\< . ?\>))
+                       (_ (cons char char))))
+               (beg (region-beginning))
+               (end (region-end)))
+          (save-excursion
+            (goto-char end)
+            (insert (cdr pair))
+            (goto-char beg)
+            (insert (car pair)))
+          ;; Drop back to normal state after wrapping
+          (meow-cancel-selection))
+      (message "No active region to surround.")))
 
-    (defun my/copy-file-path (&optional arg)
+  (defun my/copy-file-path (&optional arg)
     "Copy the current buffer's file path to the clipboard.
   If in a Dired/Dirvish buffer, copy the path of the file at point.
   If the buffer is not saved to a file, copy the default directory.
@@ -431,13 +433,12 @@
           (message "Copied path: %s" text)))))
 
   (with-eval-after-load 'meow
-  (defvar-keymap my/file-map
-    :doc "Files"
-    "f" #'find-file             ; Standard file search
-    "s" #'save-buffer           ; Save current file
-    "y" #'my/copy-file-path)    ; Our custom copy-path function
+    (defvar-keymap my/file-map
+      :doc "Files"
+      "f" #'find-file             ; Standard file search
+      "s" #'save-buffer           ; Save current file
+      "y" #'my/copy-file-path)    ; Our custom copy-path function
 
-  (meow-leader-define-key 
-   ;; ... your other maps like "w" and "t"
-   (cons "f" my/file-map)))
+    (meow-leader-define-key 
+     (cons "f" my/file-map)))
 #+end_src
