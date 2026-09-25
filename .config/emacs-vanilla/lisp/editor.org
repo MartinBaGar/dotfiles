@@ -58,152 +58,6 @@
     (find-file (f-dirname tempel-path)))
 #+end_src
 
-* Meow
-#+begin_src emacs-lisp
-  (use-package meow
-    :config
-    (defun meow-setup ()
-      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-      (meow-motion-define-key
-       '("j" . meow-next)
-       '("k" . meow-prev)
-       '("<escape>" . ignore))
-      (meow-leader-define-key
-       ;; Use SPC (0-9) for digit arguments.
-       '("1" . meow-digit-argument)
-       '("2" . meow-digit-argument)
-       '("3" . meow-digit-argument)
-       '("4" . meow-digit-argument)
-       '("5" . meow-digit-argument)
-       '("6" . meow-digit-argument)
-       '("7" . meow-digit-argument)
-       '("8" . meow-digit-argument)
-       '("9" . meow-digit-argument)
-       '("0" . meow-digit-argument)
-       '("/" . meow-keypad-describe-key)
-       '("?" . meow-cheatsheet))
-      (meow-normal-define-key
-       '("0" . meow-expand-0)
-       '("9" . meow-expand-9)
-       '("8" . meow-expand-8)
-       '("7" . meow-expand-7)
-       '("6" . meow-expand-6)
-       '("5" . meow-expand-5)
-       '("4" . meow-expand-4)
-       '("3" . meow-expand-3)
-       '("2" . meow-expand-2)
-       '("1" . meow-expand-1)
-       '("-" . negative-argument)
-       '(";" . meow-reverse)
-       '("," . meow-inner-of-thing)
-       '("." . meow-bounds-of-thing)
-       '("[" . meow-beginning-of-thing)
-       '("]" . meow-end-of-thing)
-       '("a" . meow-append)
-       '("A" . meow-open-below)
-       '("b" . meow-back-word)
-       '("B" . meow-back-symbol)
-       '("c" . meow-change)
-       '("d" . meow-delete)
-       '("D" . meow-backward-delete)
-       '("e" . meow-next-word)
-       '("E" . meow-next-symbol)
-       '("f" . meow-find)
-       '("g" . meow-cancel-selection)
-       '("G" . meow-grab)
-       '("h" . meow-left)
-       '("H" . meow-left-expand)
-       '("i" . meow-insert)
-       '("I" . meow-open-above)
-       '("j" . meow-next)
-       '("J" . meow-next-expand)
-       '("k" . meow-prev)
-       '("K" . meow-prev-expand)
-       '("l" . meow-right)
-       '("L" . meow-right-expand)
-       '("m" . meow-join)
-       '("n" . meow-search)
-       '("o" . meow-block)
-       '("O" . meow-to-block)
-       '("p" . meow-yank)
-       '("q" . meow-quit)
-       '("Q" . meow-goto-line)
-       '("r" . meow-replace)
-       '("R" . meow-swap-grab)
-       '("s" . meow-kill)
-       '("t" . meow-till)
-       '("u" . meow-undo)
-       '("U" . meow-undo-in-selection)
-       '("v" . meow-visit)
-       '("w" . meow-mark-word)
-       '("W" . meow-mark-symbol)
-       '("x" . meow-line)
-       '("X" . meow-goto-line)
-       '("y" . meow-save)
-       '("Y" . meow-sync-grab)
-       '("z" . meow-pop-selection)
-       '("'" . repeat)
-       '("<escape>" . ignore)))
-    (meow-setup)
-
-    ;; Window management submap -- SPC w ...
-    (defvar-keymap my/window-map
-      :doc "Windows"
-      "w" #'other-window
-      "v" #'split-window-right
-      "s" #'split-window-below
-      "c" #'delete-window
-      "o" #'delete-other-windows
-      "=" #'balance-windows
-      "h" #'windmove-left
-      "j" #'windmove-down
-      "k" #'windmove-up
-      "l" #'windmove-right
-      "H" #'windmove-swap-states-left
-      "J" #'windmove-swap-states-down
-      "K" #'windmove-swap-states-up
-      "L" #'windmove-swap-states-right
-      "u" #'winner-undo
-      "U" #'winner-redo)
-    
-    (defvar-keymap my/tabs-map
-      :doc "Workspaces/Tabs"
-      "." #'tab-bar-switch-to-tab
-      "n" #'tab-new
-      "c" #'tab-close
-      "R" #'tab-rename
-      "h" #'tab-previous
-      "l" #'tab-next)
-    
-    ;; Buffer management submap -- SPC b ...
-    (defvar-keymap my/buffer-map
-      :doc "Buffers"
-      "b" #'switch-to-buffer          ; Switch to another buffer
-      "k" #'kill-current-buffer       ; Kill current buffer
-      "d" #'kill-current-buffer       ; Alias for kill (Doom uses both k and d)
-      "n" #'next-buffer               ; Cycle to next buffer
-      "p" #'previous-buffer           ; Cycle to previous buffer
-      "s" #'scratch-buffer            ; Instantly jump to the *scratch* buffer
-      "r" #'revert-buffer             ; Reload the current buffer from disk
-      "S" #'save-some-buffers)        ; Save all modified buffers
-
-    ;; Text management -- SPC t ...
-    (defvar-keymap my/text-map
-      :doc "Text"
-      "t" #'gt-translate         
-      "s" #'gt-switch-translator
-      "d" #'gt-delete-render-overlays)   
-
-    ;; `cons' (not a quoted list) so Meow evaluates the variable into the
-    ;; actual keymap object rather than binding the bare symbol.
-    (meow-leader-define-key (cons "w" my/window-map)
-  			  (cons "TAB" my/tabs-map)
-  			  (cons "t" my/text-map)
-  			  (cons "b" my/buffer-map))
-
-    (meow-global-mode 1))
-#+end_src
-
 * Windows (built-in support)
 #+begin_src emacs-lisp
 (use-package windmove
@@ -442,3 +296,196 @@
     (meow-leader-define-key 
      (cons "f" my/file-map)))
 #+end_src
+
+* Folding
+#+begin_src emacs-lisp
+  (use-package outline
+    :ensure nil
+    :hook (emacs-lisp-mode . outline-minor-mode)) ; keep — indentation can't replace this here
+
+  (use-package outline-indent
+    :ensure t
+    :hook ((python-mode . outline-indent-minor-mode)
+           (python-ts-mode . outline-indent-minor-mode)))
+  ;; add more language hooks as needed — never prog-mode-hook
+
+  (use-package kirigami
+    :ensure t
+    :custom
+    (kirigami-show-menu-bar t)
+    (kirigami-show-context-menu t)
+    :init
+    (kirigami-global-mode 1))
+
+  (use-package savefold
+    :ensure t
+    :init
+    (setq savefold-backends '(outline org hideshow))
+    (setq savefold-directory (locate-user-emacs-file "savefold"))  ;; default
+
+    :config
+    (savefold-mode 1))
+#+end_src
+* Terminal
+#+begin_src emacs-lisp
+  (use-package vterm
+      :ensure t)
+#+end_src
+
+* Meow
+#+begin_src emacs-lisp
+  (use-package meow
+    :config
+    (defun meow-setup ()
+      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+      (meow-motion-define-key
+       '("j" . meow-next)
+       '("k" . meow-prev)
+       '("<escape>" . ignore))
+      (meow-leader-define-key
+       ;; Use SPC (0-9) for digit arguments.
+       '("1" . meow-digit-argument)
+       '("2" . meow-digit-argument)
+       '("3" . meow-digit-argument)
+       '("4" . meow-digit-argument)
+       '("5" . meow-digit-argument)
+       '("6" . meow-digit-argument)
+       '("7" . meow-digit-argument)
+       '("8" . meow-digit-argument)
+       '("9" . meow-digit-argument)
+       '("0" . meow-digit-argument)
+       '("/" . meow-keypad-describe-key)
+       '("?" . meow-cheatsheet))
+      (meow-normal-define-key
+       '("0" . meow-expand-0)
+       '("9" . meow-expand-9)
+       '("8" . meow-expand-8)
+       '("7" . meow-expand-7)
+       '("6" . meow-expand-6)
+       '("5" . meow-expand-5)
+       '("4" . meow-expand-4)
+       '("3" . meow-expand-3)
+       '("2" . meow-expand-2)
+       '("1" . meow-expand-1)
+       '("-" . negative-argument)
+       '(";" . meow-reverse)
+       '("," . meow-inner-of-thing)
+       '("." . meow-bounds-of-thing)
+       '("[" . meow-beginning-of-thing)
+       '("]" . meow-end-of-thing)
+       '("a" . meow-append)
+       '("A" . meow-open-below)
+       '("b" . meow-back-word)
+       '("B" . meow-back-symbol)
+       '("c" . meow-change)
+       '("d" . meow-delete)
+       '("D" . meow-backward-delete)
+       '("e" . meow-next-word)
+       '("E" . meow-next-symbol)
+       '("f" . meow-find)
+       '("g" . meow-cancel-selection)
+       '("G" . meow-grab)
+       '("h" . meow-left)
+       '("H" . meow-left-expand)
+       '("i" . meow-insert)
+       '("I" . meow-open-above)
+       '("j" . meow-next)
+       '("J" . meow-next-expand)
+       '("k" . meow-prev)
+       '("K" . meow-prev-expand)
+       '("l" . meow-right)
+       '("L" . meow-right-expand)
+       '("m" . meow-join)
+       '("n" . meow-search)
+       '("o" . meow-block)
+       '("O" . meow-to-block)
+       '("p" . meow-yank)
+       '("q" . meow-quit)
+       '("Q" . meow-goto-line)
+       '("r" . meow-replace)
+       '("R" . meow-swap-grab)
+       '("s" . meow-kill)
+       '("t" . meow-till)
+       '("u" . meow-undo)
+       '("U" . meow-undo-in-selection)
+       '("v" . meow-visit)
+       '("w" . meow-mark-word)
+       '("W" . meow-mark-symbol)
+       '("x" . meow-line)
+       '("X" . meow-goto-line)
+       '("y" . meow-save)
+       '("Y" . meow-sync-grab)
+       '("z" . meow-pop-selection)
+       '("'" . repeat)
+       '("<escape>" . ignore)))
+    (meow-setup)
+
+    ;; Window management submap -- SPC w ...
+    (defvar-keymap my/window-map
+      :doc "Windows"
+      "w" #'other-window
+      "v" #'split-window-right
+      "s" #'split-window-below
+      "c" #'delete-window
+      "o" #'delete-other-windows
+      "=" #'balance-windows
+      "h" #'windmove-left
+      "j" #'windmove-down
+      "k" #'windmove-up
+      "l" #'windmove-right
+      "H" #'windmove-swap-states-left
+      "J" #'windmove-swap-states-down
+      "K" #'windmove-swap-states-up
+      "L" #'windmove-swap-states-right
+      "u" #'winner-undo
+      "U" #'winner-redo)
+    
+    (defvar-keymap my/tabs-map
+      :doc "Workspaces/Tabs"
+      "." #'tab-bar-switch-to-tab
+      "n" #'tab-new
+      "c" #'tab-close
+      "R" #'tab-rename
+      "h" #'tab-previous
+      "l" #'tab-next)
+    
+    ;; Buffer management submap -- SPC b ...
+    (defvar-keymap my/buffer-map
+      :doc "Buffers"
+      "b" #'switch-to-buffer          ; Switch to another buffer
+      "k" #'kill-current-buffer       ; Kill current buffer
+      "d" #'kill-current-buffer       ; Alias for kill (Doom uses both k and d)
+      "n" #'next-buffer               ; Cycle to next buffer
+      "p" #'previous-buffer           ; Cycle to previous buffer
+      "s" #'scratch-buffer            ; Instantly jump to the *scratch* buffer
+      "r" #'revert-buffer             ; Reload the current buffer from disk
+      "S" #'save-some-buffers)        ; Save all modified buffers
+
+    ;; Text management -- SPC t ...
+    (defvar-keymap my/text-map
+      :doc "Text"
+      "t" #'gt-translate         
+      "s" #'gt-switch-translator
+      "d" #'gt-delete-render-overlays)
+
+    (defvar-keymap my/fold-map
+      :doc "Folding"
+      "a" #'kirigami-toggle-fold
+      "c" #'kirigami-close-fold
+      "o" #'kirigami-open-fold
+      "O" #'kirigami-open-fold-rec
+      "m" #'kirigami-close-folds
+      "r" #'kirigami-open-folds
+      "e" #'kirigami-close-folds-except-current)
+
+    ;; `cons' (not a quoted list) so Meow evaluates the variable into the
+    ;; actual keymap object rather than binding the bare symbol.
+    (meow-leader-define-key (cons "w" my/window-map)
+  			  (cons "TAB" my/tabs-map)
+  			  (cons "t" my/text-map)
+  			  (cons "z" my/fold-map)
+  			  (cons "b" my/buffer-map))
+
+    (meow-global-mode 1))
+#+end_src
+
