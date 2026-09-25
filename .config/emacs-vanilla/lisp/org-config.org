@@ -107,6 +107,41 @@ to live in the hook.
        (emacs-lisp . t))))
 
   (setq org-confirm-babel-evaluate nil)
+
+  (with-eval-after-load 'ob-core
+    (require 'cl-lib)
+
+    (defun my/org-babel-fold-result (result &optional result-params info &rest _)
+      "Fold the results drawer/block that was just written, sync or async,
+  but only for blocks whose effective header args include `:fold yes'."
+      (when (derived-mode-p 'org-mode)
+        (let* ((params (and info (nth 2 info)))
+               (fold   (cdr (assq :fold params))))
+          (when (member fold '("yes" "t"))
+            (save-excursion
+              (let ((loc (ignore-errors (org-babel-where-is-src-block-result))))
+                (when loc
+                  (goto-char loc)
+                  (let ((end (ignore-errors (org-babel-result-end))))
+                    (when end
+                      ;; Purge ANY existing hide-overlay touching this result
+                      ;; block, alive or not. Comint async can re-run this
+                      ;; advice several times as output streams in, and Org
+                      ;; doesn't clean up the previous fold overlay before
+                      ;; the next chunk lands, leaving a stale/shrunk
+                      ;; overlay behind.
+                      (setq org-babel-hide-result-overlays
+                            (cl-remove-if
+                             (lambda (ov)
+                               (when (and (overlay-buffer ov)
+                                          (>= (overlay-start ov) (1- loc))
+                                          (<= (overlay-end ov) (1+ end)))
+                                 (delete-overlay ov)
+                                 t))
+                             org-babel-hide-result-overlays)))
+                    (org-babel-hide-result-toggle t)))))))))
+
+    (advice-add 'org-babel-insert-result :after #'my/org-babel-fold-result))
 #+end_src
 ** Org-img
 #+begin_src emacs-lisp

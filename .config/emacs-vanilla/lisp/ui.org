@@ -126,6 +126,8 @@ this hook actually fires on.
     (doom-modeline-icon t)
     (doom-modeline-major-mode-icon t)
     (doom-modeline-major-mode-color-icon t)
+    (doom-modeline-buffer-encoding nil)
+    (doom-modeline-check-icon nil)
 
     ;; Clean path display (e.g., project/src/main.py instead of full path)
     (doom-modeline-buffer-file-name-style 'truncate-upto-project))

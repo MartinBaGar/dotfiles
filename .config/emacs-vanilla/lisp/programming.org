@@ -22,120 +22,63 @@ executables).
 #+end_src
 * Reproducibility
 #+begin_src emacs-lisp
-  ;; (with-eval-after-load 'org
-  ;;   (require 'ob-python)
-
-  ;;   (defun +org-babel-edit-prep-python-session-a (info)
-  ;;     "Point this edit buffer's inferior Python process at the running
-  ;; Babel session named in INFO's :session header, so eldoc/completion
-  ;; talk to the live REPL. Self-contained: doesn't depend on
-  ;; `org-babel-edit-prep:python' existing."
-  ;;     (let ((session (cdr (assq :session (nth 2 info)))))
-  ;;       (when (and session (not (string= session "none")))
-  ;;         (setq-local python-shell-buffer-name
-  ;;                     (if (fboundp 'org-babel-python-without-earmuffs)
-  ;;                         (org-babel-python-without-earmuffs session)
-  ;;                       (string-trim session "\\*" "\\*"))))))
-
-  ;;   (defun +org-babel-remote-dir (path host)
-  ;;     "Return PATH as-is on HOST, or its
-  ;; /ssh:HOST: tramp form otherwise. Used in :dir header-args to make
-  ;; Babel blocks work identically whether running locally or over SSH."
-  ;;       (if (string= system-name host)
-  ;;           path
-  ;;         (format "/ssh:%s:%s" host path)))
-
-  ;;   (defmacro def-python-babel-preset! (name &rest header-args)
-  ;;     (let* ((name-str (symbol-name name))
-  ;;            (execute-sym      (intern (format "org-babel-execute:%s" name-str)))
-  ;;            (expand-sym       (intern (format "org-babel-expand-body:%s" name-str)))
-  ;;            (prep-session-sym (intern (format "org-babel-prep-session:%s" name-str)))
-  ;;            (edit-prep-sym    (intern (format "org-babel-edit-prep:%s" name-str)))
-  ;;            (header-args-sym  (intern (format "org-babel-header-args:%s" name-str)))
-  ;;            (default-sym      (intern (format "org-babel-default-header-args:%s" name-str))))
-  ;;       `(progn
-  ;;          (defalias ',execute-sym      #'org-babel-execute:python)
-  ;;          (defalias ',expand-sym       #'org-babel-expand-body:python)
-  ;;          (defalias ',prep-session-sym #'org-babel-prep-session:python)
-  ;;          (defalias ',edit-prep-sym    #'+org-babel-edit-prep-python-session-a)
-  ;;          (defvaralias ',header-args-sym 'org-babel-header-args:python)
-  ;;          (add-to-list 'org-src-lang-modes (cons ,name-str 'python))
-  ;;          (add-to-list 'org-babel-tangle-lang-exts (cons ,name-str "py"))
-  ;;          (setf (alist-get ',name +org-babel-mode-alist) 'python)
-  ;;          (defvar ,default-sym ',header-args)
-  ;;          (put ',default-sym 'safe-local-variable #'listp)
-  ;;          (add-to-list 'org-structure-template-alist (cons ,name-str ,(format "src %s" name-str))))))
-
-  ;;   (def-python-babel-preset! pyplot
-  ;;     (:session  . "pyplot-session")
-  ;;     (:results  . "output raw")
-  ;;     (:epilogue . "print(f'[[file:{fname}]]')"))
-
-  ;;   (def-python-babel-preset! pyops
-  ;;     (:session . "pyops-session")
-  ;;     (:results . "output")
-  ;;     (:exports . "code"))
-  ;;   (def-python-babel-preset! pyviz
-  ;;     (:session . "pyviz-session")
-  ;;     (:results . "output")
-  ;;     (:exports . "code")))
-
   (with-eval-after-load 'org
-  (require 'ob-python)
+    (require 'ob-python)
+    
+    (defun +org-babel-edit-prep-python-session-a (info)
+      "Point this edit buffer's inferior Python process at the running
+  Babel session named in INFO's :session header, so eldoc/completion
+  talk to the live REPL. Self-contained: doesn't depend on
+  `org-babel-edit-prep:python' existing."
+      (let ((session (cdr (assq :session (nth 2 info)))))
+        (when (and session (not (string= session "none")))
+          (setq-local python-shell-buffer-name
+                      (if (fboundp 'org-babel-python-without-earmuffs)
+                          (org-babel-python-without-earmuffs session)
+                        (string-trim session "\\*" "\\*"))))))
 
-  (defun +org-babel-edit-prep-python-session-a (info)
-    "Point this edit buffer's inferior Python process at the running
-Babel session named in INFO's :session header, so eldoc/completion
-talk to the live REPL. Self-contained: doesn't depend on
-`org-babel-edit-prep:python' existing."
-    (let ((session (cdr (assq :session (nth 2 info)))))
-      (when (and session (not (string= session "none")))
-        (setq-local python-shell-buffer-name
-                    (if (fboundp 'org-babel-python-without-earmuffs)
-                        (org-babel-python-without-earmuffs session)
-                      (string-trim session "\\*" "\\*"))))))
-
-  (defun +org-babel-remote-dir (path host)
-    "Return PATH as-is on HOST, or its
-/ssh:HOST: tramp form otherwise. Used in :dir header-args to make
-Babel blocks work identically whether running locally or over SSH."
+    (defun +org-babel-remote-dir (path host)
+      "Return PATH as-is on HOST, or its
+  /ssh:HOST: tramp form otherwise. Used in :dir header-args to make
+  Babel blocks work identically whether running locally or over SSH."
       (if (string= system-name host)
           path
         (format "/ssh:%s:%s" host path)))
 
-  (defmacro def-python-babel-preset! (name &rest header-args)
-    (let* ((name-str (symbol-name name))
-           (execute-sym      (intern (format "org-babel-execute:%s" name-str)))
-           (expand-sym       (intern (format "org-babel-expand-body:%s" name-str)))
-           (prep-session-sym (intern (format "org-babel-prep-session:%s" name-str)))
-           (edit-prep-sym    (intern (format "org-babel-edit-prep:%s" name-str)))
-           (header-args-sym  (intern (format "org-babel-header-args:%s" name-str)))
-           (default-sym      (intern (format "org-babel-default-header-args:%s" name-str))))
-      `(progn
-         (defalias ',execute-sym      #'org-babel-execute:python)
-         (defalias ',expand-sym       #'org-babel-expand-body:python)
-         (defalias ',prep-session-sym #'org-babel-prep-session:python)
-         (defalias ',edit-prep-sym    #'+org-babel-edit-prep-python-session-a)
-         (defvaralias ',header-args-sym 'org-babel-header-args:python)
-         (add-to-list 'org-src-lang-modes (cons ,name-str 'python))
-         (add-to-list 'org-babel-tangle-lang-exts (cons ,name-str "py"))
-         ;; The Doom-specific line was removed here
-         (defvar ,default-sym ',header-args)
-         (put ',default-sym 'safe-local-variable #'listp)
-         (add-to-list 'org-structure-template-alist (cons ,name-str ,(format "src %s" name-str))))))
+    (defmacro def-python-babel-preset! (name &rest header-args)
+      (let* ((name-str (symbol-name name))
+             (execute-sym      (intern (format "org-babel-execute:%s" name-str)))
+             (expand-sym       (intern (format "org-babel-expand-body:%s" name-str)))
+             (prep-session-sym (intern (format "org-babel-prep-session:%s" name-str)))
+             (edit-prep-sym    (intern (format "org-babel-edit-prep:%s" name-str)))
+             (header-args-sym  (intern (format "org-babel-header-args:%s" name-str)))
+             (default-sym      (intern (format "org-babel-default-header-args:%s" name-str))))
+        `(progn
+           (defalias ',execute-sym      #'org-babel-execute:python)
+           (defalias ',expand-sym       #'org-babel-expand-body:python)
+           (defalias ',prep-session-sym #'org-babel-prep-session:python)
+           (defalias ',edit-prep-sym    #'+org-babel-edit-prep-python-session-a)
+           (defvaralias ',header-args-sym 'org-babel-header-args:python)
+           (add-to-list 'org-src-lang-modes (cons ,name-str 'python))
+           (add-to-list 'org-babel-tangle-lang-exts (cons ,name-str "py"))
+           (defvar ,default-sym ',header-args)
+           (put ',default-sym 'safe-local-variable #'listp)
+           (add-to-list 'org-structure-template-alist (cons ,name-str ,(format "src %s" name-str))))))
 
-  (def-python-babel-preset! pyplot
-    (:session  . "pyplot-session")
-    (:results  . "output raw")
-    (:epilogue . "print(f'[[file:{fname}]]')"))
+    (def-python-babel-preset! pyplot
+  			    (:session  . "pyplot-session")
+  			    (:results  . "output raw")
+  			    (:epilogue . "print(f'[[file:{fname}]]')"))
 
-  (def-python-babel-preset! pyops
-    (:session . "pyops-session")
-    (:results . "output")
-    (:exports . "code"))
-    
-  (def-python-babel-preset! pyviz
-    (:session . "pyviz-session")
-    (:results . "output")
-    (:exports . "code")))
+    (def-python-babel-preset! pyops
+  			    (:session . "pyops-session")
+  			    (:results . "output")
+  			    (:exports . "code")
+  			    (:fold    . "yes"))
+
+    (def-python-babel-preset! pyviz
+  			    (:session . "pyviz-session")
+  			    (:results . "output")
+  			    (:exports . "code")
+  			    (:fold    . "yes")))
 #+end_src
