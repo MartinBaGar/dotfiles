@@ -8,9 +8,9 @@
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-sources-directory (expand-file-name "sources/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                       :ref nil :depth 1 :inherit ignore
-                       :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-                       :build (:not elpaca-activate)))
+			      :ref nil :depth 1 :inherit ignore
+			      :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+			      :build (:not elpaca-activate)))
 (let* ((repo  (expand-file-name "elpaca/" elpaca-sources-directory))
        (build (expand-file-name "elpaca/" elpaca-builds-directory))
        (order (cdr elpaca-order))
@@ -44,7 +44,7 @@
 
 ;; use-package support
 (elpaca elpaca-use-package
-        (elpaca-use-package-mode))
+  (elpaca-use-package-mode))
 
 (use-package compat :ensure (:wait t))
 ;; --- End Elpaca bootstrap ---------------------------------------------
@@ -55,7 +55,7 @@
 
 ;; Redirect the Emacs auto-generated Custom block to a hidden file
 ;; This prevents Emacs from constantly injecting garbage at the bottom of this init.el
-(setq custom-file (expand-file-name ".custom.el" user-emacs-directory))
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (when (file-exists-p custom-file)
   (load custom-file 'noerror 'nomessage))
 
