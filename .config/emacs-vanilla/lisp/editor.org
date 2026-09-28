@@ -483,6 +483,11 @@
   	  "r" #'consult-recent-file	; Consult recent files list
   	  "y" #'my/copy-file-path))    ; Our custom copy-path function
 
+    (defvar-keymap my/ui-map
+      :doc "UI / Global Zoom"
+      "b" #'text-scale-adjust
+      "g" #'global-text-scale-adjust)
+
     ;; `cons' (not a quoted list) so Meow evaluates the variable into the
     ;; actual keymap object rather than binding the bare symbol.
     (meow-leader-define-key (cons "w" my/window-map)
@@ -490,6 +495,7 @@
   			  (cons "t" my/text-map)
   			  (cons "z" my/fold-map)
   			  (cons "f" my/file-map)
+  			  (cons "u" my/ui-map)
   			  (cons "b" my/buffer-map))
 
     (meow-global-mode 1))
