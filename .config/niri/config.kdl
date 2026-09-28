@@ -264,7 +264,7 @@ spawn-at-startup "waybar"
 spawn-at-startup "kanshi"
 environment {
   XDG_CURRENT_DESKTOP "niri"
-  QT_QPA_PLATFORM "wayland"
+  QT_QPA_PLATFORM "wayland;xcb"
   ELECTRON_OZONE_PLATFORM_HINT "auto"
   SAL_USE_VCLPLUGIN "qt5"
   QT_QPA_PLATFORMTHEME "qt5ct"

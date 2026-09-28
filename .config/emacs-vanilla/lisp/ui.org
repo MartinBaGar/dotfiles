@@ -48,68 +48,63 @@ reapply automatically every time, including the very first load,
 since =load-theme= internally calls =enable-theme=, which is what
 this hook actually fires on.
 #+begin_src emacs-lisp
-(defun my/apply-face-overrides (&rest _)
-  "(Re)apply font and tab-bar face overrides after any theme is enabled."
-  ;; Fixed-pitch (code, and the "default" face everything falls back to)
-  (set-face-attribute 'default nil
-                       :family "Iosevka"
-                       :height 120        ; height is in 1/10 pt, so 120 = 12pt
-                       :weight 'medium)
+  (defun my/apply-face-overrides (&rest _)
+    "(Re)apply font and tab-bar face overrides after any theme is enabled."
+    
+    ;; 1. Set the absolute baseline on 'default' ONLY
+    (set-face-attribute 'default nil
+                        :family "Iosevka"
+                        :height 120        ; Absolute 12pt base
+                        :weight 'medium)
 
-  ;; fixed-pitch should usually just mirror default
-  (set-face-attribute 'fixed-pitch nil
-                       :family "Iosevka"
-                       :height 120
-                       :weight 'medium)
+    ;; 2. Use a 1.0 multiplier so it perfectly tracks the scaled default
+    (set-face-attribute 'fixed-pitch nil
+                        :family "Iosevka"
+                        :height 1.0        ; Relative multiplier!
+                        :weight 'medium)
 
-  ;; Variable-pitch (org-mode prose, markdown, UI elements)
-  (set-face-attribute 'variable-pitch nil
-                       :family "Montserrat"
-                       :height 130
-                       :weight 'semi-bold)
+    ;; 3. Use a 1.08 multiplier to get ~130 height, while keeping it scalable
+    (set-face-attribute 'variable-pitch nil
+                        :family "Montserrat"
+                        :height 1.08       ; Relative multiplier!
+                        :weight 'semi-bold)
 
-  ;; 1. The tab-bar itself: blend into the mode-line, no box
-  (set-face-attribute 'tab-bar nil
-                       :background 'unspecified
-                       :inherit 'mode-line-inactive
-                       :box nil)
+    ;; ... your existing tab-bar code remains unchanged ...
+    (set-face-attribute 'tab-bar nil
+                        :background 'unspecified
+                        :inherit 'mode-line-inactive
+  		      :box nil)
+    (set-face-attribute 'tab-bar-tab nil
+                        :inherit 'mode-line
+                        :weight 'bold
+                        :box nil
+                        :underline `(:color ,(face-attribute 'link :foreground nil t)
+                                     :style line :position t))
+    (set-face-attribute 'tab-bar-tab-inactive nil
+                        :background 'unspecified
+                        :inherit 'shadow
+                        :weight 'normal
+  		      :box nil))
 
-  ;; 2. Active tab: real background contrast + a colored underline
-  ;;    pulled from the theme's own link/accent face, so it adapts
-  ;;    automatically to whatever theme is currently loaded
-  (set-face-attribute 'tab-bar-tab nil
-                       :inherit 'mode-line
-                       :weight 'bold
-                       :box nil
-                       :underline `(:color ,(face-attribute 'link :foreground nil t)
-                                    :style line :position t))
+  ;; Register the hook *before* the initial load-theme call below, so
+  ;; the first load benefits too, not just subsequent switches.
+  (add-hook 'enable-theme-functions #'my/apply-face-overrides)
 
-  ;; 3. Inactive tabs: unchanged
-  (set-face-attribute 'tab-bar-tab-inactive nil
-                       :background 'unspecified
-                       :inherit 'shadow
-                       :weight 'normal
-                       :box nil))
+  ;; Load the theme synchronously and immediately -- this is what makes
+  ;; startup look right from the very first frame paint, with no
+  ;; dependency on any later hook actually firing.
+  (load-theme 'spacegrey-light t)
 
-;; Register the hook *before* the initial load-theme call below, so
-;; the first load benefits too, not just subsequent switches.
-(add-hook 'enable-theme-functions #'my/apply-face-overrides)
-
-;; Load the theme synchronously and immediately -- this is what makes
-;; startup look right from the very first frame paint, with no
-;; dependency on any later hook actually firing.
-(load-theme 'spacegrey-light t)
-
-;; The one narrow thing that genuinely needs a real, fully-realized
-;; frame is the underline color computed via `face-attribute' inside
-;; `my/apply-face-overrides' -- at cold startup that can resolve as
-;; unspecified. Re-running the same (idempotent) function once more,
-;; one-shot, once a real frame is guaranteed to exist, corrects just
-;; that -- without deferring the theme, fonts, or modeline the way an
-;; earlier, broader fix did.
-(if (daemonp)
-    (add-hook 'server-after-make-frame-hook #'my/apply-face-overrides)
-  (add-hook 'window-setup-hook #'my/apply-face-overrides))
+  ;; The one narrow thing that genuinely needs a real, fully-realized
+  ;; frame is the underline color computed via `face-attribute' inside
+  ;; `my/apply-face-overrides' -- at cold startup that can resolve as
+  ;; unspecified. Re-running the same (idempotent) function once more,
+  ;; one-shot, once a real frame is guaranteed to exist, corrects just
+  ;; that -- without deferring the theme, fonts, or modeline the way an
+  ;; earlier, broader fix did.
+  (if (daemonp)
+      (add-hook 'server-after-make-frame-hook #'my/apply-face-overrides)
+    (add-hook 'window-setup-hook #'my/apply-face-overrides))
 #+end_src
 
 * Modeline

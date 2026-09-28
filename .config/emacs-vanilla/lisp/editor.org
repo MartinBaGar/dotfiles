@@ -119,36 +119,37 @@
 #+end_src
 ** Minuet
 #+begin_src emacs-lisp
-(use-package minuet
-    :bind
-    (("M-y" . #'minuet-complete-with-minibuffer) ;; use minibuffer for completion
-     ("M-i" . #'minuet-show-suggestion) ;; use overlay for completion
-     ("C-c m" . #'minuet-configure-provider)
-     :map minuet-active-mode-map
-     ;; These keymaps activate only when a minuet suggestion is displayed in the current buffer
-     ("M-p" . #'minuet-previous-suggestion) ;; invoke completion or cycle to next completion
-     ("M-n" . #'minuet-next-suggestion) ;; invoke completion or cycle to previous completion
-     ("M-A" . #'minuet-accept-suggestion) ;; accept whole completion
-     ;; Accept the first line of completion, or N lines with a numeric-prefix:
-     ;; e.g. C-u 2 M-a will accepts 2 lines of completion.
-     ("M-a" . #'minuet-accept-suggestion-line)
-     ;; Accept the first word of completion, or N words with a numeric-prefix:
-     ;; e.g. C-u 2 M-w will accepts 2 words of completion.
-     ("M-w" . #'minuet-accept-suggestion-word)
-     ("M-e" . #'minuet-dismiss-suggestion))
-  :hook (prog-mode . minuet-auto-suggestion-mode)
-  :config
-  ;; Tell Minuet to use Codestral
-  (setq minuet-provider 'codestral)
+  (use-package minuet
+      :bind
+      (
+       ;; ("M-y" . #'minuet-complete-with-minibuffer) ;; use minibuffer for completion
+       ("M-i" . #'minuet-show-suggestion) ;; use overlay for completion
+       ;; ("C-c m" . #'minuet-configure-provider)
+       :map minuet-active-mode-map
+       ;; These keymaps activate only when a minuet suggestion is displayed in the current buffer
+       ("M-p" . #'minuet-previous-suggestion) ;; invoke completion or cycle to next completion
+       ("M-n" . #'minuet-next-suggestion) ;; invoke completion or cycle to previous completion
+       ("M-A" . #'minuet-accept-suggestion) ;; accept whole completion
+       ;; Accept the first line of completion, or N lines with a numeric-prefix:
+       ;; e.g. C-u 2 M-a will accepts 2 lines of completion.
+       ("M-a" . #'minuet-accept-suggestion-line)
+       ;; Accept the first word of completion, or N words with a numeric-prefix:
+       ;; e.g. C-u 2 M-w will accepts 2 words of completion.
+       ("M-w" . #'minuet-accept-suggestion-word)
+       ("M-e" . #'minuet-dismiss-suggestion))
+    :hook (prog-mode . minuet-auto-suggestion-mode)
+    :config
+    ;; Tell Minuet to use Codestral
+    (setq minuet-provider 'codestral)
 
-  ;; Use gptel's built-in function to extract the key.
-  ;; We use a lambda so it is evaluated only when Minuet needs it.
-  (plist-put minuet-codestral-options :api-key
-             (lambda () (gptel-api-key-from-auth-source "api.codestral.ai")))
+    ;; Use gptel's built-in function to extract the key.
+    ;; We use a lambda so it is evaluated only when Minuet needs it.
+    (plist-put minuet-codestral-options :api-key
+               (lambda () (gptel-api-key-from-auth-source "api.codestral.ai")))
 
-  ;; Recommended limits to prevent burning through tokens or timing out
-  (minuet-set-optional-options minuet-codestral-options :max_tokens 256)
-  (minuet-set-optional-options minuet-codestral-options :stop ["\n\n"]))
+    ;; Recommended limits to prevent burning through tokens or timing out
+    (minuet-set-optional-options minuet-codestral-options :max_tokens 256)
+    (minuet-set-optional-options minuet-codestral-options :stop ["\n\n"]))
 #+end_src
 * Language
 ** Translation
@@ -483,6 +484,12 @@
   	  "r" #'consult-recent-file	; Consult recent files list
   	  "y" #'my/copy-file-path))    ; Our custom copy-path function
 
+    (defvar-keymap my/ui-map
+      :doc "UI / Global Zoom"
+      "b" #'text-scale-adjust
+      "t" #'consult-theme
+      "g" #'global-text-scale-adjust)
+
     ;; `cons' (not a quoted list) so Meow evaluates the variable into the
     ;; actual keymap object rather than binding the bare symbol.
     (meow-leader-define-key (cons "w" my/window-map)
@@ -490,6 +497,7 @@
   			  (cons "t" my/text-map)
   			  (cons "z" my/fold-map)
   			  (cons "f" my/file-map)
+  			  (cons "u" my/ui-map)
   			  (cons "b" my/buffer-map))
 
     (meow-global-mode 1))
