@@ -1,0 +1,29 @@
+#+TITLE: Bootstrap
+#+PROPERTY: header-args:emacs-lisp :tangle bootstrap.el :results none
+
+#+begin_src emacs-lisp
+;;; bootstrap.el --- Core settings -*- lexical-binding: t; -*-
+#+end_src
+
+The raw Elpaca bootstrap itself (and the =compat= :wait pin) now lives
+directly in init.el, not here -- see the comment there for why. This
+file only holds settings that need Elpaca and use-package already
+loaded as real macros, which is guaranteed true by the time this file
+tangles and loads.
+
+* Core settings
+Make =:ensure t= the default for every =use-package= block from here on,
+so only the exceptions -- built-ins like =savehist= or =emacs= itself --
+need to say otherwise with =:ensure nil=.
+
+#+begin_src emacs-lisp
+(setq use-package-always-ensure t)
+#+end_src
+
+Discoverability for leader-key and prefix-key menus (Meow's leader map,
+the window submap, etc). Built into Emacs core as of 31.1 -- no package
+needed.
+
+#+begin_src emacs-lisp
+(which-key-mode 1)
+#+end_src

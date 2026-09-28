@@ -1,0 +1,154 @@
+#+TITLE: Org
+#+PROPERTY: header-args:emacs-lisp :tangle org-config.el :results none
+
+#+begin_src emacs-lisp
+  ;;; org-config.el --- Org mode settings and appearance -*- lexical-binding: t; -*-
+#+end_src
+
+* Core settings
+#+begin_src emacs-lisp
+  (with-eval-after-load 'org
+    (setq
+     ;; Edit settings
+     org-auto-align-tags nil
+     org-tags-column 0
+     org-fold-catch-invisible-edits 'show-and-error
+     org-special-ctrl-a/e t
+     org-insert-heading-respect-content t
+
+     ;; Org styling, hide markup etc.
+     org-hide-emphasis-markers t
+     ;; org-pretty-entities t
+     ;; org-agenda-tags-column 0
+     org-ellipsis "…"
+
+     ;; CRITICAL: org-modern-indent requires org-indent to be enabled globally
+     org-startup-indented t))
+#+end_src
+
+* Appearance (org-modern)
+org-modern owns stars, tags, lists and checkboxes on its own -- no
+separate bullets package needed alongside it.
+#+begin_src emacs-lisp
+(use-package org-modern
+  :custom
+  (org-modern-star '("◉" "○" "●" "○" "●"))
+  ;; Disable org-modern table styling if you prefer standard Org tables
+  (org-modern-table nil)
+  (org-modern-list
+   '(;; (?- . "-")
+     (?* . "•")
+     (?+ . "‣")))
+  :hook
+  (org-mode . org-modern-mode)
+  (org-agenda-finalize . org-modern-agenda))
+
+;; Source blocks and indentation structure
+(use-package org-modern-indent
+  :ensure (org-modern-indent :host github :repo "jdtsmith/org-modern-indent")
+  :config
+  ;; The '90' ensures this hook runs very late, after org-modern and org-indent
+  (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+#+end_src
+
+* Fonts: prose vs. code
+These faces are set globally, once -- not inside a per-buffer hook,
+since `set-face-attribute' without a frame argument changes the face
+everywhere, and re-running it on every org buffer you open is pure
+waste. Only the buffer-local minor mode (`variable-pitch-mode') needs
+to live in the hook.
+#+begin_src emacs-lisp
+(with-eval-after-load 'org
+  (dolist (face '(org-table org-code org-verbatim org-block
+                   org-meta-line org-drawer org-special-keyword
+                   org-property-value org-document-info-keyword
+                   org-date org-tag))
+    (set-face-attribute face nil :inherit 'fixed-pitch)))
+
+(add-hook 'org-mode-hook #'variable-pitch-mode)
+#+end_src
+
+* Sub-modes
+** Org-roam
+#+begin_src emacs-lisp
+(use-package org-roam
+  :ensure t
+  :custom
+  ;; Replace this string with the exact path to your Syncthing directory
+  (org-roam-directory (file-truename "~/org/roam"))
+  
+  ;; Enables completion for node insertion anywhere
+  (org-roam-completion-everywhere t)
+  :config
+  ;; This is the magic line. It automatically parses all your existing files
+  ;; and builds the SQLite database so everything links up immediately.
+  (org-roam-db-autosync-mode 1))
+
+(with-eval-after-load 'meow
+  ;; Recreate Doom's Notes submap -- SPC n ...
+  (defvar-keymap my/notes-map
+    :doc "Org-Roam / Notes"
+    "f" #'org-roam-node-find       ; Find or create a node
+    "i" #'org-roam-node-insert     ; Insert a link to a node
+    "c" #'org-roam-capture         ; Capture a new node instantly
+    "l" #'org-roam-buffer-toggle   ; Toggle the backlinks buffer
+    "t" #'org-roam-tag-add)        ; Add a tag to the current node
+    
+  (meow-leader-define-key (cons "n" my/notes-map)))
+#+end_src
+
+** Org-babel
+#+begin_src emacs-lisp
+  (with-eval-after-load 'org
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((shell . t)
+       (python . t)    ;; Added this since you use Python blocks
+       (emacs-lisp . t))))
+
+  (setq org-confirm-babel-evaluate nil)
+
+  (with-eval-after-load 'ob-core
+    (require 'cl-lib)
+
+    (defun my/org-babel-fold-result (result &optional result-params info &rest _)
+      "Fold the results drawer/block that was just written, sync or async,
+  but only for blocks whose effective header args include `:fold yes'."
+      (when (derived-mode-p 'org-mode)
+        (let* ((params (and info (nth 2 info)))
+               (fold   (cdr (assq :fold params))))
+          (when (member fold '("yes" "t"))
+            (save-excursion
+              (let ((loc (ignore-errors (org-babel-where-is-src-block-result))))
+                (when loc
+                  (goto-char loc)
+                  (let ((end (ignore-errors (org-babel-result-end))))
+                    (when end
+                      ;; Purge ANY existing hide-overlay touching this result
+                      ;; block, alive or not. Comint async can re-run this
+                      ;; advice several times as output streams in, and Org
+                      ;; doesn't clean up the previous fold overlay before
+                      ;; the next chunk lands, leaving a stale/shrunk
+                      ;; overlay behind.
+                      (setq org-babel-hide-result-overlays
+                            (cl-remove-if
+                             (lambda (ov)
+                               (when (and (overlay-buffer ov)
+                                          (>= (overlay-start ov) (1- loc))
+                                          (<= (overlay-end ov) (1+ end)))
+                                 (delete-overlay ov)
+                                 t))
+                             org-babel-hide-result-overlays)))
+                    (org-babel-hide-result-toggle t)))))))))
+
+    (advice-add 'org-babel-insert-result :after #'my/org-babel-fold-result))
+#+end_src
+** Org-img
+#+begin_src emacs-lisp
+  (use-package org-img
+    :ensure (org-img :host github :repo "MartinBaGar/org-img")
+    :after org
+    :hook (org-mode . org-img-mode)
+    :config
+    (setq-default org-img-dir "~/org/img/"))
+#+end_src
