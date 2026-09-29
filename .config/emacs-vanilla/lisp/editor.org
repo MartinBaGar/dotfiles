@@ -116,39 +116,44 @@
     :after (gptel magit)
     :custom
     (gptel-commit-stream t))
+
+  (use-package gptel-agent
+    :ensure t
+    :after (gptel))
 #+end_src
 ** Minuet
 #+begin_src emacs-lisp
-(use-package minuet
-    :bind
-    (("M-y" . #'minuet-complete-with-minibuffer) ;; use minibuffer for completion
-     ("M-i" . #'minuet-show-suggestion) ;; use overlay for completion
-     ("C-c m" . #'minuet-configure-provider)
-     :map minuet-active-mode-map
-     ;; These keymaps activate only when a minuet suggestion is displayed in the current buffer
-     ("M-p" . #'minuet-previous-suggestion) ;; invoke completion or cycle to next completion
-     ("M-n" . #'minuet-next-suggestion) ;; invoke completion or cycle to previous completion
-     ("M-A" . #'minuet-accept-suggestion) ;; accept whole completion
-     ;; Accept the first line of completion, or N lines with a numeric-prefix:
-     ;; e.g. C-u 2 M-a will accepts 2 lines of completion.
-     ("M-a" . #'minuet-accept-suggestion-line)
-     ;; Accept the first word of completion, or N words with a numeric-prefix:
-     ;; e.g. C-u 2 M-w will accepts 2 words of completion.
-     ("M-w" . #'minuet-accept-suggestion-word)
-     ("M-e" . #'minuet-dismiss-suggestion))
-  :hook (prog-mode . minuet-auto-suggestion-mode)
-  :config
-  ;; Tell Minuet to use Codestral
-  (setq minuet-provider 'codestral)
+  (use-package minuet
+      :bind
+      (
+       ;; ("M-y" . #'minuet-complete-with-minibuffer) ;; use minibuffer for completion
+       ("M-i" . #'minuet-show-suggestion) ;; use overlay for completion
+       ;; ("C-c m" . #'minuet-configure-provider)
+       :map minuet-active-mode-map
+       ;; These keymaps activate only when a minuet suggestion is displayed in the current buffer
+       ("M-p" . #'minuet-previous-suggestion) ;; invoke completion or cycle to next completion
+       ("M-n" . #'minuet-next-suggestion) ;; invoke completion or cycle to previous completion
+       ("M-A" . #'minuet-accept-suggestion) ;; accept whole completion
+       ;; Accept the first line of completion, or N lines with a numeric-prefix:
+       ;; e.g. C-u 2 M-a will accepts 2 lines of completion.
+       ("M-a" . #'minuet-accept-suggestion-line)
+       ;; Accept the first word of completion, or N words with a numeric-prefix:
+       ;; e.g. C-u 2 M-w will accepts 2 words of completion.
+       ("M-w" . #'minuet-accept-suggestion-word)
+       ("M-e" . #'minuet-dismiss-suggestion))
+    ;; :hook (prog-mode . minuet-auto-suggestion-mode)
+    :config
+    ;; Tell Minuet to use Codestral
+    (setq minuet-provider 'codestral)
 
-  ;; Use gptel's built-in function to extract the key.
-  ;; We use a lambda so it is evaluated only when Minuet needs it.
-  (plist-put minuet-codestral-options :api-key
-             (lambda () (gptel-api-key-from-auth-source "api.codestral.ai")))
+    ;; Use gptel's built-in function to extract the key.
+    ;; We use a lambda so it is evaluated only when Minuet needs it.
+    (plist-put minuet-codestral-options :api-key
+               (lambda () (gptel-api-key-from-auth-source "api.codestral.ai")))
 
-  ;; Recommended limits to prevent burning through tokens or timing out
-  (minuet-set-optional-options minuet-codestral-options :max_tokens 256)
-  (minuet-set-optional-options minuet-codestral-options :stop ["\n\n"]))
+    ;; Recommended limits to prevent burning through tokens or timing out
+    (minuet-set-optional-options minuet-codestral-options :max_tokens 256)
+    (minuet-set-optional-options minuet-codestral-options :stop ["\n\n"]))
 #+end_src
 * Language
 ** Translation
@@ -212,6 +217,16 @@
      typst-ts-markup-rawblock-blob-face
      typst-ts-error-face typst-ts-shorthand-face typst-ts-markup-linebreak-face
      typst-ts-markup-quote-face typst-ts-markup-url-face typst-ts-math-indicator-face)))
+#+end_src
+* LSP
+#+begin_src emacs-lisp
+(with-eval-after-load 'eglot
+  (with-eval-after-load 'typst-ts-mode
+    (add-to-list 'eglot-server-programs
+		 `((typst-ts-mode) .
+		   ,(eglot-alternatives `(,typst-ts-lsp-download-path
+					  "tinymist"
+					  "typst-lsp"))))))
 #+end_src
 * Default-Apps
 #+begin_src emacs-lisp
@@ -318,6 +333,27 @@
     :config
     (savefold-mode 1))
 #+end_src
+
+* Multicursor
+#+begin_src emacs-lisp
+  ;; (use-package multiple-cursors
+  ;; :ensure t
+  ;; :config
+  ;; ;; 1. The Modal Trap Fix: 
+  ;; ;; Force Meow into INSERT state when multiple cursors activate,
+  ;; ;; so typing and deleting works normally across all cursors.
+  ;; (add-hook 'multiple-cursors-mode-enabled-hook
+  ;;           (lambda () (meow-insert)))
+
+  ;; ;; Force Meow back to NORMAL state when you press RET or C-g to exit MC
+  ;; (add-hook 'multiple-cursors-mode-disabled-hook
+  ;;           (lambda () (meow-normal)))
+
+  ;; ;; 2. Mouse support (Hold Alt and click to add a cursor)
+  ;; (global-unset-key (kbd "M-<down-mouse-1>"))
+  ;; (global-set-key (kbd "M-<mouse-1>") 'mc/add-cursor-on-click))
+#+end_src
+
 * Terminal
 #+begin_src emacs-lisp
   (use-package vterm
@@ -483,11 +519,23 @@
   	  "r" #'consult-recent-file	; Consult recent files list
   	  "y" #'my/copy-file-path))    ; Our custom copy-path function
 
-    (defvar-keymap my/ui-map
-      :doc "UI / Global Zoom"
-      "b" #'text-scale-adjust
-      "g" #'global-text-scale-adjust)
+    (setq my/ui-map
+         (define-keymap
+  	 :name "UI / Global Zoom"
+  	 "b" #'text-scale-adjust
+  	 "t" #'consult-theme
+  	 "g" #'global-text-scale-adjust))
 
+    ;; (setq my/mc-map
+    ;; 	(define-keymap
+    ;; 	  :name "Multiple Cursors"
+    ;; 	  "n" #'mc/mark-next-like-this          ; Select next occurrence of word/region
+    ;; 	  "p" #'mc/mark-previous-like-this      ; Select previous occurrence
+    ;; 	  "s" #'mc/skip-to-next-like-this       ; Skip current, mark next
+    ;; 	  "a" #'mc/mark-all-like-this           ; Mark every occurrence in buffer
+    ;; 	  "w" #'mc/mark-next-word-like-this     ; Strictly match whole words
+    ;; 	  "l" #'mc/edit-lines))                  ; Add a cursor to each selected line
+    
     ;; `cons' (not a quoted list) so Meow evaluates the variable into the
     ;; actual keymap object rather than binding the bare symbol.
     (meow-leader-define-key (cons "w" my/window-map)
@@ -496,6 +544,7 @@
   			  (cons "z" my/fold-map)
   			  (cons "f" my/file-map)
   			  (cons "u" my/ui-map)
+  			  ;; (cons "m" my/mc-map)
   			  (cons "b" my/buffer-map))
 
     (meow-global-mode 1))

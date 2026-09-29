@@ -17,6 +17,7 @@ so only the exceptions -- built-ins like =savehist= or =emacs= itself --
 need to say otherwise with =:ensure nil=.
 
 #+begin_src emacs-lisp
+(require 'compile)
 (setq use-package-always-ensure t)
 #+end_src
 
