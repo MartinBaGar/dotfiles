@@ -101,3 +101,9 @@ Babel blocks work identically whether running locally or over SSH."
   :config
   (keymap-set typst-ts-mode-map "C-c C-c" #'typst-ts-tmenu))
 #+end_src
+* Jupyter
+#+begin_src emacs-lisp
+(use-package code-cells
+  :ensure (:type git :host github :repo "astoff/code-cells.el" :branch "master")
+  :hook (python-mode . code-cells-mode-maybe))
+#+end_src

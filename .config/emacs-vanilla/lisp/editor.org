@@ -74,6 +74,25 @@
 (with-eval-after-load 'which-key
   (which-key-add-key-based-replacements "SPC w" "Windows"))
 #+end_src
+
+* Copying
+#+begin_src emacs-lisp
+;; --- Unified Clipboard Integration ---
+
+;; 1. Sync Emacs yanks/kills with the system clipboard
+(setq select-enable-clipboard t)
+
+;; 2. (Optional) Sync with the primary selection (Linux middle-click paste)
+(setq select-enable-primary t)
+
+;; 3. THE MAGIC SETTING: 
+;; If you copy something outside Emacs, and then delete a word inside Emacs,
+;; Emacs normally overwrites your clipboard with the deleted word!
+;; This setting forces Emacs to save the outside clipboard to the kill ring FIRST,
+;; so when you press 'p' or 'r', it pastes what you actually wanted.
+(setq save-interprogram-paste-before-kill t)
+#+end_src
+
 * LLM
 ** Gptel
 #+begin_src emacs-lisp
@@ -249,57 +268,71 @@
 #+end_src
 * Keys
 #+begin_src emacs-lisp
-  (use-package key-chord
-    :ensure t
-    :config
-    (key-chord-mode 1)
-    
-    ;; Optional but highly recommended: tweak the delay so it doesn't 
-    ;; trigger accidentally when you are typing fast. (0.15 is a sweet spot).
-    (setq key-chord-two-keys-delay 0.15)
-    
-    (with-eval-after-load 'meow
-      ;; Only bind 'fd' to exit insert mode, and ONLY when in insert mode.
-      (key-chord-define meow-insert-state-keymap "fd" #'meow-insert-exit)))
+(use-package key-chord
+  :ensure t
+  :config
+  (key-chord-mode 1)
+  
+  ;; Optional but highly recommended: tweak the delay so it doesn't 
+  ;; trigger accidentally when you are typing fast. (0.15 is a sweet spot).
+  (setq key-chord-two-keys-delay 0.15)
+  
+  (with-eval-after-load 'meow
+    ;; Only bind 'fd' to exit insert mode, and ONLY when in insert mode.
+    (key-chord-define meow-insert-state-keymap "fd" #'meow-insert-exit)))
 
-  (defun my/meow-surround ()
-    "Surround the current active region with a pair of characters."
-    (interactive)
-    (if (region-active-p)
-        (let* ((char (read-char "Surround with: "))
-               ;; Map opening/closing brackets to their pairs. 
-               ;; Any other character (like quotes or asterisks) is paired with itself.
-               (pair (pcase char
-                       ((or ?\( ?\)) '(?\( . ?\)))
-                       ((or ?\[ ?\]) '(?\[ . ?\]))
-                       ((or ?\{ ?\}) '(?\{ . ?\}))
-                       ((or ?\< ?\>) '(?\< . ?\>))
-                       (_ (cons char char))))
-               (beg (region-beginning))
-               (end (region-end)))
-          (save-excursion
-            (goto-char end)
-            (insert (cdr pair))
-            (goto-char beg)
-            (insert (car pair)))
-          ;; Drop back to normal state after wrapping
-          (meow-cancel-selection))
-      (message "No active region to surround.")))
+(defun my/meow-surround ()
+  "Surround the current active region with a pair of characters."
+  (interactive)
+  (if (region-active-p)
+      (let* ((char (read-char "Surround with: "))
+             ;; Map opening/closing brackets to their pairs. 
+             ;; Any other character (like quotes or asterisks) is paired with itself.
+             (pair (pcase char
+		     ((or ?\( ?\)) '(?\( . ?\)))
+                     ((or ?\[ ?\]) '(?\[ . ?\]))
+                     ((or ?\{ ?\}) '(?\{ . ?\}))
+                     ((or ?\< ?\>) '(?\< . ?\>))
+                     (_ (cons char char))))
+             (beg (region-beginning))
+             (end (region-end)))
+        (save-excursion
+          (goto-char end)
+          (insert (cdr pair))
+          (goto-char beg)
+          (insert (car pair)))
+        ;; Drop back to normal state after wrapping
+        (meow-cancel-selection))
+    (message "No active region to surround.")))
 
-  (defun my/copy-file-path (&optional arg)
-    "Copy the current buffer's file path to the clipboard.
+(defun my/copy-file-path (&optional arg)
+  "Copy the current buffer's file path to the clipboard.
   If in a Dired/Dirvish buffer, copy the path of the file at point.
   If the buffer is not saved to a file, copy the default directory.
   With a prefix argument (e.g., `SPC 1`), copy ONLY the filename instead of the full path."
-    (interactive "P")
-    (let ((path (if (derived-mode-p 'dired-mode)
-                    (dired-get-filename nil t)
-                  (or buffer-file-name default-directory))))
-      (if (not path)
-          (message "No file path associated with this buffer.")
-        (let ((text (if arg (file-name-nondirectory path) path)))
-          (kill-new text)
-          (message "Copied path: %s" text)))))
+  (interactive "P")
+  (let ((path (if (derived-mode-p 'dired-mode)
+                  (dired-get-filename nil t)
+                (or buffer-file-name default-directory))))
+    (if (not path)
+        (message "No file path associated with this buffer.")
+      (let ((text (if arg (file-name-nondirectory path) path)))
+        (kill-new text)
+	(message "Copied path: %s" text)))))
+
+(defun my/scroll-half-page-down ()
+  "Scroll down exactly half the current window height."
+  (interactive)
+  (scroll-up-command (/ (window-body-height) 2)))
+
+(defun my/scroll-half-page-up ()
+  "Scroll up exactly half the current window height."
+  (interactive)
+  (scroll-down-command (/ (window-body-height) 2)))
+
+;; Bind to the classic Doom/Vim scrolling keys
+(global-set-key (kbd ">") #'my/scroll-half-page-down)
+(global-set-key (kbd "<") #'my/scroll-half-page-up)
   #+end_src
 
 * Folding
