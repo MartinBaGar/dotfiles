@@ -54,16 +54,21 @@ Babel blocks work identically whether running locally or over SSH."
            (header-args-sym  (intern (format "org-babel-header-args:%s" name-str)))
            (default-sym      (intern (format "org-babel-default-header-args:%s" name-str))))
       `(progn
-         (defalias ',execute-sym      #'org-babel-execute:python)
-         (defalias ',expand-sym       #'org-babel-expand-body:python)
-         (defalias ',prep-session-sym #'org-babel-prep-session:python)
-         (defalias ',edit-prep-sym    #'+org-babel-edit-prep-python-session-a)
-         (defvaralias ',header-args-sym 'org-babel-header-args:python)
-         (add-to-list 'org-src-lang-modes (cons ,name-str 'python))
-         (add-to-list 'org-babel-tangle-lang-exts (cons ,name-str "py"))
-         (defvar ,default-sym ',header-args)
-         (put ',default-sym 'safe-local-variable #'listp)
-         (add-to-list 'org-structure-template-alist (cons ,name-str ,(format "src %s" name-str))))))
+	 (defalias ',execute-sym      #'org-babel-execute:python)
+	 (defun ,expand-sym (body params)
+           "Expand BODY according to PARAMS, matching what
+`org-babel-execute:python' does internally in recent Org versions
+\(which no longer expose a standalone `org-babel-expand-body:python'\)."
+           (org-babel-expand-body:generic
+            body params (org-babel-variable-assignments:python params)))
+	 (defalias ',prep-session-sym #'org-babel-prep-session:python)
+	 (defalias ',edit-prep-sym    #'+org-babel-edit-prep-python-session-a)
+	 (defvaralias ',header-args-sym 'org-babel-header-args:python)
+	 (add-to-list 'org-src-lang-modes (cons ,name-str 'python))
+	 (add-to-list 'org-babel-tangle-lang-exts (cons ,name-str "py"))
+	 (defvar ,default-sym ',header-args)
+	 (put ',default-sym 'safe-local-variable #'listp)
+	 (add-to-list 'org-structure-template-alist (cons ,name-str ,(format "src %s" name-str))))))
 
   (def-python-babel-preset! pyplot
 			    (:session  . "pyplot-session")
