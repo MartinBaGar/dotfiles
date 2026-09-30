@@ -4,6 +4,11 @@
 #+begin_src emacs-lisp
 ;;; programming.el --- Language-agnostic dev tools -*- lexical-binding: t; -*-
 #+end_src
+* General
+#+begin_src emacs-lisp
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 2)
+#+end_src
 
 * Magit
 #+begin_src emacs-lisp
@@ -22,63 +27,120 @@ executables).
 #+end_src
 * Reproducibility
 #+begin_src emacs-lisp
-  (with-eval-after-load 'org
-    (require 'ob-python)
-    
-    (defun +org-babel-edit-prep-python-session-a (info)
-      "Point this edit buffer's inferior Python process at the running
-  Babel session named in INFO's :session header, so eldoc/completion
-  talk to the live REPL. Self-contained: doesn't depend on
-  `org-babel-edit-prep:python' existing."
-      (let ((session (cdr (assq :session (nth 2 info)))))
-        (when (and session (not (string= session "none")))
-          (setq-local python-shell-buffer-name
-                      (if (fboundp 'org-babel-python-without-earmuffs)
-                          (org-babel-python-without-earmuffs session)
-                        (string-trim session "\\*" "\\*"))))))
+(with-eval-after-load 'org
+  (require 'ob-python)
+  
+  (defun +org-babel-edit-prep-python-session-a (info)
+    "Point this edit buffer's inferior Python process at the running
+Babel session named in INFO's :session header, so eldoc/completion
+talk to the live REPL. Self-contained: doesn't depend on
+`org-babel-edit-prep:python' existing."
+    (let ((session (cdr (assq :session (nth 2 info)))))
+      (when (and session (not (string= session "none")))
+        (setq-local python-shell-buffer-name
+                    (if (fboundp 'org-babel-python-without-earmuffs)
+                        (org-babel-python-without-earmuffs session)
+                      (string-trim session "\\*" "\\*"))))))
 
-    (defun +org-babel-remote-dir (path host)
-      "Return PATH as-is on HOST, or its
-  /ssh:HOST: tramp form otherwise. Used in :dir header-args to make
-  Babel blocks work identically whether running locally or over SSH."
-      (if (string= system-name host)
-          path
-        (format "/ssh:%s:%s" host path)))
+  (defun +org-babel-remote-dir (path host)
+    "Return PATH as-is on HOST, or its
+/ssh:HOST: tramp form otherwise. Used in :dir header-args to make
+Babel blocks work identically whether running locally or over SSH."
+    (if (string= system-name host)
+        path
+      (format "/ssh:%s:%s" host path)))
 
-    (defmacro def-python-babel-preset! (name &rest header-args)
-      (let* ((name-str (symbol-name name))
-             (execute-sym      (intern (format "org-babel-execute:%s" name-str)))
-             (expand-sym       (intern (format "org-babel-expand-body:%s" name-str)))
-             (prep-session-sym (intern (format "org-babel-prep-session:%s" name-str)))
-             (edit-prep-sym    (intern (format "org-babel-edit-prep:%s" name-str)))
-             (header-args-sym  (intern (format "org-babel-header-args:%s" name-str)))
-             (default-sym      (intern (format "org-babel-default-header-args:%s" name-str))))
-        `(progn
-           (defalias ',execute-sym      #'org-babel-execute:python)
-           (defalias ',expand-sym       #'org-babel-expand-body:python)
-           (defalias ',prep-session-sym #'org-babel-prep-session:python)
-           (defalias ',edit-prep-sym    #'+org-babel-edit-prep-python-session-a)
-           (defvaralias ',header-args-sym 'org-babel-header-args:python)
-           (add-to-list 'org-src-lang-modes (cons ,name-str 'python))
-           (add-to-list 'org-babel-tangle-lang-exts (cons ,name-str "py"))
-           (defvar ,default-sym ',header-args)
-           (put ',default-sym 'safe-local-variable #'listp)
-           (add-to-list 'org-structure-template-alist (cons ,name-str ,(format "src %s" name-str))))))
+  (defmacro def-python-babel-preset! (name &rest header-args)
+    (let* ((name-str (symbol-name name))
+           (execute-sym      (intern (format "org-babel-execute:%s" name-str)))
+           (expand-sym       (intern (format "org-babel-expand-body:%s" name-str)))
+           (prep-session-sym (intern (format "org-babel-prep-session:%s" name-str)))
+           (edit-prep-sym    (intern (format "org-babel-edit-prep:%s" name-str)))
+           (header-args-sym  (intern (format "org-babel-header-args:%s" name-str)))
+           (default-sym      (intern (format "org-babel-default-header-args:%s" name-str))))
+      `(progn
+	 (defalias ',execute-sym      #'org-babel-execute:python)
+	 (defun ,expand-sym (body params)
+           "Expand BODY according to PARAMS, matching what
+`org-babel-execute:python' does internally in recent Org versions
+\(which no longer expose a standalone `org-babel-expand-body:python'\)."
+           (org-babel-expand-body:generic
+            body params (org-babel-variable-assignments:python params)))
+	 (defalias ',prep-session-sym #'org-babel-prep-session:python)
+	 (defalias ',edit-prep-sym    #'+org-babel-edit-prep-python-session-a)
+	 (defvaralias ',header-args-sym 'org-babel-header-args:python)
+	 (add-to-list 'org-src-lang-modes (cons ,name-str 'python))
+	 (add-to-list 'org-babel-tangle-lang-exts (cons ,name-str "py"))
+	 (defvar ,default-sym ',header-args)
+	 (put ',default-sym 'safe-local-variable #'listp)
+	 (add-to-list 'org-structure-template-alist (cons ,name-str ,(format "src %s" name-str))))))
 
-    (def-python-babel-preset! pyplot
-  			    (:session  . "pyplot-session")
-  			    (:results  . "output raw")
-  			    (:epilogue . "print(f'[[file:{fname}]]')"))
+  (def-python-babel-preset! pyplot
+			    (:session  . "pyplot-session")
+			    (:results  . "output raw")
+			    (:epilogue . "print(f'[[file:{fname}]]')"))
 
-    (def-python-babel-preset! pyops
-  			    (:session . "pyops-session")
-  			    (:results . "output")
-  			    (:exports . "code")
-  			    (:fold    . "yes"))
+  (def-python-babel-preset! pyops
+			    (:session . "pyops-session")
+			    (:results . "output")
+			    (:exports . "code")
+			    (:fold    . "yes"))
 
-    (def-python-babel-preset! pyviz
-  			    (:session . "pyviz-session")
-  			    (:results . "output")
-  			    (:exports . "code")
-  			    (:fold    . "yes")))
+  (def-python-babel-preset! pyviz
+			    (:session . "pyviz-session")
+			    (:results . "output")
+			    (:exports . "code")
+			    (:fold    . "yes")))
+#+end_src
+* Typst
+#+begin_src emacs-lisp
+(use-package typst-preview
+  :custom
+  (typst-preview-browser "default")
+  (typst-preview-open-browser-automatically t)
+  (typst-preview-executable "~/.config/emacs/.local/cache/.cache/lsp/tinymist/tinymist")
+  (typst-preview-autostart t)
+  (typst-preview-invert-colors "never"))
+
+(use-package typst-ts-mode
+  :ensure (:type git :host codeberg :repo "meow_king/typst-ts-mode" :branch "main")
+  :custom
+  (typst-ts-watch-options "--open")
+  (typst-ts-mode-grammar-location (expand-file-name "tree-sitter/libtree-sitter-typst.so" user-emacs-directory))
+  (typst-ts-mode-enable-raw-blocks-highlight t)
+  :config
+  (keymap-set typst-ts-mode-map "C-c C-c" #'typst-ts-tmenu))
+#+end_src
+* Jupyter
+#+begin_src emacs-lisp
+(use-package code-cells
+  :ensure (:type git :host github :repo "astoff/code-cells.el" :branch "master")
+  :hook (python-mode . code-cells-mode-maybe))
+#+end_src
+* Web
+** Svelte
+#+begin_src emacs-lisp
+;; 1. Tell Emacs where to download the Svelte tree-sitter grammar
+(add-to-list 'treesit-language-source-alist '(css "https://github.com/tree-sitter/tree-sitter-css"))
+(add-to-list 'treesit-language-source-alist '(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src"))
+(add-to-list 'treesit-language-source-alist
+	     '(svelte "https://github.com/tree-sitter-grammars/tree-sitter-svelte"))
+
+;; 2. Install and configure the major mode
+(use-package svelte-ts-mode
+  :ensure (:type git :host github :repo "leafOfTree/svelte-ts-mode")
+  :mode "\\.svelte\\'"
+  :config
+  (setq svelte-ts-mode-indent-offset 2)
+  
+  ;; Indent the TypeScript inside the <script> block by 2 spaces
+  (setq typescript-ts-mode-indent-offset 2)
+  
+  ;; (Optional) If you use normal CSS/JS inside Svelte
+  (setq css-ts-mode-indent-offset 2)
+  (setq js-ts-mode-indent-offset 2)
+  ;; Link Svelte files to Eglot for LSP features (autocomplete, diagnostics)
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs
+                 '(svelte-ts-mode . ("svelteserver" "--stdio")))))
 #+end_src
