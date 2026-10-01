@@ -229,40 +229,40 @@ Operates directly on the Org AST."
 * Exporters
 #+begin_src emacs-lisp
 (use-package ox-typst
-  :after org)
-
-(with-eval-after-load 'ox-typst
+  :after org
+  :config
   ;; 1. Define how an example block should look in Typst
   (defun org-typst-example-block (example-block contents info)
     "Transcode an EXAMPLE-BLOCK element from Org to Typst."
     (let ((value (org-element-property :value example-block)))
-      ;; Wrap the raw value in Typst's triple backticks
       (format "```\n%s```\n" value)))
 
-  ;; 2. Inject this new rule into the ox-typst export backend
-  (let ((backend (org-export-get-backend 'typst)))
-    (when backend
-      (setf (org-export-backend-transcoders backend)
-            (cons '(example-block . org-typst-example-block)
-                  (org-export-backend-transcoders backend)))))
-
+  ;; 2. Define the TODO preservation hook
   (defun org-typst-preserve-todos (tree backend info)
     "Force TODO keywords into the headline title so ox-typst doesn't drop them."
     (when (eq backend 'typst)
       (org-element-map tree 'headline
-	(lambda (hl)
+        (lambda (hl)
           (let ((todo (org-element-property :todo-keyword hl)))
             (when todo
               (let ((title (org-element-property :title hl)))
-		;; Prepend the TODO keyword (with a space) directly to the title
-		(org-element-put-property 
-		 hl :title 
-		 (cons (format "%s " todo) title))))))))
-    ;; Return the modified tree
+                (org-element-put-property 
+                 hl :title 
+                 (cons (format "%s " todo) title))))))))
     tree)
 
-  ;; Attach our fix to the export pipeline
-  (add-to-list 'org-export-filter-parse-tree-functions #'org-typst-preserve-todos))
+  ;; 3. Apply both fixes when ox-typst loads
+  (with-eval-after-load 'ox-typst
+    
+    ;; INJECTION FIX: Modifying the list in-place to avoid the setf void-function error
+    (let* ((backend (org-export-get-backend 'typst))
+           (transcoders (org-export-backend-transcoders backend)))
+      (when transcoders
+        (setcdr transcoders (cons '(example-block . org-typst-example-block)
+                                  (cdr transcoders)))))
+
+    ;; Attach the TODO fix to the export pipeline
+    (add-to-list 'org-export-filter-parse-tree-functions #'org-typst-preserve-todos)))
 
 (use-package ox-ipynb
   :ensure ox-ipynb (:host github :repo "jkitchin/ox-ipynb"))
