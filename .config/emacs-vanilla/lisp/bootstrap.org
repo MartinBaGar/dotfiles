@@ -28,3 +28,11 @@ needed.
 #+begin_src emacs-lisp
 (which-key-mode 1)
 #+end_src
+
+* Secrets
+#+begin_src emacs-lisp
+;; Load work-specific TRAMP configs if they exist on this machine
+(let ((secrets-file (expand-file-name "~/.emacs-secrets.el")))
+  (when (file-exists-p secrets-file)
+    (load secrets-file)))
+#+end_src

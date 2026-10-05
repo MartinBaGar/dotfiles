@@ -546,8 +546,9 @@
 	(define-keymap
 	  :name "Files"
 	  "f" #'find-file             ; Standard file search
-	  "s" #'save-buffer           ; Save current file
-	  "r" #'consult-recent-file	; Consult recent files list
+	  "p" #'find-file-at-point
+	  "m" #'consult-bookmark
+	  "b" #'consult-buffer	; Consult recent files list
 	  "y" #'my/copy-file-path))    ; Our custom copy-path function
 
   (setq my/ui-map

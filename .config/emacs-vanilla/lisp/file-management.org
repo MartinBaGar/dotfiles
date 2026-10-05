@@ -7,24 +7,25 @@
 
 * Dirvish
 #+begin_src emacs-lisp
-  (recentf-mode)
-  (use-package dirvish
-    :init
-    ;; Let Dirvish take over Dired globally
-    (dirvish-override-dired-mode)
-
-    :custom
-    ;; Subtree visual indicators: 'subtree-state' is required to show
-    ;; the [+]/[-] icons, alongside a few other useful attributes.
-    (dirvish-attributes '(vc-state subtree-state nerd-icons collapse git-msg))
-    (dirvish-side-width 35)
-
-    :config
-    ;; Persistent sidebar & follow mode: highlights the current buffer's
-    ;; file and jumps to project roots when you switch projects.
-    (dirvish-side-follow-mode 1)
-    (setq dirvish-subtree-always-show-state t)
-
+(recentf-mode)
+(use-package dirvish
+  :init
+  ;; Let Dirvish take over Dired globally
+  (dirvish-override-dired-mode)
+  
+  :custom
+  ;; Subtree visual indicators: 'subtree-state' is required to show
+  ;; the [+]/[-] icons, alongside a few other useful attributes.
+  (dirvish-attributes '(vc-state subtree-state nerd-icons collapse git-msg))
+  (dirvish-side-width 35)
+  (dirvish-header-line-format '(:left (path) :right (yank free-space)))
+  
+  :config
+  ;; Persistent sidebar & follow mode: highlights the current buffer's
+  ;; file and jumps to project roots when you switch projects.
+  (dirvish-side-follow-mode 1)
+  (setq dirvish-subtree-always-show-state t)
+  
     :bind
     (("C-c d" . dirvish-side)
      :map dirvish-mode-map
