@@ -148,6 +148,13 @@ act on a completion candidate without visiting it first.
 
 
   (setq consult-narrow-key "<"))
+
+(use-package consult-dir
+  :ensure t
+  :bind (("C-x C-d" . consult-dir)
+	 :map minibuffer-local-completion-map
+	 ("C-x C-d" . consult-dir)
+         ("C-x C-j" . consult-dir-jump-file)))
 #+end_src
 
 * Corfu / Cape

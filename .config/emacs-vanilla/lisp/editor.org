@@ -547,6 +547,7 @@
 	  :name "Files"
 	  "f" #'find-file             ; Standard file search
 	  "p" #'find-file-at-point
+	  "d" #'consult-dir
 	  "m" #'consult-bookmark
 	  "b" #'consult-buffer	; Consult recent files list
 	  "y" #'my/copy-file-path))    ; Our custom copy-path function
