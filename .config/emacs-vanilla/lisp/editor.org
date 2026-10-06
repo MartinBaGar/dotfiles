@@ -330,7 +330,20 @@
   (interactive)
   (scroll-down-command (/ (window-body-height) 2)))
   #+end_src
-
+* Undo-Redo
+#+begin_src emacs-lisp
+(use-package vundo
+  :ensure t
+  :custom
+  ;; Use crisp Unicode characters to draw the tree lines instead of ASCII
+  (vundo-glyph-alist vundo-unicode-symbols)
+  ;; Make the tree pop up in a small window at the bottom of the screen
+  (vundo-window-max-height 6)
+  :config
+  ;; Automatically quit the vundo buffer when you confirm a selection
+  (with-eval-after-load 'vundo
+    (define-key vundo-mode-map (kbd "RET") #'vundo-confirm)))
+#+end_src
 * Folding
 #+begin_src emacs-lisp
   (use-package outline
