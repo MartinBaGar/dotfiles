@@ -330,7 +330,20 @@
   (interactive)
   (scroll-down-command (/ (window-body-height) 2)))
   #+end_src
-
+* Undo-Redo
+#+begin_src emacs-lisp
+(use-package vundo
+  :ensure t
+  :custom
+  ;; Use crisp Unicode characters to draw the tree lines instead of ASCII
+  (vundo-glyph-alist vundo-unicode-symbols)
+  ;; Make the tree pop up in a small window at the bottom of the screen
+  (vundo-window-max-height 6)
+  :config
+  ;; Automatically quit the vundo buffer when you confirm a selection
+  (with-eval-after-load 'vundo
+    (define-key vundo-mode-map (kbd "RET") #'vundo-confirm)))
+#+end_src
 * Folding
 #+begin_src emacs-lisp
   (use-package outline
@@ -387,6 +400,42 @@
 #+begin_src emacs-lisp
   (use-package vterm
       :ensure t)
+#+end_src
+
+* Web browsing
+#+begin_src emacs-lisp
+(defvar my/search-engines
+  '(("DuckDuckGo"    . "https://duckduckgo.com/?q=%s")
+    ("Google"        . "https://google.com/search?q=%s")
+    ("GitHub"        . "https://github.com/search?q=%s")
+    ("DevDocs"       . "https://devdocs.io/#q=%s")
+    ("StackOverflow" . "https://stackoverflow.com/search?q=%s")
+    ("YouTube"       . "https://youtube.com/results?search_query=%s")
+    ("Wikipedia"     . "https://en.wikipedia.org/wiki/Special:Search?search=%s"))
+  "List of search engines and their query URLs.")
+
+(defvar my/last-search-engine "DuckDuckGo"
+  "The last engine used by `my/search-web-smart'.")
+
+(defun my/search-web-smart (&optional prefix)
+  "Search the web using a predefined engine. 
+With a prefix argument (e.g., C-u), forces a prompt to change the engine."
+  (interactive "P")
+  (let* ((query (if (use-region-p)
+                    (buffer-substring (region-beginning) (region-end))
+                  (thing-at-point 'symbol t)))
+         ;; Prompt for engine if prefix is used, otherwise use the last one
+         (engine-name (if prefix
+                          (completing-read "Search engine: " (mapcar #'car my/search-engines) nil t)
+                        my/last-search-engine))
+         (url-template (cdr (assoc engine-name my/search-engines)))
+         ;; Let the user edit the final query before launching
+         (final-query (read-string (format "Search %s for: " engine-name) query)))
+    
+    ;; Save the chosen engine for next time
+    (setq my/last-search-engine engine-name)
+    ;; Launch it in your Wayland/system browser
+    (browse-url (format url-template (url-hexify-string final-query)))))
 #+end_src
 
 * Meow
@@ -545,29 +594,26 @@
   (setq my/file-map
 	(define-keymap
 	  :name "Files"
-	  "f" #'find-file             ; Standard file search
+	  "f" #'find-file
 	  "p" #'find-file-at-point
 	  "d" #'consult-dir
 	  "m" #'consult-bookmark
-	  "b" #'consult-buffer	; Consult recent files list
-	  "y" #'my/copy-file-path))    ; Our custom copy-path function
+	  "b" #'consult-buffer
+	  "y" #'my/copy-file-path))
 
   (setq my/ui-map
-       (define-keymap
-	 :name "UI / Global Zoom"
-	 "b" #'text-scale-adjust
-	 "t" #'consult-theme
-	 "g" #'global-text-scale-adjust))
+	(define-keymap
+	  :name "UI / Global Zoom"
+	  "b" #'text-scale-adjust
+	  "t" #'consult-theme
+	  "g" #'global-text-scale-adjust))
 
-  ;; (setq my/mc-map
-  ;; 	(define-keymap
-  ;; 	  :name "Multiple Cursors"
-  ;; 	  "n" #'mc/mark-next-like-this          ; Select next occurrence of word/region
-  ;; 	  "p" #'mc/mark-previous-like-this      ; Select previous occurrence
-  ;; 	  "s" #'mc/skip-to-next-like-this       ; Skip current, mark next
-  ;; 	  "a" #'mc/mark-all-like-this           ; Mark every occurrence in buffer
-  ;; 	  "w" #'mc/mark-next-word-like-this     ; Strictly match whole words
-  ;; 	  "l" #'mc/edit-lines))                  ; Add a cursor to each selected line
+  (setq my/lookup-map
+	(define-keymap 
+	  :name "Lookup / Search"
+	  "w" #'my/search-web-smart
+	  "d" #'consult-dash
+	  "D" #'dictionary-lookup-definition))
   
   ;; `cons' (not a quoted list) so Meow evaluates the variable into the
   ;; actual keymap object rather than binding the bare symbol.
@@ -577,7 +623,7 @@
 			  (cons "z" my/fold-map)
 			  (cons "f" my/file-map)
 			  (cons "u" my/ui-map)
-			  ;; (cons "m" my/mc-map)
+			  (cons "l" my/lookup-map)
 			  (cons "b" my/buffer-map))
 
   (meow-global-mode 1))

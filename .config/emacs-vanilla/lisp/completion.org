@@ -155,6 +155,23 @@ act on a completion candidate without visiting it first.
 	 :map minibuffer-local-completion-map
 	 ("C-x C-d" . consult-dir)
          ("C-x C-j" . consult-dir-jump-file)))
+
+(use-package consult-dash
+  :ensure t
+  :config
+  (setq consult-dash-docsets-path (expand-file-name "docsets/" user-emacs-directory))
+  (setq consult-dash-browser-func #'eww)
+  
+  ;; Use setq-default because the author defined it as a buffer-local variable
+  (setq-default consult-dash-docsets '("Python" "TypeScript" "CSS" "Emacs Lisp")))
+
+(use-package dumb-jump
+  :ensure t
+  :custom
+  (dumb-jump-prefer-searcher 'rg) ; Use ripgrep for speed
+  :config
+  ;; This tells xref: "If the LSP fails, try dumb-jump before giving up"
+  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
 #+end_src
 
 * Corfu / Cape
