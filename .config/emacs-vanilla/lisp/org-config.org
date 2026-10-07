@@ -231,25 +231,14 @@ Operates directly on the Org AST."
 (use-package ox-typst
   :after org
   :config
-  ;; CRUCIAL: Load the export framework first so Emacs knows how to 
-  ;; macro-expand 'setf' for org-export-backend-transcoders
-  (require 'ox)
-
-  ;; 1. Define how an example block should look in Typst
+  ;; 1. OVERWRITE the package's broken example-block function
+  ;; (This safely replaces the original function in memory)
   (defun org-typst-example-block (example-block contents info)
     "Transcode an EXAMPLE-BLOCK element from Org to Typst."
     (let ((value (org-element-property :value example-block)))
-      ;; Wrap the raw value in Typst's triple backticks
       (format "```\n%s```\n" value)))
 
-  ;; 2. Inject this new rule into the ox-typst export backend
-  (let ((backend (org-export-get-backend 'typst)))
-    (when backend
-      (setf (org-export-backend-transcoders backend)
-            (cons '(example-block . org-typst-example-block)
-                  (org-export-backend-transcoders backend)))))
-
-  ;; 3. Define the TODO preservation logic
+  ;; 2. Define the TODO preservation hook
   (defun org-typst-preserve-todos (tree backend info)
     "Force TODO keywords into the headline title so ox-typst doesn't drop them."
     (when (eq backend 'typst)
@@ -258,15 +247,27 @@ Operates directly on the Org AST."
           (let ((todo (org-element-property :todo-keyword hl)))
             (when todo
               (let ((title (org-element-property :title hl)))
-                ;; Prepend the TODO keyword (with a space) directly to the title
                 (org-element-put-property 
                  hl :title 
                  (cons (format "%s " todo) title))))))))
-    ;; Return the modified tree
     tree)
 
-  ;; Attach our fix to the export pipeline
-  (add-to-list 'org-export-filter-parse-tree-functions #'org-typst-preserve-todos))
+  ;; 3. Define the Source Block Backslash fix
+  (defun org-typst-fix-src-backslashes (tree backend info)
+    "Escape backslashes in source blocks so Typst doesn't evaluate them."
+    (when (eq backend 'typst)
+      (org-element-map tree 'src-block
+        (lambda (src)
+          (let ((value (org-element-property :value src)))
+            (when value
+              (org-element-put-property 
+               src :value 
+               (replace-regexp-in-string "\\\\" "\\\\\\\\" value)))))))
+    tree)
+
+  ;; 4. Attach the AST fixes to the Org export pipeline
+  (add-to-list 'org-export-filter-parse-tree-functions #'org-typst-preserve-todos)
+  (add-to-list 'org-export-filter-parse-tree-functions #'org-typst-fix-src-backslashes))
 
 (use-package ox-ipynb
   :ensure ox-ipynb (:host github :repo "jkitchin/ox-ipynb"))

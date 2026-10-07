@@ -7,25 +7,16 @@
 
 * Formatting
 #+begin_src emacs-lisp
-(use-package apheleia
-  :ensure t
-  :config
-  ;; Enable format-on-save globally
-  (apheleia-global-mode +1)
+  (use-package apheleia
+    :config
+    (apheleia-global-mode +1))
 
-  ;; Tell Apheleia to use Prettier for your specific tree-sitter modes
-  ;; (add-to-list 'apheleia-mode-alist '(svelte-ts-mode . prettier))
-  (add-to-list 'apheleia-mode-alist '(typescript-ts-mode . prettier))
-  (add-to-list 'apheleia-mode-alist '(tsx-ts-mode . prettier))
-  (add-to-list 'apheleia-mode-alist '(js-ts-mode . prettier))
-  (add-to-list 'apheleia-mode-alist '(css-ts-mode . prettier)))
-
-(use-package smartparens
-  :ensure smartparens  ;; install the package
-  :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
-  :config
-  ;; load default config
-  (require 'smartparens-config))
+  (use-package smartparens
+    :ensure smartparens  ;; install the package
+    :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
+    :config
+    ;; load default config
+    (require 'smartparens-config))
 #+end_src
 
 * Snippets
@@ -254,10 +245,7 @@
 		 `((typst-ts-mode) .
 		   ,(eglot-alternatives `(,typst-ts-lsp-download-path
 					  "tinymist"
-					  "typst-lsp"))))
-    (add-to-list 'eglot-server-programs
-		 `((js-ts-mode tsx-ts-mode typescript-ts-mode)
-		   . ("typescript-language-server" "--stdio")))))
+					  "typst-lsp"))))))
 #+end_src
 * Default-Apps
 #+begin_src emacs-lisp
@@ -558,8 +546,10 @@
 	(define-keymap
 	  :name "Files"
 	  "f" #'find-file             ; Standard file search
-	  "s" #'save-buffer           ; Save current file
-	  "r" #'consult-recent-file	; Consult recent files list
+	  "p" #'find-file-at-point
+	  "d" #'consult-dir
+	  "m" #'consult-bookmark
+	  "b" #'consult-buffer	; Consult recent files list
 	  "y" #'my/copy-file-path))    ; Our custom copy-path function
 
   (setq my/ui-map

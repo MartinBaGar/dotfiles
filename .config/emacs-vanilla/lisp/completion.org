@@ -144,8 +144,17 @@ act on a completion candidate without visiting it first.
    consult-source-bookmark consult-source-file-register
    consult-source-recent-file consult-source-project-recent-file
    :preview-key '(:debounce 0.4 any))
+  (setq consult-buffer-list-function #'tabspaces-local-buffer-list)
+
 
   (setq consult-narrow-key "<"))
+
+(use-package consult-dir
+  :ensure t
+  :bind (("C-x C-d" . consult-dir)
+	 :map minibuffer-local-completion-map
+	 ("C-x C-d" . consult-dir)
+         ("C-x C-j" . consult-dir-jump-file)))
 #+end_src
 
 * Corfu / Cape
