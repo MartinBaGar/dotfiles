@@ -96,16 +96,16 @@
 * LLM
 ** Gptel
 #+begin_src emacs-lisp
-  (use-package gptel
-    :config
-    (gptel-make-openai "Mistral"
+(use-package gptel
+  :config
+  (gptel-make-openai "Mistral"
     :host "api.mistral.ai"
     :endpoint "/v1/chat/completions"
     :models '("mistral-small-latest" "mistral-large-latest" "codestral-latest" "ministral-8b-latest")
     :key #'gptel-api-key-from-auth-source)
 
-     ;; OpenRouter offers an OpenAI compatible API
-    (gptel-make-openai "OpenRouter"
+  ;; OpenRouter offers an OpenAI compatible API
+  (gptel-make-openai "OpenRouter"
     :host "openrouter.ai"
     :endpoint "/api/v1/chat/completions"
     :stream t
@@ -113,32 +113,65 @@
     :models '(openai/gpt-oss-120b:free
               tngtech/deepseek-r1t2-chimera:free))
 
-    ;; Default model + backend
-    (setopt gptel-backend (gptel-get-backend "Mistral"))
-    (setopt gptel-model 'mistral-large-latest)
-    (setopt gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
-    (setopt gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
-    (setopt gptel-default-mode 'org-mode))
+  ;; Default model + backend
+  (setopt gptel-backend (gptel-get-backend "Mistral"))
+  (setopt gptel-model 'mistral-large-latest)
+  (setopt gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
+  (setopt gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
+  (setopt gptel-default-mode 'org-mode))
 
-  ;; (use-package gptel-prompts
-  ;;   :after (gptel)
-  ;;   :demand t
-  ;;   :config
-  ;;   (setq gptel-prompts-directory "~/org/gptel_prompts")
-  ;;   (gptel-prompts-update)
-  ;;   ;; Ensure prompts are updated if prompt files change
-  ;;   (gptel-prompts-add-update-watchers)
-  ;;   )
+;; (use-package gptel-prompts
+;;   :after (gptel)
+;;   :demand t
+;;   :config
+;;   (setq gptel-prompts-directory "~/org/gptel_prompts")
+;;   (gptel-prompts-update)
+;;   ;; Ensure prompts are updated if prompt files change
+;;   (gptel-prompts-add-update-watchers)
+;;   )
 
-  (use-package gptel-commit
-    :ensure t
-    :after (gptel magit)
-    :custom
-    (gptel-commit-stream t))
+(use-package gptel-commit
+  :ensure t
+  :after (gptel magit)
+  :custom
+  (gptel-commit-stream t))
 
-  (use-package gptel-agent
-    :ensure t
-    :after (gptel))
+(use-package gptel-agent
+  :ensure t
+  :after (gptel))
+
+(defun my/org-ai-name-caption ()
+  "Ask gptel-rewrite to add #+name: and #+caption: to an Org element.
+Use the active region if there is one, else the element at point."
+  (interactive)
+  (let* ((names (save-excursion
+                  (save-restriction
+                    (widen)
+                    (goto-char (point-min))
+                    (let (acc)
+                      (while (re-search-forward
+                              "^[ \t]*#\\+name:[ \t]*\\(.+\\)$" nil t)
+                        (push (match-string-no-properties 1) acc))
+                      acc))))
+         (gptel--rewrite-directive
+          "You are an Org mode assistant.  Output ONLY the Org element you \
+are given, unchanged, with a #+name: line and a #+caption: line added \
+directly above it (replace them if they already exist).  No commentary, \
+no code fences.")
+         (default-directory (if (file-directory-p default-directory)
+                                default-directory
+                              temporary-file-directory)))
+    (unless (use-region-p)
+      (let* ((el (org-element-at-point))
+             (beg (org-element-property :begin el))
+             (end (- (org-element-property :end el)
+                     (or (org-element-property :post-blank el) 0))))
+        (goto-char end)
+        (push-mark beg nil t)))
+    (gptel--suffix-rewrite
+     (format "Add #+name: (lowercase kebab-case, must not be any of: %s) \
+and #+caption: (short, descriptive)."
+             (if names (string-join names ", ") "none yet")))))
 #+end_src
 ** Minuet
 #+begin_src emacs-lisp
@@ -596,6 +629,7 @@ With a prefix argument (e.g., C-u), forces a prompt to change the engine."
 	  :name "Files"
 	  "f" #'find-file
 	  "p" #'find-file-at-point
+	  "r" #'consult-recent-file
 	  "d" #'consult-dir
 	  "m" #'consult-bookmark
 	  "b" #'consult-buffer
