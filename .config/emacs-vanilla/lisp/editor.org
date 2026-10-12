@@ -7,16 +7,52 @@
 
 * Formatting
 #+begin_src emacs-lisp
-  (use-package apheleia
-    :config
-    (apheleia-global-mode +1))
+;; 1. Make tab characters display as 2 spaces wide (instead of 8)
+(setq-default tab-width 2)
 
-  (use-package smartparens
-    :ensure smartparens  ;; install the package
-    :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
-    :config
-    ;; load default config
-    (require 'smartparens-config))
+;; 2. Tell Emacs to use spaces instead of literal tabs (optional but standard for JS/TS)
+(setq-default indent-tabs-mode nil)
+
+;; 3. Set the specific indentation level for JS/TS modes
+(setq js-indent-level 2)
+(setq typescript-indent-level 2)
+
+;; If you are using Tree-sitter modes (Emacs 29+), add these too:
+(setq js-ts-indent-offset 2)
+(setq typescript-ts-indent-offset 2)
+
+(use-package apheleia
+  :ensure t
+  :config
+  ;; Use plain `prettier` (infers the parser from the filename) for these modes.
+  ;; Includes the tree-sitter variants that older Apheleia versions miss.
+  (dolist (mode '(svelte-mode
+                  svelte-ts-mode
+                  js-ts-mode
+                  typescript-ts-mode
+                  tsx-ts-mode
+                  css-ts-mode
+                  json-ts-mode
+                  yaml-ts-mode
+                  markdown-mode))
+    (setf (alist-get mode apheleia-mode-alist) 'prettier))
+
+  ;; Match by filename too, so .svelte files get `prettier` even when they
+  ;; are opened in web-mode/html-mode (which would use `prettier-html`).
+  ;; New entries are pushed to the front, so they win over mode-based ones.
+  (setf (alist-get "\\.svelte\\'" apheleia-mode-alist nil nil #'equal) 'prettier)
+
+  ;; Don't reformat huge files
+  (setq apheleia-log-only-errors t)
+
+  (apheleia-global-mode +1))
+
+(use-package smartparens
+  :ensure smartparens  ;; install the package
+  :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
+  :config
+  ;; load default config
+  (require 'smartparens-config))
 #+end_src
 
 * Snippets
@@ -379,34 +415,36 @@ and #+caption: (short, descriptive)."
 #+end_src
 * Folding
 #+begin_src emacs-lisp
-  (use-package outline
-    :ensure nil
-    :hook (emacs-lisp-mode . outline-minor-mode))
+(use-package outline
+  :ensure nil
+  :hook (emacs-lisp-mode . outline-minor-mode))
 
-  (use-package treesit-fold
-    :ensure (treesit-fold :host github :repo "emacs-tree-sitter/treesit-fold"))
+(use-package treesit-fold
+  :ensure (treesit-fold :host github :repo "emacs-tree-sitter/treesit-fold"))
 
-  (use-package outline-indent
-    :ensure t
-    :hook ((python-mode . outline-indent-minor-mode)
-  	 (python-ts-mode . outline-indent-minor-mode)))
+(use-package outline-indent
+  :ensure t
+  :hook ((python-mode . outline-indent-minor-mode)
+	 (python-ts-mode . outline-indent-minor-mode)
+	 (typescript-mode . outline-indent-minor-mode)
+	 (typescript-ts-mode . outline-indent-minor-mode)))
 
-  (use-package kirigami
-    :ensure t
-    :custom
-    (kirigami-show-menu-bar t)
-    (kirigami-show-context-menu t)
-    :init
+(use-package kirigami
+  :ensure t
+  :custom
+  (kirigami-show-menu-bar t)
+  (kirigami-show-context-menu t)
+  :init
     (kirigami-global-mode 1))
 
-  (use-package savefold
-    :ensure t
-    :init
-    (setq savefold-backends '(outline org hideshow treesit-fold))
-    (setq savefold-directory (locate-user-emacs-file "savefold"))
-    
-    :config
-    (savefold-mode 1))
+(use-package savefold
+  :ensure t
+  :init
+  (setq savefold-backends '(outline org hideshow treesit-fold))
+  (setq savefold-directory (locate-user-emacs-file "savefold"))
+  
+  :config
+  (savefold-mode 1))
 #+end_src
 
 * Multicursor
