@@ -233,6 +233,15 @@ Operates directly on the Org AST."
                (replace-regexp-in-string "\\\\" "\\\\\\\\" value)))))))
     tree)
 
+  ;; 5. FIX the broken inlinetask function signature
+  (setq org-typst-format-inlinetask-function
+        (lambda (todo todo-type priority title tags contents info)
+          ;; Formats the inline task as a styled block with the title and contents
+          (format "#block(fill: rgb(\"f4f4f4\"), stroke: 1pt + rgb(\"d3d3d3\"), inset: 8pt, radius: 4pt)[*%s %s*\n\n%s]"
+                  (if todo todo "")
+                  title
+                  (or contents ""))))
+
   ;; 4. Attach the AST fixes to the Org export pipeline
   (add-to-list 'org-export-filter-parse-tree-functions #'org-typst-preserve-todos)
   (add-to-list 'org-export-filter-parse-tree-functions #'org-typst-fix-src-backslashes))
