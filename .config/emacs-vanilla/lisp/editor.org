@@ -55,6 +55,30 @@
   (require 'smartparens-config))
 #+end_src
 
+* Treesitter
+#+begin_src emacs-lisp
+(use-package treesit-auto
+  :ensure t
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  ;; 1. Find the default JavaScript recipe and patch the ABI 14 revision
+  (let ((js-recipe (seq-find (lambda (r) (eq (treesit-auto-recipe-lang r) 'javascript))
+                             treesit-auto-recipe-list)))
+    (when js-recipe
+      (setf (treesit-auto-recipe-abi14-revision js-recipe) "v0.20.3")))
+      
+  ;; (Optional) Do the same for typescript if it throws the same error
+  (let ((ts-recipe (seq-find (lambda (r) (eq (treesit-auto-recipe-lang r) 'typescript))
+                             treesit-auto-recipe-list)))
+    (when ts-recipe
+      (setf (treesit-auto-recipe-abi14-revision ts-recipe) "v0.20.3")))
+
+  ;; 2. Apply the modes
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+#+end_src
+
 * Snippets
 #+begin_src emacs-lisp
   (use-package tempel
@@ -117,9 +141,6 @@
 
 ;; 1. Sync Emacs yanks/kills with the system clipboard
 (setq select-enable-clipboard t)
-
-;; 2. (Optional) Sync with the primary selection (Linux middle-click paste)
-(setq select-enable-primary t)
 
 ;; 3. THE MAGIC SETTING: 
 ;; If you copy something outside Emacs, and then delete a word inside Emacs,
