@@ -29,6 +29,35 @@ needed.
 (which-key-mode 1)
 #+end_src
 
+#+begin_src emacs-lisp
+(use-package no-littering
+  :ensure t
+  :demand t
+  :config
+  ;; Redirect backup, auto-save, and undo-tree history files.
+  (no-littering-theme-backups)
+
+  ;; Redirect lock files instead of disabling them.
+  (let ((dir (no-littering-expand-var-file-name "lock-files/")))
+    (make-directory dir t)
+    (setq lock-file-name-transforms
+          `((".*" ,dir t))))
+
+  ;; Keep Customize output out of init.el.
+  (setq custom-file
+        (no-littering-expand-etc-file-name "custom.el"))
+  (when (file-exists-p custom-file)
+    (load custom-file nil t))
+
+  ;; Do not show no-littering's internal files in recentf.
+  (with-eval-after-load 'recentf
+    (add-to-list
+     'recentf-exclude
+     (recentf-expand-file-name no-littering-var-directory))
+    (add-to-list
+     'recentf-exclude
+     (recentf-expand-file-name no-littering-etc-directory))))
+#+end_src
 * Secrets
 #+begin_src emacs-lisp
 ;; Load work-specific TRAMP configs if they exist on this machine
