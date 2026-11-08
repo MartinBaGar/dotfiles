@@ -37,6 +37,9 @@ needed.
   ;; Redirect backup, auto-save, and undo-tree history files.
   (no-littering-theme-backups)
 
+  ;; FIX: Ensure the auto-save directory actually exists
+  (make-directory (no-littering-expand-var-file-name "auto-save/") t)
+
   ;; Redirect lock files instead of disabling them.
   (let ((dir (no-littering-expand-var-file-name "lock-files/")))
     (make-directory dir t)

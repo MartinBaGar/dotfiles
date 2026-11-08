@@ -148,6 +148,25 @@
 ;; This setting forces Emacs to save the outside clipboard to the kill ring FIRST,
 ;; so when you press 'p' or 'r', it pastes what you actually wanted.
 (setq save-interprogram-paste-before-kill t)
+
+(defun my-wayland-copy (text)
+  "Export TEXT to the Wayland clipboard as UTF-8."
+  (let* ((process-connection-type nil)
+         (proc
+          (make-process
+           :name (generate-new-buffer-name "wl-copy")
+           :command '("wl-copy" "--type" "text/plain;charset=utf-8")
+           :connection-type 'pipe
+           :noquery t)))
+    (set-process-coding-system proc 'utf-8-unix 'utf-8-unix)
+    (process-send-string proc text)
+    (process-send-eof proc))
+  text)
+
+(when (and (eq window-system 'pgtk)
+           (getenv "WAYLAND_DISPLAY")
+           (executable-find "wl-copy"))
+  (setq interprogram-cut-function #'my-wayland-copy))
 #+end_src
 
 * LLM
@@ -158,7 +177,7 @@
   (gptel-make-openai "Mistral"
     :host "api.mistral.ai"
     :endpoint "/v1/chat/completions"
-    :models '("mistral-small-latest" "mistral-large-latest" "codestral-latest" "ministral-8b-latest")
+    :models '("mistral-small-latest" "mistral-large-latest" "mistral-large-4" "codestral-latest" "ministral-8b-latest")
     :key #'gptel-api-key-from-auth-source)
 
   ;; OpenRouter offers an OpenAI compatible API
