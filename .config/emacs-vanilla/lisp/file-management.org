@@ -31,7 +31,3 @@
      :map dirvish-mode-map
      ("TAB" . dirvish-subtree-toggle)))
 #+end_src
-
-# Note: the Dired/Dirvish Meow keybindings we discussed earlier
-# (h/l navigation, motion-state j/k) aren't in here yet -- add them
-# under a new heading in this file whenever you're ready to wire them in.
