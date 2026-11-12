@@ -81,23 +81,25 @@
 
 * Snippets
 #+begin_src emacs-lisp
-(use-package tempel
-  :bind (("M-+" . tempel-complete)
-         ("M-*" . tempel-insert))
-  :init
-  (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'. `tempel-expand'
-    ;; only triggers on exact matches. We add it *before* the main
-    ;; programming mode Capf, so it's tried first.
-    (setq-local completion-at-point-functions
-                (cons #'tempel-expand completion-at-point-functions))
-    (setopt tempel-path (concat (expand-file-name "templates" user-emacs-directory) "/*")))
+  (use-package tempel
+    :bind (("M-+" . tempel-complete)
+           ("M-*" . tempel-insert))
+    :init
+    (defun tempel-setup-capf ()
+      ;; Add the Tempel Capf to `completion-at-point-functions'. `tempel-expand'
+      ;; only triggers on exact matches. We add it *before* the main
+      ;; programming mode Capf, so it's tried first.
+      (setq-local completion-at-point-functions
+    		(cons #'tempel-expand completion-at-point-functions))
+      (setopt tempel-path (concat (expand-file-name "templates" user-emacs-directory) "/*"))
+      )
 
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
+    (add-hook 'conf-mode-hook 'tempel-setup-capf)
+    (add-hook 'prog-mode-hook 'tempel-setup-capf)
+    (add-hook 'text-mode-hook 'tempel-setup-capf))
 
-  :config
+  (use-package tempel-collection)
+
   (defun tempel-case-match (elt fields)
     (pcase elt
       (`(c ,text)
@@ -111,13 +113,9 @@
              (concat (upcase (substring text 0 1)) (substring text 1))
            text)))))
 
-  (add-to-list 'tempel-user-elements #'tempel-case-match)
-
   (defun my/open-tempel-templates ()
     (interactive)
-    (find-file (f-dirname tempel-path))))
-
-(use-package tempel-collection)
+    (find-file (f-dirname tempel-path)))
 #+end_src
 
 * Windows (built-in support)
@@ -150,6 +148,25 @@
 ;; This setting forces Emacs to save the outside clipboard to the kill ring FIRST,
 ;; so when you press 'p' or 'r', it pastes what you actually wanted.
 (setq save-interprogram-paste-before-kill t)
+
+(defun my-wayland-copy (text)
+  "Export TEXT to the Wayland clipboard as UTF-8."
+  (let* ((process-connection-type nil)
+         (proc
+          (make-process
+           :name (generate-new-buffer-name "wl-copy")
+           :command '("wl-copy" "--type" "text/plain;charset=utf-8")
+           :connection-type 'pipe
+           :noquery t)))
+    (set-process-coding-system proc 'utf-8-unix 'utf-8-unix)
+    (process-send-string proc text)
+    (process-send-eof proc))
+  text)
+
+(when (and (eq window-system 'pgtk)
+           (getenv "WAYLAND_DISPLAY")
+           (executable-find "wl-copy"))
+  (setq interprogram-cut-function #'my-wayland-copy))
 #+end_src
 
 * LLM
@@ -160,7 +177,7 @@
   (gptel-make-openai "Mistral"
     :host "api.mistral.ai"
     :endpoint "/v1/chat/completions"
-    :models '("mistral-small-latest" "mistral-large-latest" "codestral-latest" "ministral-8b-latest")
+    :models '("mistral-small-latest" "mistral-large-latest" "mistral-large-4" "codestral-latest" "ministral-8b-latest")
     :key #'gptel-api-key-from-auth-source)
 
   ;; OpenRouter offers an OpenAI compatible API
@@ -192,8 +209,41 @@
 (use-package gptel-commit
   :ensure t
   :after (gptel magit)
-  :custom
-  (gptel-commit-stream t))
+
+  :bind
+  (:map git-commit-mode-map
+        ("C-c g" . gptel-commit)
+        ("C-c G" . gptel-commit-rationale))
+
+  :config
+  (setq
+   ;; Use gptel rather than the Claude Code CLI.
+   gptel-commit-use-claude-code nil
+
+   ;; Use gptel's streaming response path.
+   gptel-commit-stream t
+
+   ;; Use a separate lightweight backend for commit messages.
+   gptel-commit-backend
+   (gptel-make-openai "Mistral-Commits"
+     :host "api.mistral.ai"
+     :endpoint "/v1/chat/completions"
+     :protocol "https"
+     :stream t
+     :key #'gptel-api-key-from-auth-source
+     :models '(codestral-latest))
+
+   ;; Exclude generated or noisy files from the supplied diff.
+   gptel-commit-diff-excludes
+   '("package-lock.json"
+     "pnpm-lock.yaml"
+     "yarn.lock"
+     "*.lock"
+     "*.min.js"
+     "*.map"
+     "dist/*"
+     "build/*"
+     "coverage/*")))
 
 (use-package gptel-agent
   :ensure t
