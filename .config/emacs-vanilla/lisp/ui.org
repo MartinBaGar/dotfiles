@@ -130,35 +130,38 @@ this hook actually fires on.
 
 * Tabs
 #+begin_src emacs-lisp
-  ;; 1. Configure the native Tab Bar
-  (use-package tab-bar
-    :ensure nil
-    :custom
-    (tab-bar-show 1)                        ; Only show the bar if > 1 tab is open
-    (tab-bar-close-button-show nil)         ; Hide the [X] for a cleaner UI
-    (tab-bar-new-tab-choice "*scratch*")    ; New tabs start clean
-    (tab-bar-tab-hints t)
-    (tab-bar-format '(tab-bar-format-tabs
-                      tab-bar-format-align-right
-                      tab-bar-format-global))
-    :config
-    (tab-bar-mode 1))
+;; 1. Configure the native Tab Bar
+(use-package tab-bar
+  :ensure nil
+  :custom
+  (tab-bar-show 1)                        ; Only show the bar if > 1 tab is open
+  (tab-bar-close-button-show nil)         ; Hide the [X] for a cleaner UI
+  (tab-bar-new-tab-choice "*scratch*")    ; New tabs start clean
+  (tab-bar-tab-hints t)
+  (tab-bar-format '(tab-bar-format-tabs
+                    tab-bar-format-align-right
+                    tab-bar-format-global))
+  :config
+  (tab-bar-mode 1))
 
-  ;; 2. Tabspaces: Isolate buffers per tab (The "Workspace" magic)
-  (use-package tabspaces
-    :ensure t
-    ;; Filter consult-buffer to only show buffers in the current tab's workspace
-    :hook (after-init . tabspaces-mode)
-    :custom
-    (tabspaces-use-filtered-buffers-as-default t)
-    (tabspaces-default-tab "Default")
-    (tabspaces-remove-to-default t)
-    (tabspaces-include-buffers '("*scratch*"))
-    ;; Tell project.el to open new projects in a brand new tab automatically
-    (project-switch-commands '((project-find-file "Find file")
-                               (project-dired "Dired")
-                               (project-vc-dir "VC-Dir")
-                               (project-eshell "Eshell")))
-    :config
-    (defalias 'project-other-tab-command 'tabspaces-open-or-create-project-and-workspace))
+;; 2. Tabspaces: Isolate buffers per tab (The "Workspace" magic)
+(use-package tabspaces
+  :ensure t
+  ;; Filter consult-buffer to only show buffers in the current tab's workspace
+  :hook (after-init . tabspaces-mode)
+  :custom
+  (tabspaces-session t)  ; Save sessions automatically
+  (tabspaces-session-auto-save-delay 300)  ; Save after 5 idle minutes
+  (tabspaces-session-auto-restore nil)
+  (tabspaces-use-filtered-buffers-as-default t)
+  (tabspaces-default-tab "Default")
+  (tabspaces-remove-to-default t)
+  (tabspaces-include-buffers '("*scratch*"))
+  ;; Tell project.el to open new projects in a brand new tab automatically
+  (project-switch-commands '((project-find-file "Find file")
+                             (project-dired "Dired")
+                             (project-vc-dir "VC-Dir")
+                             (project-eshell "Eshell")))
+  :config
+  (defalias 'project-other-tab-command 'tabspaces-open-or-create-project-and-workspace))
 #+end_src
