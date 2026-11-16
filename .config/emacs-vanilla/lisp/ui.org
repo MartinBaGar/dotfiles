@@ -7,29 +7,31 @@
 
 * General
 #+begin_src emacs-lisp
-  (add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
-  (global-visual-line-mode 1)
+(add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
+(global-visual-line-mode 1)
 
-  (use-package spacious-padding
-    :config
-    (setq spacious-padding-widths
-          '( :internal-border-width 15
-             :header-line-width 4
-             :mode-line-width 4
-             :tab-width 4
-             :right-divider-width 30
-             :scroll-bar-width 8))
-    (spacious-padding-mode 1))
+(use-package spacious-padding
+  :config
+  (setq spacious-padding-widths
+        '( :internal-border-width 15
+           :header-line-width 4
+           :mode-line-width 4
+           :tab-width 4
+           :right-divider-width 30
+           :scroll-bar-width 8))
+  (when (daemonp)
+    (setq spacious-padding-subtle-frame-lines nil))
+  (spacious-padding-mode 1))
 
-  (use-package nerd-icons
-    :custom
-    (nerd-icons-font-family "Symbols Nerd Font Mono"))
+(use-package nerd-icons
+  :custom
+  (nerd-icons-font-family "Symbols Nerd Font Mono"))
 
-  (use-package olivetti
-    :ensure t
-    :hook (org-mode . olivetti-mode)
-    :config
-    (setq-default olivetti-body-width 100))
+(use-package olivetti
+  :ensure t
+  :hook (org-mode . olivetti-mode)
+  :config
+  (setq-default olivetti-body-width 100))
 #+end_src
 
 * Fonts
@@ -48,63 +50,58 @@ reapply automatically every time, including the very first load,
 since =load-theme= internally calls =enable-theme=, which is what
 this hook actually fires on.
 #+begin_src emacs-lisp
-  (defun my/apply-face-overrides (&rest _)
-    "(Re)apply font and tab-bar face overrides after any theme is enabled."
-    
-    ;; 1. Set the absolute baseline on 'default' ONLY
-    (set-face-attribute 'default nil
-                        :family "Iosevka"
-                        :height 120        ; Absolute 12pt base
-                        :weight 'medium)
+(defun my/apply-face-overrides (&rest _)
+  "(Re)apply font and tab-bar face overrides after a theme is enabled."
 
-    ;; 2. Use a 1.0 multiplier so it perfectly tracks the scaled default
-    (set-face-attribute 'fixed-pitch nil
-                        :family "Iosevka"
-                        :height 1.0        ; Relative multiplier!
-                        :weight 'medium)
+  (set-face-attribute 'default nil
+                      :family "Iosevka"
+                      :height 120
+                      :weight 'medium)
 
-    ;; 3. Use a 1.08 multiplier to get ~130 height, while keeping it scalable
-    (set-face-attribute 'variable-pitch nil
-                        :family "Montserrat"
-                        :height 1.08       ; Relative multiplier!
-                        :weight 'semi-bold)
+  (set-face-attribute 'fixed-pitch nil
+                      :family "Iosevka"
+                      :height 1.0
+                      :weight 'medium)
 
-    ;; ... your existing tab-bar code remains unchanged ...
-    (set-face-attribute 'tab-bar nil
-                        :background 'unspecified
-                        :inherit 'mode-line-inactive
-  		      :box nil)
+  (set-face-attribute 'variable-pitch nil
+                      :family "Montserrat"
+                      :height 1.08
+                      :weight 'semi-bold)
+
+  (set-face-attribute 'tab-bar nil
+                      :background 'unspecified
+                      :inherit 'mode-line-inactive
+                      :box nil)
+
+  ;; During daemon startup, `link' may not have a resolved foreground.
+  ;; The underline's :color must be a color string or `foreground-color',
+  ;; never `unspecified'.
+  (let ((link-color (face-attribute 'link :foreground nil t)))
     (set-face-attribute 'tab-bar-tab nil
                         :inherit 'mode-line
                         :weight 'bold
                         :box nil
-                        :underline `(:color ,(face-attribute 'link :foreground nil t)
-                                     :style line :position t))
-    (set-face-attribute 'tab-bar-tab-inactive nil
-                        :background 'unspecified
-                        :inherit 'shadow
-                        :weight 'normal
-  		      :box nil))
+                        :underline (list :color (if (stringp link-color)
+                                                    link-color
+                                                  'foreground-color)
+                                         :style 'line
+                                         :position t)))
 
-  ;; Register the hook *before* the initial load-theme call below, so
-  ;; the first load benefits too, not just subsequent switches.
-  (add-hook 'enable-theme-functions #'my/apply-face-overrides)
+  (set-face-attribute 'tab-bar-tab-inactive nil
+                      :background 'unspecified
+                      :inherit 'shadow
+                      :weight 'normal
+                      :box nil))
 
-  ;; Load the theme synchronously and immediately -- this is what makes
-  ;; startup look right from the very first frame paint, with no
-  ;; dependency on any later hook actually firing.
-  (load-theme 'spacegrey-light t)
+;; Register before the initial theme load.
+(add-hook 'enable-theme-functions #'my/apply-face-overrides)
+(load-theme 'spacegrey-light t)
 
-  ;; The one narrow thing that genuinely needs a real, fully-realized
-  ;; frame is the underline color computed via `face-attribute' inside
-  ;; `my/apply-face-overrides' -- at cold startup that can resolve as
-  ;; unspecified. Re-running the same (idempotent) function once more,
-  ;; one-shot, once a real frame is guaranteed to exist, corrects just
-  ;; that -- without deferring the theme, fonts, or modeline the way an
-  ;; earlier, broader fix did.
-  (if (daemonp)
-      (add-hook 'server-after-make-frame-hook #'my/apply-face-overrides)
-    (add-hook 'window-setup-hook #'my/apply-face-overrides))
+;; Once a graphical frame exists, reapply to pick up `link' color if
+;; it was unavailable during daemon startup. Also applies on later frames.
+(if (daemonp)
+    (add-hook 'server-after-make-frame-hook #'my/apply-face-overrides)
+  (add-hook 'window-setup-hook #'my/apply-face-overrides))
 #+end_src
 
 * Modeline

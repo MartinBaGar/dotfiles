@@ -4,8 +4,8 @@ Documentation=info:emacs man:emacs(1) https://gnu.org/software/emacs/
 
 [Service]
 Type=notify
-Environment="WAYLAND_DISPLAY=wayland-1"
-ExecStart=/data/bari-garnier/local/bin/emacs --fg-daemon=utils
+#Environment="WAYLAND_DISPLAY=wayland-1"
+ExecStart=/data/bari-garnier/local/bin/emacs-31.1 --debug-init --init-directory ~/.config/emacs-vanilla --fg-daemon=launcher
 
 # Emacs will exit with status 15 after having received SIGTERM, which
 # is the default "KillSignal" value systemd uses to stop services.

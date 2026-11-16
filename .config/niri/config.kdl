@@ -265,7 +265,7 @@ spawn-at-startup "kanshi"
 spawn-at-startup "waypaper" "--random"
 environment {
   XDG_CURRENT_DESKTOP "niri"
-  QT_QPA_PLATFORM "wayland"
+  QT_QPA_PLATFORM "wayland;xcb"
   ELECTRON_OZONE_PLATFORM_HINT "auto"
   SAL_USE_VCLPLUGIN "qt5"
   QT_QPA_PLATFORMTHEME "qt5ct"
@@ -474,6 +474,45 @@ window-rule {
     open-maximized true
 }
 
+// window-rule {
+    // match app-id="emacs" title="^omni-splash"
+    // open-floating true
+   // }
+   
+window-rule {
+    match app-id="emacs" title="^omni-splash"
+
+    open-floating true
+    // default-column-width { fixed 720; }
+    // default-window-height { fixed 430; }
+
+    geometry-corner-radius 18
+    clip-to-geometry true
+
+    // Subtle glass translucency (set to 1.0 if using Emacs alpha-background instead)
+    opacity 0.95
+
+    // Swap the thick tiling focus ring for a 1px glass-edge border
+    focus-ring {
+        off
+    }
+    border {
+        on
+        width 1
+        active-color "#ffffff28"
+        inactive-color "#ffffff14"
+    }
+
+    // Soft floating elevation
+    shadow {
+        on
+        softness 28
+        spread 4
+        offset x=0 y=10
+        color "#00000066"
+    }
+}
+
 binds {
     // === System & Overview ===
     Mod+D { spawn "niri" "msg" "action" "toggle-overview"; }
@@ -482,9 +521,22 @@ binds {
 
     // === Application Launchers / Scripts execution ===
     Mod+T hotkey-overlay-title="Open Terminal" { spawn "kitty"; }
-    Mod+Space hotkey-overlay-title="Application Launcher" {
-        spawn "fuzzel";
-    }
+    
+    // Mod+Space hotkey-overlay-title="Application Launcher" {
+        // spawn "fuzzel";
+    // }
+    
+    // Mod+Space { spawn "sh" "-c" "emacsclient --socket-name=launcher -e '(my/omni-launcher)' || fuzzel"; }
+    // Mod+Space { spawn "sh" "-c" r#"emacsclient -c -s launcher -F '((name . "omni-launcher"))' -e '(my/omni-launcher)'"#; }
+
+    Mod+Space {
+       spawn "sh" "-c" r#"emacsclient -c -s launcher -F '((name . "omni-splash"))' -e '(my/omni-splash-show)'"#;
+    }   
+
+    // Mod+Space {
+        // spawn "emacsclient" "-n" "-c" "-s" "launcher" "-F" "((name . \"omni-splash\") (title . \"omni-splash\") (undecorated . t) (alpha-background . 92) (internal-border-width . 24) (menu-bar-lines . 0) (tool-bar-lines . 0) (vertical-scroll-bars . nil) (horizontal-scroll-bars . nil) (cursor-type . nil))" "-e" "(my/omni-splash-show)";
+    // }
+
     Mod+Alt+Space { spawn-sh "~/scripts/bash/niri-window-switcher.sh"; }
     Mod+Alt+O { spawn-sh "~/scripts/bash/fuzzel-file-actions.sh"; }
     Mod+Alt+V { spawn-sh "~/scripts/bash/fuzzel-clipboard.sh"; }
@@ -496,7 +548,8 @@ binds {
     Mod+Alt+T { spawn-sh "~/scripts/bash/niri_switch_theme.sh"; }
     Mod+Alt+D { spawn "waypaper" "--random"; }
 
-    Mod+E {spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main";}
+    // Mod+E {spawn-sh "emacsclient --alternate-editor= --create-frame --socket-name=main";}
+    Mod+E {spawn-sh "emacs --init-directory ~/.config/emacs-vanilla --debug-init";}
 
     Mod+N { spawn-sh " emacsclient --alternate-editor= --reuse-frame -n --socket-name=utils -e '(toggle-named-frame \"Doom Notes\")' "; }
     Mod+M { spawn-sh "~/scripts/bash/mails.sh"; }
@@ -677,6 +730,4 @@ layer-rule {
         blur true
     }
     geometry-corner-radius 20
-
-
 }

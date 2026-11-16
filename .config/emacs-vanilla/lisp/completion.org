@@ -152,8 +152,8 @@ act on a completion candidate without visiting it first.
 (use-package consult-dir
   :ensure t
   :bind (("C-x C-d" . consult-dir)
-	 :map minibuffer-local-completion-map
-	 ("C-x C-d" . consult-dir)
+         :map minibuffer-local-completion-map
+         ("C-x C-d" . consult-dir)
          ("C-x C-j" . consult-dir-jump-file)))
 
 (use-package consult-dash
@@ -172,6 +172,58 @@ act on a completion candidate without visiting it first.
   :config
   ;; This tells xref: "If the LSP fails, try dumb-jump before giving up"
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
+
+(use-package consult-omni
+  :ensure (:host github :repo "armindarvish/consult-omni"
+                 :branch "main" :files (:defaults "sources/*.el"))
+  :after consult
+  :custom
+  (consult-omni-show-preview t)
+  (consult-omni-preview-key "C-o")
+  (consult-omni-default-count 5)
+  (consult-omni-dynamic-input-debounce 0.8)
+  (consult-omni-dynamic-input-throttle 1.6)
+  (consult-omni-dynamic-refresh-delay 0.8)
+  (consult-omni-default-preview-function #'xwidget-webkit-browse-url)
+  :config
+  (require 'consult-omni-sources)
+  (require 'consult-omni-embark)
+  
+  ;; In the EXISTING consult-omni use-package block, extend ONLY its
+  ;; consult-omni-sources-modules-to-load list. Do not create a second block.
+  ;; This is the complete suggested list (retain the other customizations):
+  (setq consult-omni-sources-modules-to-load
+        '(consult-omni-apps
+          consult-omni-calc
+          consult-omni-dict
+          consult-omni-wikipedia
+          consult-omni-buffer
+          consult-omni-org-agenda
+          consult-omni-ripgrep
+          consult-omni-fd
+          consult-omni-notes
+          consult-omni-google-autosuggest
+          consult-omni-openalex
+          consult-omni-gptel))
+  
+  (setq consult-omni-gptel-backend (gptel-get-backend "Mistral")
+        consult-omni-gptel-model 'mistral-small-latest
+        consult-omni-gptel-cand-title
+        #'consult-omni--gptel-make-title-placeholder)
+  
+  (consult-omni-sources-load-modules)
+  ;; Leave (consult-omni-sources-load-modules) immediately AFTER that setq.
+  ;; Add these inside the same :config block AFTER loading modules:
+  (setq consult-omni-notes-files (list (expand-file-name "~/org/"))
+        consult-omni-notes-backend-command "rg")
+  
+  (setq consult-omni-multi-sources
+        '("Apps" "calc" "Buffer" "Dictionary" "Wikipedia" "Org Agenda" "gptel"))
+  
+  (setq consult-omni-default-interactive-command #'consult-omni-multi)
+  
+
+  :bind ("M-s o" . consult-omni))
 #+end_src
 
 * Corfu / Cape

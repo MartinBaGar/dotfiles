@@ -8,9 +8,9 @@
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-sources-directory (expand-file-name "sources/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-			      :ref nil :depth 1 :inherit ignore
-			      :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-			      :build (:not elpaca-activate)))
+			                        :ref nil :depth 1 :inherit ignore
+			                        :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+			                        :build (:not elpaca-activate)))
 (let* ((repo  (expand-file-name "elpaca/" elpaca-sources-directory))
        (build (expand-file-name "elpaca/" elpaca-builds-directory))
        (order (cdr elpaca-order))
@@ -66,6 +66,7 @@
 ;; Notice the missing 't' at the end -- this permanently stops .elc generation!
 (dolist (file '("bootstrap.org"
                 "completion.org"
+                "launcher.org"
                 "editor.org"
                 "ui.org"
                 "org-config.org"
