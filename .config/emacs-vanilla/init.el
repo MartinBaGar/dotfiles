@@ -66,6 +66,7 @@
 ;; Notice the missing 't' at the end -- this permanently stops .elc generation!
 (dolist (file '("bootstrap.org"
                 "completion.org"
+                "launcher.org"
                 "editor.org"
                 "ui.org"
                 "org-config.org"
