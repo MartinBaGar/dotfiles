@@ -479,37 +479,57 @@ window-rule {
     // open-floating true
    // }
    
+// window-rule { 
+    // match app-id="emacs" title="^omni-splash"
+// 
+    // open-floating true
+    // // default-column-width { fixed 720; }
+    // // default-window-height { fixed 430; }
+// 
+    // geometry-corner-radius 18
+    // clip-to-geometry true
+// 
+    // // Subtle glass translucency (set to 1.0 if using Emacs alpha-background instead)
+    // opacity 0.95
+// 
+    // // Swap the thick tiling focus ring for a 1px glass-edge border
+    // focus-ring {
+        // off
+    // }
+    // border {
+        // on
+        // width 1
+        // active-color "#ffffff28"
+        // inactive-color "#ffffff14"
+    // }
+// 
+    // // Soft floating elevation
+    // shadow {
+        // on
+        // softness 28
+        // spread 4
+        // offset x=0 y=10
+        // color "#00000066"
+    // }
+// }
+
 window-rule {
-    match app-id="emacs" title="^omni-splash"
-
+    match app-id="^spleen$"
+    match title="^spleen$"
     open-floating true
-    // default-column-width { fixed 720; }
-    // default-window-height { fixed 430; }
-
-    geometry-corner-radius 18
+    geometry-corner-radius 12
     clip-to-geometry true
-
-    // Subtle glass translucency (set to 1.0 if using Emacs alpha-background instead)
-    opacity 0.95
-
-    // Swap the thick tiling focus ring for a 1px glass-edge border
+    background-effect {
+        off
+        blur true
+        noise 0.05
+        saturation 3
+    }
+    
     focus-ring {
         off
-    }
-    border {
-        on
-        width 1
-        active-color "#ffffff28"
-        inactive-color "#ffffff14"
-    }
-
-    // Soft floating elevation
-    shadow {
-        on
-        softness 28
-        spread 4
-        offset x=0 y=10
-        color "#00000066"
+        width 4
+        active-color "#000000"
     }
 }
 
@@ -530,12 +550,18 @@ binds {
     // Mod+Space { spawn "sh" "-c" r#"emacsclient -c -s launcher -F '((name . "omni-launcher"))' -e '(my/omni-launcher)'"#; }
 
     Mod+Space {
-       spawn "sh" "-c" r#"emacsclient -c -s launcher -F '((name . "omni-splash"))' -e '(my/omni-splash-show)'"#;
+       spawn "env" "-u" "LD_LIBRARY_PATH" "emacs" "--name" "spleen" "--title" "spleen" "--init-directory" "~/.config/emacs-vanilla/var/spleen-standalone";
     }   
 
     // Mod+Space {
         // spawn "emacsclient" "-n" "-c" "-s" "launcher" "-F" "((name . \"omni-splash\") (title . \"omni-splash\") (undecorated . t) (alpha-background . 92) (internal-border-width . 24) (menu-bar-lines . 0) (tool-bar-lines . 0) (vertical-scroll-bars . nil) (horizontal-scroll-bars . nil) (cursor-type . nil))" "-e" "(my/omni-splash-show)";
     // }
+    
+    // Mod+X {
+        // spawn "env" "-u" "LD_LIBRARY_PATH" "emacs" "--name" "spleen" "--title" "spleen" "--init-directory" "~/.config/emacs-vanilla/var/spleen-standalone";
+    // spawn "emacsclient" "-c" "-n" "-F" "s" "launcher" "((name . \"omni-splash\") (title . \"omni-splash\") (menu-bar-lines . 0) (tool-bar-lines . 0) (vertical-scroll-bars . nil))" "-e" "(omni-splash)";
+          // spawn "env" "-u" "LD_LIBRARY_PATH" "emacs" "--name" "omni-splash" "--title" "omni-splash" "--init-directory" "~/.config/emacs-vanilla/var/omni-splash-standalone";
+          // }
 
     Mod+Alt+Space { spawn-sh "~/scripts/bash/niri-window-switcher.sh"; }
     Mod+Alt+O { spawn-sh "~/scripts/bash/fuzzel-file-actions.sh"; }
