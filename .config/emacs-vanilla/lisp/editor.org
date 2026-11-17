@@ -177,23 +177,27 @@
   (gptel-make-openai "Mistral"
     :host "api.mistral.ai"
     :endpoint "/v1/chat/completions"
-    :models '("mistral-small-latest" "mistral-large-latest" "mistral-large-4" "codestral-latest" "ministral-8b-latest")
-    :key #'gptel-api-key-from-auth-source)
-
-  ;; OpenRouter offers an OpenAI compatible API
-  (gptel-make-openai "OpenRouter"
-    :host "openrouter.ai"
-    :endpoint "/api/v1/chat/completions"
+    :protocol "https"
     :stream t
-    :key #'gptel-api-key-from-auth-source
-    :models '(openai/gpt-oss-120b:free
-              tngtech/deepseek-r1t2-chimera:free))
+    :models '("mistral-small-latest"
+              "mistral-large-latest"
+              "mistral-large-4-0"
+              "codestral-latest"
+              "ministral-8b-latest")
+    :key #'gptel-api-key-from-auth-source)
 
   ;; Default model + backend
   (setopt gptel-backend (gptel-get-backend "Mistral"))
-  (setopt gptel-model 'mistral-large-latest)
-  (setopt gptel-prompt-prefix-alist '((markdown-mode . "*User:*\n") (org-mode . "*User:*\n") (text-mode . "*User:*\n")))
-  (setopt gptel-response-prefix-alist '((markdown-mode . "/Assistant:/\n") (org-mode . "/Assistant:/\n") (text-mode . "/Assistant:/\n")))
+  (setopt gptel-model 'mistral-small-latest)
+  
+  (setopt gptel-prompt-prefix-alist
+          '((markdown-mode . "*User:*\n")
+            (org-mode . "*User:*\n")
+            (text-mode . "*User:*\n")))
+  (setopt gptel-response-prefix-alist
+          '((markdown-mode . "/Assistant:/\n")
+            (org-mode . "/Assistant:/\n")
+            (text-mode . "/Assistant:/\n")))
   (setopt gptel-default-mode 'org-mode))
 
 ;; (use-package gptel-prompts

@@ -152,8 +152,8 @@ act on a completion candidate without visiting it first.
 (use-package consult-dir
   :ensure t
   :bind (("C-x C-d" . consult-dir)
-	 :map minibuffer-local-completion-map
-	 ("C-x C-d" . consult-dir)
+         :map minibuffer-local-completion-map
+         ("C-x C-d" . consult-dir)
          ("C-x C-j" . consult-dir-jump-file)))
 
 (use-package consult-dash
@@ -161,7 +161,7 @@ act on a completion candidate without visiting it first.
   :config
   (setq consult-dash-docsets-path (expand-file-name "docsets/" user-emacs-directory))
   (setq consult-dash-browser-func #'eww)
-  
+
   ;; Use setq-default because the author defined it as a buffer-local variable
   (setq-default consult-dash-docsets '("Python" "TypeScript" "CSS" "Emacs Lisp")))
 
