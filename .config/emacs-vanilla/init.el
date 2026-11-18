@@ -65,7 +65,8 @@
                 "ui.org"
                 "org-config.org"
                 "file-management.org"
-                "programming.org"))
+                "programming.org"
+                "bibliography.org"))
   (org-babel-load-file (expand-file-name file my/config-dir)))
 
 ;;; init.el ends here
