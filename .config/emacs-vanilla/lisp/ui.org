@@ -5,7 +5,7 @@
 ;;; ui.el --- General appearance, icons, fonts -*- lexical-binding: t; -*-
 #+end_src
 
-- General
+* General
 #+begin_src emacs-lisp
 (add-to-list 'custom-theme-load-path
              (expand-file-name "themes" user-emacs-directory))
@@ -25,7 +25,7 @@
   (olivetti-body-width 100))
 #+end_src
 
-- Fonts & Faces
+* Fonts & Faces
 Base faces only. The org-specific fixed-pitch overrides (tables, code
 blocks, etc) live in =org-config.org=, next to the rest of the org
 appearance settings.
@@ -54,9 +54,6 @@ manage tab-bar padding cleanly.
                             :height 1.08
                             :weight 'semi-bold)
 
-        ;; Minimal flat tab-bar: identical background across bar and tabs,
-        ;; active tab distinguished only by bold text and a colored underline.
-        ;; Leave :box untouched; spacious-padding manages :box on tab-bar.
         (let ((bar-bg (or (face-background 'header-line frame t)
                           (face-background 'default frame t)))
               (accent (face-foreground 'font-lock-keyword-face frame t)))
@@ -66,8 +63,8 @@ manage tab-bar padding cleanly.
 
           (set-face-attribute 'tab-bar-tab frame
                               :background (or bar-bg 'unspecified)
-                              :foreground (face-foreground 'default frame t)
-                              :weight 'bold
+                              :foreground (if (stringp accent) accent 'unspecified)
+                              :weight 'demibold
                               :underline (list :color (if (stringp accent)
                                                           accent
                                                         'foreground-color)
@@ -77,7 +74,7 @@ manage tab-bar padding cleanly.
           (set-face-attribute 'tab-bar-tab-inactive frame
                               :background (or bar-bg 'unspecified)
                               :foreground (face-foreground 'shadow frame t)
-                              :weight 'normal
+                              :weight 'demibold
                               :underline nil))))))
 
 ;; Register before the initial theme load.
@@ -90,7 +87,7 @@ manage tab-bar padding cleanly.
 (load-theme 'spacegrey t)
 #+end_src
 
-- Padding
+* Padding
 Loaded after the theme and =nerd-icons= so it wraps the final face
 definitions without fighting =my/apply-face-overrides=.
 #+begin_src emacs-lisp
@@ -110,7 +107,7 @@ definitions without fighting =my/apply-face-overrides=.
   (spacious-padding-mode 1))
 #+end_src
 
-- Modeline
+* Modeline
 #+begin_src emacs-lisp
 (use-package doom-modeline
   :ensure t
@@ -133,7 +130,7 @@ definitions without fighting =my/apply-face-overrides=.
   (doom-modeline-mode 1))
 #+end_src
 
-- Tabs & Workspaces
+* Tabs & Workspaces
 =tab-bar= and =project= are configured first so =tabspaces= can take
 ownership of =tab-bar-mode= activation cleanly on startup.
 #+begin_src emacs-lisp

@@ -237,11 +237,12 @@ window-rule {
     geometry-corner-radius 12
     clip-to-geometry true
     
-    background-effect {
-        blur true
-        noise 0.05
-        saturation 3
-    }
+    // background-effect {
+        // off
+        // blur true
+        // noise 0.05
+        // saturation 3
+    // }
         focus-ring {
         off
         width 4
