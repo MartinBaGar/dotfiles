@@ -31,7 +31,7 @@ needed.
 
 #+begin_src emacs-lisp
 (use-package no-littering
-  :ensure t
+  :ensure (:wait t)
   :demand t
   :config
   ;; Redirect backup, auto-save, and undo-tree history files.

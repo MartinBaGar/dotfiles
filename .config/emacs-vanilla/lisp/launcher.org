@@ -76,7 +76,9 @@ Customized config
               consult-omni-sources-modules-to-load
               '(consult-omni-apps consult-omni-calc))
         (consult-omni-sources-load-modules)
-        (setq consult-omni-multi-sources '("Apps" "calc"))))
+        (setq consult-omni-multi-sources '("Apps" "calc"))
+        (set-face-attribute 'default nil :height 150))
+      )
   
   (spleen-add-section
    "TOOLS"
