@@ -270,6 +270,19 @@ window-rule {
     open-maximized true
 }
 
+window-rule {
+    match app-id="^spleen$"
+    match title="^spleen$"
+    open-floating true
+    geometry-corner-radius 12
+    clip-to-geometry true
+    focus-ring {
+        on
+        width 4
+        active-color "#000000"
+    }
+}
+
 binds {
     // === System & Overview ===
     Mod+D { spawn "niri" "msg" "action" "toggle-overview"; }
