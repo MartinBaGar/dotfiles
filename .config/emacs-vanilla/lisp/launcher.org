@@ -1,0 +1,90 @@
+#+TITLE: Launcher
+#+PROPERTY: header-args:emacs-lisp :tangle launcher.el :results none
+
+#+begin_src emacs-lisp
+;;; launcher.el --- Desktop launcher -*- lexical-binding: t; -*-
+#+end_src
+
+* Splash and actions
+
+Customized config
+#+begin_src emacs-lisp
+(use-package spleen
+  :ensure
+  (:repo "~/git-repos/spleen"
+         :main "spleen.el"
+         :files ("spleen.el"
+                 "spleen-actions.el"
+                 "spleen-standalone.el"))
+  :demand t
+  :config
+  (require 'spleen-actions)
+  (require 'spleen-standalone)
+  (setq spleen-cancel-behavior 'return)
+
+  (defun my/spleen-web-search (query)
+    "Search the web for QUERY in the default browser."
+    (interactive (list (read-string "Web search: ")))
+    (unless (string-empty-p (string-trim query))
+      (unless (executable-find "xdg-open")
+        (user-error "Web search requires xdg-open"))
+      (require 'url-util)
+      (spleen-spawn
+       "xdg-open" (concat "https://www.google.com/search?q="
+                          (url-hexify-string query)))))
+
+  (defun my/spleen-calculator (expression)
+    "Calculate EXPRESSION and copy the result to the Wayland clipboard."
+    (interactive (list (read-string "Calculate: ")))
+    (unless (string-empty-p (string-trim expression))
+      (unless (executable-find "wl-copy")
+        (user-error "Calculator clipboard requires wl-copy"))
+      (require 'calc)
+      (let ((result (calc-eval expression)))
+        (with-temp-buffer
+          (insert result)
+          (unless (equal 0 (call-process-region
+                            (point-min) (point-max)
+                            "wl-copy" nil nil nil))
+            (user-error "Could not copy the result with wl-copy")))
+        (message "Copied: %s" result))))
+  
+  (defun my/spleen-focus-window ()
+  (interactive)
+  (let* ((windows (json-parse-string
+                   (shell-command-to-string "niri msg --json windows")
+                   :object-type 'alist :array-type 'list :null-object nil))
+         (cands (mapcar (lambda (w)
+                          (cons (format "%s — %s"
+                                        (or (alist-get 'app_id w) "?")
+                                        (or (alist-get 'title w) ""))
+                                (alist-get 'id w)))
+                        windows))
+         (choice (completing-read "Focus: " cands nil t)))
+    (spleen-spawn "niri" "msg" "action" "focus-window" "--id"
+                  (number-to-string (cdr (assoc choice cands))))))
+
+  (setq spleen-standalone-packages
+      '(vertico orderless consult consult-omni)
+      spleen-standalone-completion 'vertico
+      spleen-standalone-setup
+      '((require 'orderless)
+        (setq completion-styles '(orderless basic))
+        (require 'consult)
+        (require 'consult-omni-sources)
+        (setq consult-omni-show-preview nil
+              consult-omni-sources-modules-to-load
+              '(consult-omni-apps consult-omni-calc))
+        (consult-omni-sources-load-modules)
+        (setq consult-omni-multi-sources '("Apps" "calc"))
+        (set-face-attribute 'default nil :height 150))
+      )
+  
+  (spleen-add-section
+   "TOOLS"
+   '(
+     ("s" "Web Search" my/spleen-web-search :on-cancel close)
+     ("w" "Focus Window" my/spleen-focus-window)
+     ;; ("o" "Consult Omni" consult-omni-multi)
+     ("c" "Calculator" my/spleen-calculator))))
+#+end_src

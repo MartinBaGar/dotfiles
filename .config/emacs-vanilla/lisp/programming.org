@@ -7,7 +7,70 @@
 
 * Magit
 #+begin_src emacs-lisp
-(use-package magit)
+;; 1. Ediff: Single-frame, side-by-side, clean restore on quit
+(use-package ediff
+  :ensure nil
+  :custom
+  ;; Never spawn a separate floating control frame
+  (ediff-window-setup-function #'ediff-setup-windows-plain)
+  ;; Always split side-by-side (left/right) instead of top/bottom
+  (ediff-split-window-function #'split-window-horizontally)
+  ;; Ignore whitespace changes by default when diffing
+  (ediff-diff-options "-w")
+  :init
+  ;; Save window layout before Ediff starts and restore it on `q`
+  (defvar my/ediff-saved-window-config nil)
+  (add-hook 'ediff-before-setup-hook
+            (lambda ()
+              (setq my/ediff-saved-window-config (current-window-configuration))))
+  (add-hook 'ediff-quit-hook
+            (lambda ()
+              (when (window-configuration-p my/ediff-saved-window-config)
+                (set-window-configuration my/ediff-saved-window-config)))
+            90))
+
+;; 2. Magit: UI-safe display, word-level diffs, fast workflow
+(use-package magit
+  :ensure t
+  :bind (("C-x g" . magit-status)
+         ("C-x M-g" . magit-dispatch))
+  :custom
+  ;; Keep window layout predictable and UI-safe
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
+  (magit-bury-buffer-function #'magit-restore-window-configuration)
+
+  ;; Highlight exact changed words inside every hunk (not just the current one)
+  (magit-diff-refine-hunk 'all)
+
+  ;; Auto-save repo files when opening Magit instead of prompting every time
+  (magit-save-repository-buffers 'dontask)
+
+  ;; Cleaner commit message editing & log display
+  (git-commit-summary-max-length 50)
+  (magit-log-margin '(t "%Y-%m-%d %H:%M " magit-log-margin-width t 18))
+  :hook
+  ;; Prevent Magit's sticky header-line from fighting spacious-padding
+  (magit-mode . (lambda ()
+                  (setq-local header-line-format nil))))
+
+;; 3. Transient (Magit's popup menus): Keep docked cleanly below
+(use-package transient
+  :ensure nil
+  :custom
+  (transient-display-buffer-action '(display-buffer-below-selected
+                                     (window-height . fit-window-to-buffer))))
+
+;; 4. Diff-HL: Live git gutter indicators synced with Magit
+(use-package diff-hl
+  :ensure t
+  :hook ((prog-mode . diff-hl-mode)
+         (text-mode . diff-hl-mode)
+         (dired-mode . diff-hl-dired-mode)
+         (magit-pre-refresh . diff-hl-magit-pre-refresh)
+         (magit-post-refresh . diff-hl-magit-post-refresh))
+  :custom
+  ;; Use margin instead of fringe so it plays nicely with spacious-padding
+  (diff-hl-side 'left))
 #+end_src
 
 * envrc

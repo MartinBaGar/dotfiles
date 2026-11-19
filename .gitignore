@@ -2,3 +2,10 @@
 !.oh-my-zsh
 /.config/kitty/kitty.conf.bak
 /.config/waybar/style.css
+.config/emacs-vanilla/*
+!.config/emacs-vanilla/config.org
+!.config/emacs-vanilla/init.el
+!.config/emacs-vanilla/early-init.el
+!.config/emacs-vanilla/themes
+!.config/emacs-vanilla/lisp
+/.config/emacs-vanilla/lisp/*.el
