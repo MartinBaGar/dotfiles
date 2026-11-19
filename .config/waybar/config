@@ -43,8 +43,10 @@
         "on-click-right": "dunstctl set-paused toggle"
     },
     "mpris": {
+        "artist-len": 20,
+        "title-len": 40,
         "format": "{player_icon} {artist} - {title}",
-        "format-paused": "{status_icon} <i>{dynamic}</i>",
+        "format-paused": "{status_icon} {artist} - {title}",
         "player-icons": {
             "default": "▶ ",
         },

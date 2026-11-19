@@ -65,18 +65,12 @@ Customized config
                   (number-to-string (cdr (assoc choice cands))))))
 
   (setq spleen-standalone-packages
-      '(vertico orderless consult consult-omni)
+      '(vertico orderless consult)
       spleen-standalone-completion 'vertico
       spleen-standalone-setup
       '((require 'orderless)
         (setq completion-styles '(orderless basic))
         (require 'consult)
-        (require 'consult-omni-sources)
-        (setq consult-omni-show-preview nil
-              consult-omni-sources-modules-to-load
-              '(consult-omni-apps consult-omni-calc))
-        (consult-omni-sources-load-modules)
-        (setq consult-omni-multi-sources '("Apps" "calc"))
         (set-face-attribute 'default nil :height 150))
       )
   
@@ -85,6 +79,5 @@ Customized config
    '(
      ("s" "Web Search" my/spleen-web-search :on-cancel close)
      ("w" "Focus Window" my/spleen-focus-window)
-     ;; ("o" "Consult Omni" consult-omni-multi)
      ("c" "Calculator" my/spleen-calculator))))
 #+end_src
