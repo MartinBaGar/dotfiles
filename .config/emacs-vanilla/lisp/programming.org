@@ -63,14 +63,17 @@
 ;; 4. Diff-HL: Live git gutter indicators synced with Magit
 (use-package diff-hl
   :ensure t
-  :hook ((prog-mode . diff-hl-mode)
-         (text-mode . diff-hl-mode)
-         (dired-mode . diff-hl-dired-mode)
+  :hook ((prog-mode . turn-on-diff-hl-mode)
+         (text-mode . turn-on-diff-hl-mode)
+         (dired-mode . (lambda ()
+                         (unless (file-remote-p default-directory)
+                           (diff-hl-dired-mode 1))))
          (magit-pre-refresh . diff-hl-magit-pre-refresh)
          (magit-post-refresh . diff-hl-magit-post-refresh))
   :custom
-  ;; Use margin instead of fringe so it plays nicely with spacious-padding
-  (diff-hl-side 'left))
+  (diff-hl-side 'left)
+  ;; (diff-hl-disable-on-remote t)
+  )
 #+end_src
 
 * envrc
