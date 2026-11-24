@@ -75,8 +75,7 @@
         (0 'my/org-src-end-line prepend)))
      'append))
 
-  (add-hook 'org-mode-hook #'my/org-setup-src-block-faces 95)
-)
+  (add-hook 'org-mode-hook #'my/org-setup-src-block-faces 95))
 #+end_src
 
 * Appearance (org-modern)
@@ -86,84 +85,78 @@ separate bullets package needed alongside it.
 (use-package org-modern
   :ensure t
   :after nerd-icons
+  :hook ((org-mode . org-modern-mode)
+         (org-agenda-finalize . org-modern-agenda))
   :custom
-  (org-modern-star '("◉" "○" "●" "○" "●"))
+  (org-modern-star 'replace)
+  (org-modern-replace-stars "◉○●○●")
   (org-modern-table nil)
-  (org-modern-list
-   '((?* . "•")
-     (?+ . "‣")))
+  (org-modern-list '((?* . "•") (?+ . "‣")))
   (org-modern-block-fringe nil)
-  (org-modern-block-name nil)
+  ;; org-modern handles quotes natively; our font-lock rule below handles src blocks.
+  (org-modern-block-name '(("quote" "“" "”")))
   (org-modern-keyword
    `(("setupfile" . ,(concat (nerd-icons-codicon "nf-cod-gear") " "))
      ("options"   . ,(concat (nerd-icons-codicon "nf-cod-settings") " "))
      ("filetags"  . ,(concat (nerd-icons-octicon "nf-oct-tag") " "))
      ("startup"   . ,(concat (nerd-icons-octicon "nf-oct-zap") " "))
+     ("results"   . ,(nerd-icons-faicon "nf-fa-arrow_right"))
      (t . t)))
   (org-modern-drawer t)
-  :hook
-  (org-mode . org-modern-mode)
-  (org-agenda-finalize . org-modern-agenda)
-  :config
-  (require 'org-src)
+  :init
+  (defun my/org-header-icon (lang)
+    "Return a Nerd Font icon for LANG directly from `nerd-icons' alists."
+    (save-match-data
+      (let* ((mode (and lang (org-src-get-lang-mode lang)))
+             (base-mode (and mode
+                             (string-suffix-p "-ts-mode" (symbol-name mode))
+                             (intern (concat (string-remove-suffix "-ts-mode"
+                                                                   (symbol-name mode))
+                                             "-mode"))))
+             (modes (delq nil (append (and mode (nerd-icons--mode-parents mode))
+                                      (list base-mode))))
+             (entry (or (cdr (cl-some (lambda (m) (assq m nerd-icons-mode-icon-alist))
+                                      modes))
+                        (and lang (cdr (assoc (downcase lang)
+                                              nerd-icons-extension-icon-alist)))
+                        (and lang (nerd-icons-match-to-alist
+                                   lang nerd-icons-regexp-icon-alist)))))
+        (if entry
+            (apply (car entry) (cdr entry))
+          (nerd-icons-codicon "nf-cod-code")))))
 
-  (defun my/prettify-string (str)
-    "Convert STR into a character or composition sequence for `prettify-symbols-alist'."
-    (let ((chars (string-to-list str)))
-      (if (cdr chars)
-          (cons (car chars)
-                (mapcan (lambda (c) (list '(Br . Bl) c)) (cdr chars)))
-        (car chars))))
+  (defun my/org-match-src-marker (limit)
+    "Match a source marker before LIMIT; group 2 is the opening language."
+    (let ((case-fold-search t))
+      (re-search-forward
+       "^[ \t]*\\(?:\\(#\\+begin_src\\)[ \t]+\\([^ \t\n\r]+\\)\\|\\(#\\+end_src\\)\\(?:[ \t]*$\\)\\)"
+       limit t)))
 
-  (defun my/org-lang-icon (lang)
-    "Return the Nerd Font glyph string for Org source language LANG."
-    (let* ((default-icon (nerd-icons-icon-for-mode 'fundamental-mode))
-           (mode (and lang (org-src-get-lang-mode lang)))
-           (base-mode (and mode
-                           (intern (replace-regexp-in-string
-                                    "-ts-mode\\'" "-mode" (symbol-name mode)))))
-           (icon (and mode (nerd-icons-icon-for-mode mode)))
-           (icon (if (and icon (equal icon default-icon))
-                     (nerd-icons-icon-for-mode base-mode)
-                   icon)))
-      (if (and (stringp icon)
-               (not (equal icon default-icon)))
-          icon
-        (nerd-icons-codicon "nf-cod-code"))))
+  (defun my/org-display-src-marker ()
+    "Replace only `#+begin_src' or `#+end_src' with its Nerd Font icon."
+    (let* ((lang (match-string-no-properties 2))
+           (group (if lang 1 3))
+           (beg (match-beginning group))
+           (end (match-end group))
+           (icon (if lang
+                     (my/org-header-icon lang)
+                   (nerd-icons-codicon "nf-cod-code"))))
+      (put-text-property beg end 'display icon))
+    nil)
 
-  (defun my/org-src-prettify-alist ()
-    "Build `prettify-symbols-alist' with Nerd Font icons for Org blocks."
-    (let* ((langs '("python" "bash" "sh" "emacs-lisp" "elisp" "json" "yaml"
-                    "toml" "typst" "c" "cpp" "rust" "js" "typescript" "svelte"
-                    "html" "css" "sql" "awk" "makefile" "dockerfile" "xml"
-                    "pyops"))
-           (end-icon (my/prettify-string (nerd-icons-codicon "nf-cod-code")))
-           (alist `(("#+end_src"     . ,end-icon)
-                    ("#+END_SRC"     . ,end-icon)
-                    ("#+begin_quote" . ,(my/prettify-string "“"))
-                    ("#+BEGIN_QUOTE" . ,(my/prettify-string "“"))
-                    ("#+end_quote"   . ,(my/prettify-string "”"))
-                    ("#+END_QUOTE"   . ,(my/prettify-string "”"))
-                    ("#+RESULTS:"    . ,(my/prettify-string "")))))
-      (dolist (lang langs alist)
-        (let ((composed (my/prettify-string (concat (my/org-lang-icon lang) " " lang))))
-          (push (cons (concat "#+begin_src " lang) composed) alist)
-          (push (cons (concat "#+BEGIN_SRC " lang) composed) alist)))))
+  (defun my/org-install-src-icons ()
+    "Install `font-lock' rules to display Nerd Font icons on src block markers."
+    (require 'org-src)
+    (require 'nerd-icons)
+    (add-hook 'font-lock-extra-managed-props 'display nil t)
+    (font-lock-add-keywords
+     nil
+     '((my/org-match-src-marker (0 (my/org-display-src-marker) append)))
+     'append)
+    (when (bound-and-true-p font-lock-mode)
+      (font-lock-flush)))
 
-  (defun my/org-setup-prettify-symbols ()
-    "Enable prettified block headers and icons in Org buffers."
-    (setq-local prettify-symbols-unprettify-at-point 'right-edge)
-    (setq-local prettify-symbols-alist
-                (append (my/org-src-prettify-alist) prettify-symbols-alist))
-    (when (bound-and-true-p prettify-symbols-mode)
-      (prettify-symbols-mode -1))
-    (prettify-symbols-mode 1))
-
-  (add-hook 'org-mode-hook #'my/org-setup-prettify-symbols)
-  (dolist (buf (buffer-list))
-    (with-current-buffer buf
-      (when (derived-mode-p 'org-mode)
-        (my/org-setup-prettify-symbols)))))
+  (add-hook 'org-mode-hook #'my/org-install-src-icons 95))
 
 ;; Source blocks and indentation structure
 (use-package org-modern-indent
@@ -171,23 +164,6 @@ separate bullets package needed alongside it.
   :config
   ;; The '90' ensures this hook runs very late, after org-modern and org-indent
   (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
-#+end_src
-
-* Fonts: prose vs. code
-These faces are set globally, once -- not inside a per-buffer hook,
-since `set-face-attribute' without a frame argument changes the face
-everywhere, and re-running it on every org buffer you open is pure
-waste. Only the buffer-local minor mode (`variable-pitch-mode') needs
-to live in the hook.
-#+begin_src emacs-lisp
-;; (with-eval-after-load 'org
-;;   (dolist (face '(org-table org-code org-verbatim org-block
-;;                    org-meta-line org-drawer org-special-keyword
-;;                    org-property-value org-document-info-keyword
-;;                    org-date org-tag))
-;;     (set-face-attribute face nil :inherit 'fixed-pitch)))
-
-;; (add-hook 'org-mode-hook #'variable-pitch-mode)
 #+end_src
 
 * Sub-modes
