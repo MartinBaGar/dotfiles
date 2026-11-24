@@ -81,17 +81,66 @@
    `(outline-7 ((t (:foreground ,out7 :weight bold))))
    `(outline-8 ((t (:foreground ,fg :weight bold))))
 
-   ;; Org Mode
-   `(org-document-title ((t (:foreground ,blue :weight bold :height 1.2))))
-   `(org-block ((t (:inherit fixed-pitch :background ,org-block-bg :extend t))))
-   `(org-block-begin-line ((t (:inherit fixed-pitch :foreground ,base4 :slant italic :background ,org-meta-bg :extend t))))
-   `(org-block-end-line ((t (:inherit fixed-pitch :foreground ,base4 :slant italic :background ,org-meta-bg :extend t))))
-   `(org-quote ((t (:background ,base2 :extend t :slant italic))))
+   ;; Org Mode — Document & Metadata
+   `(org-document-title ((t (:inherit variable-pitch :foreground ,blue :weight bold :height 1.5))))
+   `(org-document-info ((t (:inherit variable-pitch :foreground ,base7 :slant italic :height 1.05))))
+   `(org-document-info-keyword ((t (:inherit (shadow fixed-pitch) :height 0.85))))
+   `(org-meta-line ((t (:inherit (shadow fixed-pitch) :height 0.85))))
+   `(org-drawer ((t (:inherit (shadow fixed-pitch) :height 0.85))))
+   `(org-special-keyword ((t (:inherit (shadow fixed-pitch) :height 0.85))))
+   `(org-property-value ((t (:inherit fixed-pitch :foreground ,base7 :height 0.85))))
+
+   ;; Org Mode — Neutral Block Defaults (quotes, examples, export blocks, indent rail)
+   `(org-block ((t (:inherit fixed-pitch :extend t))))
+   `(org-block-begin-line ((t (:inherit (shadow fixed-pitch) :height 1.0 :extend t))))
+   `(org-block-end-line ((t (:inherit (shadow fixed-pitch) :height 1.0 :extend t))))
+   `(org-quote ((t (:inherit variable-pitch :foreground ,fg-alt :slant italic :extend t))))
+   `(org-verse ((t (:inherit org-quote))))
+   `(org-modern-indent-bracket-line ((t (:inherit fixed-pitch :foreground ,base4 :height 1.0))))
+
+   ;; Org Mode — Src Block Preset (Choose Option A OR Option B)
+
+   ;; --- Option A: Ultra-Minimal Hairlines (src blocks only) ---
+   ;; `(my/org-src-block ((t (:inherit fixed-pitch
+   ;;                                  :background unspecified
+   ;;                                  :extend t))))
+   ;; `(my/org-src-begin-line ((t (:inherit fixed-pitch
+   ;;                                       :background unspecified
+   ;;                                       :foreground ,blue
+   ;;                                       :weight semi-bold
+   ;;                                       :overline ,base4
+   ;;                                       :height 1.0
+   ;;                                       :extend t))))
+   ;; `(my/org-src-end-line ((t (:inherit fixed-pitch
+   ;;                                     :background unspecified
+   ;;                                     :foreground ,base5
+   ;;                                     :height 1.0
+   ;;                                     :extend t))))
+
+   ;; --- Option B: Subtle Recessed Dark Card (unified #21262e surface) ---
+   `(my/org-src-block ((t (:inherit fixed-pitch
+                                    :background ,org-block-bg
+                                    :extend t))))
+   `(my/org-src-begin-line ((t (:inherit fixed-pitch
+                                         :background unspecified
+                                         :foreground ,blue
+                                         :weight semi-bold
+                                         :height 1.0
+                                         :extend t))))
+   `(my/org-src-end-line ((t (:inherit fixed-pitch
+                                       :background unspecified
+                                       :foreground ,base5
+                                       :height 1.0
+                                       :extend t))))
+
+   ;; Org Mode — Inline Markup & Misc
    `(org-ellipsis ((t (:foreground ,red :underline nil))))
    `(org-hide ((t (:foreground ,bg))))
    `(org-code ((t (:inherit fixed-pitch :foreground ,green))))
    `(org-verbatim ((t (:inherit fixed-pitch :foreground ,green))))
    `(org-table ((t (:inherit fixed-pitch :foreground ,blue))))
+   `(org-modern-block-name ((t (:foreground ,blue :weight semi-bold))))
+   `(org-modern-label ((t (:inherit fixed-pitch :height 0.9 :weight semi-bold))))
 
    ;; Markdown Mode
    `(markdown-markup-face ((t (:foreground ,base5))))

@@ -216,6 +216,12 @@
   :custom
   (gptel-commit-stream t))
 
+(use-package gptel-quick
+  :ensure (:host github :repo "karthink/gptel-quick")
+  :after (gptel)
+  :custom
+  (keymap-set embark-general-map "?" #'gptel-quick))
+
 (use-package gptel-agent
   :ensure t
   :after (gptel))
@@ -255,67 +261,67 @@ and #+caption: (short, descriptive)."
 #+end_src
 ** Minuet
 #+begin_src emacs-lisp
-  (use-package minuet
-      :bind
-      (
-       ;; ("M-y" . #'minuet-complete-with-minibuffer) ;; use minibuffer for completion
-       ("M-i" . #'minuet-show-suggestion) ;; use overlay for completion
-       ;; ("C-c m" . #'minuet-configure-provider)
-       :map minuet-active-mode-map
-       ;; These keymaps activate only when a minuet suggestion is displayed in the current buffer
-       ("M-p" . #'minuet-previous-suggestion) ;; invoke completion or cycle to next completion
-       ("M-n" . #'minuet-next-suggestion) ;; invoke completion or cycle to previous completion
-       ("M-A" . #'minuet-accept-suggestion) ;; accept whole completion
-       ;; Accept the first line of completion, or N lines with a numeric-prefix:
-       ;; e.g. C-u 2 M-a will accepts 2 lines of completion.
-       ("M-a" . #'minuet-accept-suggestion-line)
-       ;; Accept the first word of completion, or N words with a numeric-prefix:
-       ;; e.g. C-u 2 M-w will accepts 2 words of completion.
-       ("M-w" . #'minuet-accept-suggestion-word)
-       ("M-e" . #'minuet-dismiss-suggestion))
-    ;; :hook (prog-mode . minuet-auto-suggestion-mode)
-    :config
-    ;; Tell Minuet to use Codestral
-    (setq minuet-provider 'codestral)
+(use-package minuet
+  :bind
+  (
+   ;; ("M-y" . #'minuet-complete-with-minibuffer) ;; use minibuffer for completion
+   ("M-i" . #'minuet-show-suggestion) ;; use overlay for completion
+   ;; ("C-c m" . #'minuet-configure-provider)
+   :map minuet-active-mode-map
+   ;; These keymaps activate only when a minuet suggestion is displayed in the current buffer
+   ("M-p" . #'minuet-previous-suggestion) ;; invoke completion or cycle to next completion
+   ("M-n" . #'minuet-next-suggestion) ;; invoke completion or cycle to previous completion
+   ("M-A" . #'minuet-accept-suggestion) ;; accept whole completion
+   ;; Accept the first line of completion, or N lines with a numeric-prefix:
+   ;; e.g. C-u 2 M-a will accepts 2 lines of completion.
+   ("M-a" . #'minuet-accept-suggestion-line)
+   ;; Accept the first word of completion, or N words with a numeric-prefix:
+   ;; e.g. C-u 2 M-w will accepts 2 words of completion.
+   ("M-w" . #'minuet-accept-suggestion-word)
+   ("M-e" . #'minuet-dismiss-suggestion))
+  ;; :hook (prog-mode . minuet-auto-suggestion-mode)
+  :config
+  ;; Tell Minuet to use Codestral
+  (setq minuet-provider 'codestral)
 
-    ;; Use gptel's built-in function to extract the key.
-    ;; We use a lambda so it is evaluated only when Minuet needs it.
-    (plist-put minuet-codestral-options :api-key
-               (lambda () (gptel-api-key-from-auth-source "api.codestral.ai")))
+  ;; Use gptel's built-in function to extract the key.
+  ;; We use a lambda so it is evaluated only when Minuet needs it.
+  (plist-put minuet-codestral-options :api-key
+             (lambda () (gptel-api-key-from-auth-source "api.codestral.ai")))
 
-    ;; Recommended limits to prevent burning through tokens or timing out
-    (minuet-set-optional-options minuet-codestral-options :max_tokens 256)
-    (minuet-set-optional-options minuet-codestral-options :stop ["\n\n"]))
+  ;; Recommended limits to prevent burning through tokens or timing out
+  (minuet-set-optional-options minuet-codestral-options :max_tokens 256)
+  (minuet-set-optional-options minuet-codestral-options :stop ["\n\n"]))
 #+end_src
 * Language
 ** Translation
 #+begin_src emacs-lisp
-  (use-package gt
-    :config
-    (setq gt-default-translator
-          (gt-translator
-           :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
-           :engines (list
-                     (gt-bing-engine :if 'word)
-                     (gt-google-engine :if 'not-word))
-           :render (gt-insert-render :type 'replace)))
-    
-    (setq gt-preset-translators
+(use-package gt
+  :config
+  (setq gt-default-translator
+        (gt-translator
+         :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
+         :engines (list
+                   (gt-bing-engine :if 'word)
+                   (gt-google-engine :if 'not-word))
+         :render (gt-insert-render :type 'replace)))
+  
+  (setq gt-preset-translators
         `((replacer . ,(gt-translator
-           :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
-           :engines (list
-                     (gt-bing-engine :if 'word)
-                     (gt-google-engine :if 'not-word))
-           :render (gt-insert-render :type 'replace)))
+                        :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
+                        :engines (list
+                                  (gt-bing-engine :if 'word)
+                                  (gt-google-engine :if 'not-word))
+                        :render (gt-insert-render :type 'replace)))
           (translator . ,(gt-translator
-                    :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
-                    :engines (list
-                            (gt-google-engine :if 'word)
-                            (gt-google-engine :if 'not-word))
-                    :render (list
-                              (gt-overlay-render :type 'replace :if 'not-word)
-                              (gt-buffer-render :if 'word)
-                             ))))))
+                          :taker (gt-taker :langs '(en fr) :text 'sentence :prompt t)
+                          :engines (list
+                                    (gt-google-engine :if 'word)
+                                    (gt-google-engine :if 'not-word))
+                          :render (list
+                                   (gt-overlay-render :type 'replace :if 'not-word)
+                                   (gt-buffer-render :if 'word)
+                                   ))))))
 #+end_src
 ** Spell
 #+begin_src emacs-lisp
@@ -513,8 +519,8 @@ and #+caption: (short, descriptive)."
 
 * Terminal
 #+begin_src emacs-lisp
-  (use-package vterm
-      :ensure t)
+(use-package vterm
+  :ensure t)
 #+end_src
 
 * Web browsing

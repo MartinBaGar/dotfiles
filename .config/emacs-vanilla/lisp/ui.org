@@ -18,6 +18,19 @@
   :custom
   (nerd-icons-font-family "Symbols Nerd Font Mono"))
 
+(use-package nerd-icons-corfu
+  :ensure t
+  :after (corfu nerd-icons)
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+(use-package nerd-icons-completion
+  :ensure t
+  :after (marginalia nerd-icons)
+  :demand t
+  :config
+  (nerd-icons-completion-mode 1))
+
 (use-package olivetti
   :ensure t
   :hook (org-mode . olivetti-mode)
@@ -44,6 +57,8 @@ manage tab-bar padding cleanly.
   (let ((frame (or (and (framep frame) frame) (selected-frame))))
     (when (display-graphic-p frame)
       (with-selected-frame frame
+        (set-face-attribute 'fixed-pitch nil :family "Iosevka" :height 1.0 :weight 'medium)
+        (set-fontset-font t '(#x2500 . #x257f) (font-spec :family "Iosevka") frame)
         (set-face-attribute 'fixed-pitch frame
                             :family "Iosevka"
                             :height 1.0

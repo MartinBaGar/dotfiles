@@ -7,27 +7,76 @@
 
 * Core settings
 #+begin_src emacs-lisp
-(with-eval-after-load 'org
-  (setq
-   ;; Edit settings
-   org-auto-align-tags nil
-   org-tags-column 0
-   org-fold-catch-invisible-edits 'show-and-error
-   org-special-ctrl-a/e t
-   org-insert-heading-respect-content t
+(use-package org
+  :ensure nil
+  :hook
+  ((org-mode . variable-pitch-mode)
+   (org-mode . my/org-disable-line-spacing)
+   )
+  :custom
+  ;; Edit settings
+  (org-auto-align-tags nil)
+  (org-tags-column 0)
+  (org-fold-catch-invisible-edits 'show-and-error)
+  (org-special-ctrl-a/e t)
+  (org-insert-heading-respect-content t)
 
-   ;; Org styling, hide markup etc.
-   org-hide-emphasis-markers t
-   ;; org-pretty-entities t
-   ;; org-agenda-tags-column 0
-   org-ellipsis "…"
-   org-src-content-indentation 0
+  ;; Styling & folding
+  (org-hidden-keywords '(title author))
+  (org-hide-drawer-startup t)
+  (org-startup-folded 'content)
+  (org-hide-emphasis-markers t)
+  (org-pretty-entities t)
+  (org-ellipsis "…")
+  (org-src-content-indentation 0)
+  (org-startup-indented t)
+  :config
+  (require 'org-src)
+  (require 'org-inlinetask)
 
-   ;; CRITICAL: org-modern-indent requires org-indent to be enabled globally
-   org-startup-indented t)
+  (defun my/org-disable-line-spacing ()
+    "Keep `line-spacing' nil so `org-modern-indent' vertical rails stay unbroken."
+    (setq-local line-spacing nil))
 
-  ;; Initialize inline tasks
-  (require 'org-inlinetask))
+  ;; Keep code/structured elements monospaced while body prose uses variable-pitch
+  (dolist (face '(org-table org-code org-verbatim org-block
+                            org-property-value org-date org-tag))
+    (set-face-attribute face nil :inherit 'fixed-pitch))
+
+  ;; Keep metadata monospaced AND muted
+  (dolist (face '(org-meta-line org-drawer org-special-keyword
+                                org-document-info-keyword))
+    (set-face-attribute face nil :inherit '(shadow fixed-pitch)))
+  
+  (defface my/org-src-block
+    '((t (:inherit org-block)))
+    "Face for Org `#+begin_src' block bodies."
+    :group 'org-faces)
+
+  (defface my/org-src-begin-line
+    '((t (:inherit org-block-begin-line)))
+    "Face for Org `#+begin_src' header lines."
+    :group 'org-faces)
+
+  (defface my/org-src-end-line
+    '((t (:inherit org-block-end-line)))
+    "Face for Org `#+end_src' footer lines."
+    :group 'org-faces)
+
+  (defun my/org-setup-src-block-faces ()
+    "Apply dedicated header, body, and footer faces only to Org `src' blocks."
+    (font-lock-add-keywords
+     nil
+     '(("^[ \t]*#\\+begin_src.*\\(?:\n\\|\\'\\)"
+        (0 'my/org-src-begin-line prepend))
+       ("^[ \t]*#\\+begin_src.*\n\\(\\(?:.*\n\\)*?\\)[ \t]*#\\+end_src"
+        (1 'my/org-src-block append))
+       ("^[ \t]*#\\+end_src.*\\(?:\n\\|\\'\\)"
+        (0 'my/org-src-end-line prepend)))
+     'append))
+
+  (add-hook 'org-mode-hook #'my/org-setup-src-block-faces 95)
+)
 #+end_src
 
 * Appearance (org-modern)
@@ -35,17 +84,86 @@ org-modern owns stars, tags, lists and checkboxes on its own -- no
 separate bullets package needed alongside it.
 #+begin_src emacs-lisp
 (use-package org-modern
+  :ensure t
+  :after nerd-icons
   :custom
   (org-modern-star '("◉" "○" "●" "○" "●"))
-  ;; Disable org-modern table styling if you prefer standard Org tables
   (org-modern-table nil)
   (org-modern-list
-   '(;; (?- . "-")
-     (?* . "•")
+   '((?* . "•")
      (?+ . "‣")))
+  (org-modern-block-fringe nil)
+  (org-modern-block-name nil)
+  (org-modern-keyword
+   `(("setupfile" . ,(concat (nerd-icons-codicon "nf-cod-gear") " "))
+     ("options"   . ,(concat (nerd-icons-codicon "nf-cod-settings") " "))
+     ("filetags"  . ,(concat (nerd-icons-octicon "nf-oct-tag") " "))
+     ("startup"   . ,(concat (nerd-icons-octicon "nf-oct-zap") " "))
+     (t . t)))
+  (org-modern-drawer t)
   :hook
   (org-mode . org-modern-mode)
-  (org-agenda-finalize . org-modern-agenda))
+  (org-agenda-finalize . org-modern-agenda)
+  :config
+  (require 'org-src)
+
+  (defun my/prettify-string (str)
+    "Convert STR into a character or composition sequence for `prettify-symbols-alist'."
+    (let ((chars (string-to-list str)))
+      (if (cdr chars)
+          (cons (car chars)
+                (mapcan (lambda (c) (list '(Br . Bl) c)) (cdr chars)))
+        (car chars))))
+
+  (defun my/org-lang-icon (lang)
+    "Return the Nerd Font glyph string for Org source language LANG."
+    (let* ((default-icon (nerd-icons-icon-for-mode 'fundamental-mode))
+           (mode (and lang (org-src-get-lang-mode lang)))
+           (base-mode (and mode
+                           (intern (replace-regexp-in-string
+                                    "-ts-mode\\'" "-mode" (symbol-name mode)))))
+           (icon (and mode (nerd-icons-icon-for-mode mode)))
+           (icon (if (and icon (equal icon default-icon))
+                     (nerd-icons-icon-for-mode base-mode)
+                   icon)))
+      (if (and (stringp icon)
+               (not (equal icon default-icon)))
+          icon
+        (nerd-icons-codicon "nf-cod-code"))))
+
+  (defun my/org-src-prettify-alist ()
+    "Build `prettify-symbols-alist' with Nerd Font icons for Org blocks."
+    (let* ((langs '("python" "bash" "sh" "emacs-lisp" "elisp" "json" "yaml"
+                    "toml" "typst" "c" "cpp" "rust" "js" "typescript" "svelte"
+                    "html" "css" "sql" "awk" "makefile" "dockerfile" "xml"
+                    "pyops"))
+           (end-icon (my/prettify-string (nerd-icons-codicon "nf-cod-code")))
+           (alist `(("#+end_src"     . ,end-icon)
+                    ("#+END_SRC"     . ,end-icon)
+                    ("#+begin_quote" . ,(my/prettify-string "“"))
+                    ("#+BEGIN_QUOTE" . ,(my/prettify-string "“"))
+                    ("#+end_quote"   . ,(my/prettify-string "”"))
+                    ("#+END_QUOTE"   . ,(my/prettify-string "”"))
+                    ("#+RESULTS:"    . ,(my/prettify-string "")))))
+      (dolist (lang langs alist)
+        (let ((composed (my/prettify-string (concat (my/org-lang-icon lang) " " lang))))
+          (push (cons (concat "#+begin_src " lang) composed) alist)
+          (push (cons (concat "#+BEGIN_SRC " lang) composed) alist)))))
+
+  (defun my/org-setup-prettify-symbols ()
+    "Enable prettified block headers and icons in Org buffers."
+    (setq-local prettify-symbols-unprettify-at-point 'right-edge)
+    (setq-local prettify-symbols-alist
+                (append (my/org-src-prettify-alist) prettify-symbols-alist))
+    (when (bound-and-true-p prettify-symbols-mode)
+      (prettify-symbols-mode -1))
+    (prettify-symbols-mode 1))
+
+  (add-hook 'org-mode-hook #'my/org-setup-prettify-symbols)
+  (dolist (buf (buffer-list))
+    (with-current-buffer buf
+      (when (derived-mode-p 'org-mode)
+        (my/org-setup-prettify-symbols)))))
 
 ;; Source blocks and indentation structure
 (use-package org-modern-indent
@@ -62,14 +180,14 @@ everywhere, and re-running it on every org buffer you open is pure
 waste. Only the buffer-local minor mode (`variable-pitch-mode') needs
 to live in the hook.
 #+begin_src emacs-lisp
-(with-eval-after-load 'org
-  (dolist (face '(org-table org-code org-verbatim org-block
-                   org-meta-line org-drawer org-special-keyword
-                   org-property-value org-document-info-keyword
-                   org-date org-tag))
-    (set-face-attribute face nil :inherit 'fixed-pitch)))
+;; (with-eval-after-load 'org
+;;   (dolist (face '(org-table org-code org-verbatim org-block
+;;                    org-meta-line org-drawer org-special-keyword
+;;                    org-property-value org-document-info-keyword
+;;                    org-date org-tag))
+;;     (set-face-attribute face nil :inherit 'fixed-pitch)))
 
-(add-hook 'org-mode-hook #'variable-pitch-mode)
+;; (add-hook 'org-mode-hook #'variable-pitch-mode)
 #+end_src
 
 * Sub-modes
