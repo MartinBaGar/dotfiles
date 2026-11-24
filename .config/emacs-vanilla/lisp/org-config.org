@@ -94,8 +94,9 @@ separate bullets package needed alongside it.
   (org-modern-table nil)
   (org-modern-list '((?* . "•") (?+ . "‣")))
   (org-modern-block-fringe nil)
-  ;; org-modern handles quotes natively; our font-lock rule below handles src blocks.
-  (org-modern-block-name `(("quote" ,(nerd-icons-mdicon "nf-md-format_quote_open") ,(nerd-icons-mdicon "nf-md-format_quote_close"))))
+  (org-modern-block-name
+   `(("quote" ,(nerd-icons-mdicon "nf-md-format_quote_open")
+      ,(nerd-icons-mdicon "nf-md-format_quote_close"))))
   (org-modern-keyword
    `(("setupfile" . ,(concat (nerd-icons-codicon "nf-cod-gear") " "))
      ("options"   . ,(concat (nerd-icons-codicon "nf-cod-settings") " "))
@@ -103,7 +104,7 @@ separate bullets package needed alongside it.
      ("startup"   . ,(concat (nerd-icons-octicon "nf-oct-zap") " "))
      ("results"   . ,(nerd-icons-faicon "nf-fa-arrow_right"))
      (t . t)))
-  (org-modern-drawer t)
+  (org-modern-drawer nil)
   :init
   (defun my/org-header-icon (lang)
     "Return a Nerd Font icon for LANG directly from `nerd-icons' alists."
@@ -145,14 +146,31 @@ separate bullets package needed alongside it.
       (put-text-property beg end 'display icon))
     nil)
 
+  (defun my/org-match-drawer-marker (limit)
+    "Match `:PROPERTIES:' or `:END:' drawer boundaries before LIMIT."
+    (let ((case-fold-search t))
+      (re-search-forward "^[ \t]*\\(:PROPERTIES:\\|:END:\\)[ \t]*$" limit t)))
+
+  (defun my/org-display-drawer-marker ()
+    "Render `:PROPERTIES:' with a Nerd Font key icon and `:END:' as a subtle rule."
+    (let* ((beg (match-beginning 1))
+           (end (match-end 1))
+           (is-end (string-equal-ignore-case (match-string-no-properties 1) ":END:"))
+           (disp (if is-end
+                     (propertize "───" 'face 'shadow)
+                   (propertize (nerd-icons-codicon "nf-cod-symbol_property") 'face 'shadow))))
+      (put-text-property beg end 'display (concat disp " ")))
+    nil)
+
   (defun my/org-install-src-icons ()
-    "Install `font-lock' rules to display Nerd Font icons on src block markers."
+    "Install `font-lock' rules for Nerd Font icons on src blocks and drawers."
     (require 'org-src)
     (require 'nerd-icons)
     (add-hook 'font-lock-extra-managed-props 'display nil t)
     (font-lock-add-keywords
      nil
-     '((my/org-match-src-marker (0 (my/org-display-src-marker) append)))
+     '((my/org-match-src-marker (0 (my/org-display-src-marker) append))
+       (my/org-match-drawer-marker (0 (my/org-display-drawer-marker) append)))
      'append)
     (when (bound-and-true-p font-lock-mode)
       (font-lock-flush)))
