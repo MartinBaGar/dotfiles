@@ -98,9 +98,9 @@
    `(org-block ((t (:inherit fixed-pitch :extend t))))
    `(org-block-begin-line ((t (:inherit (shadow fixed-pitch) :height 1.0 :extend t))))
    `(org-block-end-line ((t (:inherit (shadow fixed-pitch) :height 1.0 :extend t))))
-   `(org-quote ((t (:inherit variable-pitch :background ,org-block-bg :foreground ,fg-alt :slant italic :extend t))))
-   `(org-verse ((t (:inherit org-quote))))
+   `(org-quote ((t (:inherit variable-pitch :background ,org-block-bg :foreground ,fg-alt :extend t :weight normal :height 0.9))))
    `(org-modern-indent-bracket-line ((t (:inherit fixed-pitch :foreground ,base4 :height 1.0))))
+   `(org-verse ((t (:inherit org-quote))))
 
    ;; -------------------------------------------------------------------------
    ;; 2. Src Block Preset — Choose Option A OR Option B

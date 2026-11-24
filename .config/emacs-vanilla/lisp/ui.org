@@ -1,4 +1,4 @@
-#+TITLE: UI
+#+TITLE:UI
 #+PROPERTY: header-args:emacs-lisp :tangle ui.el :results none
 
 #+begin_src emacs-lisp
