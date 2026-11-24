@@ -72,14 +72,14 @@
    `(font-lock-variable-name-face ((t (:foreground ,red))))
 
    ;; Outline (Headers)
-   `(outline-1 ((t (:foreground ,fg :weight ultra-bold))))
-   `(outline-2 ((t (:foreground ,out2 :weight bold))))
-   `(outline-3 ((t (:foreground ,out3 :weight bold))))
-   `(outline-4 ((t (:foreground ,blue :weight bold))))
-   `(outline-5 ((t (:foreground ,out5 :weight bold))))
-   `(outline-6 ((t (:foreground ,out6 :weight bold))))
-   `(outline-7 ((t (:foreground ,out7 :weight bold))))
-   `(outline-8 ((t (:foreground ,fg :weight bold))))
+   `(outline-1 ((t (:foreground ,fg :weight ultra-bold :height 1.25))))
+   `(outline-2 ((t (:foreground ,out2 :weight bold :height 1.25))))
+   `(outline-3 ((t (:foreground ,out3 :weight bold :height 1.0))))
+   `(outline-4 ((t (:foreground ,blue :weight bold :height 0.9))))
+   `(outline-5 ((t (:foreground ,out5 :weight bold :height 0.8))))
+   `(outline-6 ((t (:foreground ,out6 :weight bold :height 0.7))))
+   `(outline-7 ((t (:foreground ,out7 :weight bold :height 0.6))))
+   `(outline-8 ((t (:foreground ,fg :weight bold :height 0.5))))
 
    ;; Org Mode — Document & Metadata
    `(org-document-title ((t (:inherit variable-pitch :foreground ,blue :weight bold :height 1.5))))

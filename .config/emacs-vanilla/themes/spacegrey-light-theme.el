@@ -71,14 +71,14 @@
    `(font-lock-variable-name-face ((t (:foreground ,red))))
 
    ;; Outline (Headers)
-   `(outline-1 ((t (:foreground ,fg :weight ultra-bold))))
-   `(outline-2 ((t (:foreground ,out2 :weight bold))))
-   `(outline-3 ((t (:foreground ,out3 :weight bold))))
-   `(outline-4 ((t (:foreground ,blue :weight bold))))
-   `(outline-5 ((t (:foreground ,out5 :weight bold))))
-   `(outline-6 ((t (:foreground ,out6 :weight bold))))
-   `(outline-7 ((t (:foreground ,out7 :weight bold))))
-   `(outline-8 ((t (:foreground ,fg :weight bold))))
+   `(outline-1 ((t (:foreground ,fg :weight ultra-bold :height 1.25))))
+   `(outline-2 ((t (:foreground ,out2 :weight bold :height 1.25))))
+   `(outline-3 ((t (:foreground ,out3 :weight bold :height 1.0))))
+   `(outline-4 ((t (:foreground ,blue :weight bold :height 0.9))))
+   `(outline-5 ((t (:foreground ,out5 :weight bold :height 0.8))))
+   `(outline-6 ((t (:foreground ,out6 :weight bold :height 0.7))))
+   `(outline-7 ((t (:foreground ,out7 :weight bold :height 0.6))))
+   `(outline-8 ((t (:foreground ,fg :weight bold :height 0.5))))
 
    ;; Core UI
    `(shadow ((t (:foreground ,base5))))
@@ -98,7 +98,7 @@
    `(org-block ((t (:inherit fixed-pitch :extend t))))
    `(org-block-begin-line ((t (:inherit (shadow fixed-pitch) :height 1.0 :extend t))))
    `(org-block-end-line ((t (:inherit (shadow fixed-pitch) :height 1.0 :extend t))))
-   `(org-quote ((t (:inherit variable-pitch :foreground ,fg-alt :slant italic :extend t))))
+   `(org-quote ((t (:inherit variable-pitch :background ,org-block-bg :foreground ,fg-alt :slant italic :extend t))))
    `(org-verse ((t (:inherit org-quote))))
    `(org-modern-indent-bracket-line ((t (:inherit fixed-pitch :foreground ,base4 :height 1.0))))
 

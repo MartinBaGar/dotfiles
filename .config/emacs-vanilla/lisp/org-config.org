@@ -15,6 +15,7 @@
    )
   :custom
   ;; Edit settings
+  (org-fontify-quote-and-verse-blocks t)
   (org-auto-align-tags nil)
   (org-tags-column 0)
   (org-fold-catch-invisible-edits 'show-and-error)
@@ -94,7 +95,7 @@ separate bullets package needed alongside it.
   (org-modern-list '((?* . "•") (?+ . "‣")))
   (org-modern-block-fringe nil)
   ;; org-modern handles quotes natively; our font-lock rule below handles src blocks.
-  (org-modern-block-name '(("quote" "“" "”")))
+  (org-modern-block-name `(("quote" ,(nerd-icons-mdicon "nf-md-format_quote_open") ,(nerd-icons-mdicon "nf-md-format_quote_close"))))
   (org-modern-keyword
    `(("setupfile" . ,(concat (nerd-icons-codicon "nf-cod-gear") " "))
      ("options"   . ,(concat (nerd-icons-codicon "nf-cod-settings") " "))
@@ -171,15 +172,66 @@ separate bullets package needed alongside it.
 #+begin_src emacs-lisp
 (use-package org-roam
   :ensure t
+  :after nerd-icons
   :custom
-  ;; Replace this string with the exact path to your Syncthing directory
   (org-roam-directory (file-truename "~/org/roam"))
-  
-  ;; Enables completion for node insertion anywhere
+  (org-roam-file-exclude-regexp "\\(?:\\`\\|/\\)_setup\\.org\\'")
   (org-roam-completion-everywhere t)
   :config
-  ;; This is the magic line. It automatically parses all your existing files
-  ;; and builds the SQLite database so everything links up immediately.
+  (defun my/org-roam-compact-dir (dir)
+    "Shorten intermediate folders in DIR Fish-style, keeping the last two intact."
+    (let* ((parts (split-string dir "/" t))
+           (len (length parts)))
+      (if (<= len 2)
+          dir
+        (let ((head (butlast parts 2))
+              (tail (last parts 2)))
+          (concat (mapconcat (lambda (s) (substring s 0 1)) head "/")
+                  "/"
+                  (string-join tail "/"))))))
+
+  (cl-defmethod org-roam-node-my-dir ((node org-roam-node))
+    "Return the subdirectory of NODE with icon metadata for `nerd-icons-completion'."
+    (let* ((rel (file-relative-name (org-roam-node-file node) org-roam-directory))
+           (dir (file-name-directory rel))
+           (label (if dir (my/org-roam-compact-dir (directory-file-name dir)) ""))
+           (icon (if (zerop (org-roam-node-level node))
+                     (nerd-icons-sucicon "nf-custom-orgmode")
+                   (nerd-icons-octicon "nf-oct-bookmark"))))
+      (propertize label
+                  'face 'font-lock-keyword-face
+                  'my-roam-icon icon)))
+
+  (cl-defmethod org-roam-node-my-hierarchy ((node org-roam-node))
+    "Return dimmed File Title > Parent Headings > Node Title."
+    (let ((title (org-roam-node-title node))
+          (olp (org-roam-node-olp node))
+          (level (org-roam-node-level node))
+          (file-title (org-roam-node-file-title node)))
+      (concat
+       (when (and (> level 0) file-title)
+         (propertize (concat file-title " > ") 'face 'shadow))
+       (when (> level 1)
+         (propertize (concat (string-join olp " > ") " > ") 'face 'shadow))
+       title)))
+
+  (cl-defmethod org-roam-node-my-tags ((node org-roam-node))
+    "Return `#tag1 #tag2' styled with `org-tag'."
+    (let ((tags (org-roam-node-tags node)))
+      (if tags
+          (propertize (mapconcat (lambda (tag) (concat "#" tag)) tags " ")
+                      'face 'org-tag)
+        "")))
+
+  (with-eval-after-load 'nerd-icons-completion
+    (cl-defmethod nerd-icons-completion-get-icon (cand (_cat (eql org-roam-node)))
+      (concat (or (get-text-property 0 'my-roam-icon cand)
+                  (nerd-icons-sucicon "nf-custom-orgmode"))
+              " ")))
+
+  (setopt org-roam-node-display-template
+          "${my-dir:32} ${my-hierarchy:*} ${my-tags}")
+
   (org-roam-db-autosync-mode 1))
 
 (with-eval-after-load 'meow
@@ -191,7 +243,7 @@ separate bullets package needed alongside it.
     "c" #'org-roam-capture         ; Capture a new node instantly
     "l" #'org-roam-buffer-toggle   ; Toggle the backlinks buffer
     "t" #'org-roam-tag-add)        ; Add a tag to the current node
-    
+  
   (meow-leader-define-key (cons "n" my/notes-map)))
 #+end_src
 
