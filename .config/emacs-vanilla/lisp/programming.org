@@ -35,6 +35,7 @@
   :bind (("C-x g" . magit-status)
          ("C-x M-g" . magit-dispatch))
   :custom
+  (magit-format-file-function #'magit-format-file-nerd-icons)
   ;; Keep window layout predictable and UI-safe
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
   (magit-bury-buffer-function #'magit-restore-window-configuration)
