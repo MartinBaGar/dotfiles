@@ -81,26 +81,28 @@
 
 * Snippets
 #+begin_src emacs-lisp
-  (use-package tempel
-    :bind (("M-+" . tempel-complete)
-           ("M-*" . tempel-insert))
-    :init
-    (defun tempel-setup-capf ()
-      ;; Add the Tempel Capf to `completion-at-point-functions'. `tempel-expand'
-      ;; only triggers on exact matches. We add it *before* the main
-      ;; programming mode Capf, so it's tried first.
-      (setq-local completion-at-point-functions
-    		(cons #'tempel-expand completion-at-point-functions))
-      (setopt tempel-path (concat (expand-file-name "templates" user-emacs-directory) "/*"))
-      )
+(use-package tempel
+  :ensure t
+  :bind (("M-+" . tempel-complete)
+         ("M-*" . tempel-insert))
+  :custom
+  (tempel-path (expand-file-name "templates/*" user-emacs-directory))
+  :init
+  (defun tempel-setup-capf ()
+    "Add `tempel-expand' to buffer-local `completion-at-point-functions'."
+    (add-hook 'completion-at-point-functions #'tempel-expand nil t))
 
-    (add-hook 'conf-mode-hook 'tempel-setup-capf)
-    (add-hook 'prog-mode-hook 'tempel-setup-capf)
-    (add-hook 'text-mode-hook 'tempel-setup-capf))
+  (defun my/open-tempel-templates ()
+    "Open the Tempel templates directory."
+    (interactive)
+    (find-file (expand-file-name "templates/" user-emacs-directory)))
 
-  (use-package tempel-collection)
-
-  (defun tempel-case-match (elt fields)
+  (add-hook 'conf-mode-hook #'tempel-setup-capf)
+  (add-hook 'prog-mode-hook #'tempel-setup-capf)
+  (add-hook 'text-mode-hook #'tempel-setup-capf)
+  :config
+  (defun tempel-case-match (elt _fields)
+    "Support `(c \"text\")' elements that capitalize at sentence or bullet starts."
     (pcase elt
       (`(c ,text)
        (let ((at-start (save-excursion
@@ -108,14 +110,15 @@
                          (or (bobp)
                              (bolp)
                              (memq (char-before) '(?. ?? ?!))
-                             (looking-back "^\\s-*[*\\-]+" (line-beginning-position))))))
+                             (looking-back "^[ \t]*[*-]+[ \t]*"
+                                           (line-beginning-position))))))
          (if (and at-start (> (length text) 0))
              (concat (upcase (substring text 0 1)) (substring text 1))
            text)))))
 
-  (defun my/open-tempel-templates ()
-    (interactive)
-    (find-file (f-dirname tempel-path)))
+  (add-to-list 'tempel-user-elements #'tempel-case-match))
+
+(use-package tempel-collection)
 #+end_src
 
 * Windows (built-in support)

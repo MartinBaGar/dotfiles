@@ -88,6 +88,7 @@ separate bullets package needed alongside it.
   (org-modern-block-name
    `(("quote" ,(nerd-icons-mdicon "nf-md-format_quote_open")
               ,(nerd-icons-mdicon "nf-md-format_quote_close"))
+     ("export"   ,(nerd-icons-mdicon "nf-md-export") ,(nerd-icons-mdicon "nf-md-export"))
      ("src"   "" ,(nerd-icons-codicon "nf-cod-code"))))
   (org-modern-keyword
    `(("setupfile" . ,(concat (nerd-icons-codicon "nf-cod-gear") " "))
@@ -144,7 +145,7 @@ separate bullets package needed alongside it.
   :custom
   (org-roam-directory (file-truename "~/org/roam"))
   (org-roam-file-exclude-regexp "\\(?:\\`\\|/\\)_setup\\.org\\'")
-  (org-roam-completion-everywhere t)
+  (org-roam-completion-everywhere nil)
   :config
   (defun my/org-roam-compact-dir (dir)
     "Shorten intermediate folders in DIR Fish-style, keeping the last two intact."
