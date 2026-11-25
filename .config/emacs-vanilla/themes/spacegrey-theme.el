@@ -95,7 +95,10 @@
    `(org-block-begin-line ((t (:inherit (shadow fixed-pitch) :height 1.0 :extend t))))
    `(org-block-end-line ((t (:inherit (shadow fixed-pitch) :height 1.0 :extend t))))
    `(org-quote ((t (:inherit variable-pitch :background ,org-block-bg :foreground ,fg-alt :extend t :weight normal :height 0.9))))
-   `(org-modern-indent-bracket-line ((t (:inherit fixed-pitch :foreground ,base4 :height 1.0))))
+   `(org-modern-indent-bracket-line ((t (:inherit fixed-pitch
+                                                  :family "JetBrainsMono Nerd Font"
+                                                  :foreground ,base4
+                                                  :height 0.9))))
    `(org-verse ((t (:inherit org-quote))))
 
    ;; Org Mode — Src Block Preset (Choose Option A OR Option B)
@@ -141,6 +144,7 @@
    `(org-table ((t (:inherit fixed-pitch :foreground ,blue))))
    `(org-modern-block-name ((t (:foreground ,blue :weight semi-bold))))
    `(org-modern-label ((t (:inherit fixed-pitch :height 0.9 :weight semi-bold))))
+   `(org-modern-tag ((t (:inherit fixed-pitch :height 0.7 :weight semi-bold :background ,base2))))
 
    ;; Markdown Mode
    `(markdown-markup-face ((t (:foreground ,base5))))

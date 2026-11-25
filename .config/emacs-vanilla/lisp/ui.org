@@ -50,17 +50,15 @@ are hooked to =enable-theme-functions= and frame creation, scoped to
 graphical frames, and leave =:box= untouched so =spacious-padding= can
 manage tab-bar padding cleanly.
 #+begin_src emacs-lisp
-(add-to-list 'default-frame-alist '(font . "Iosevka-12:weight=medium"))
+(add-to-list 'default-frame-alist '(font . "Iosevka Term-12:weight=medium"))
 
 (defun my/apply-face-overrides (&optional frame)
   "(Re)apply font and minimal underline tab-bar faces after theme load or frame creation."
   (let ((frame (or (and (framep frame) frame) (selected-frame))))
     (when (display-graphic-p frame)
       (with-selected-frame frame
-        (set-face-attribute 'fixed-pitch nil :family "Iosevka" :height 1.0 :weight 'medium)
-        (set-fontset-font t '(#x2500 . #x257f) (font-spec :family "Iosevka") frame)
         (set-face-attribute 'fixed-pitch frame
-                            :family "Iosevka"
+                            :family "Iosevka Term"
                             :height 1.0
                             :weight 'medium)
 
@@ -108,7 +106,6 @@ definitions without fighting =my/apply-face-overrides=.
 #+begin_src emacs-lisp
 (use-package spacious-padding
   :ensure t
-  :after nerd-icons
   :custom
   (spacious-padding-widths
    '( :internal-border-width 15

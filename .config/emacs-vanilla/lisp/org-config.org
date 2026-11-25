@@ -94,7 +94,7 @@ separate bullets package needed alongside it.
      ("options"   . ,(concat (nerd-icons-codicon "nf-cod-settings") " "))
      ("filetags"  . ,(concat (nerd-icons-octicon "nf-oct-tag") " "))
      ("startup"   . ,(concat (nerd-icons-octicon "nf-oct-zap") " "))
-     ("results"   . ,(concat (nerd-icons-faicon "nf-fa-arrow_right")))
+     ("results"   . ,(concat (nerd-icons-mdicon "nf-md-hand_extended") " "))
      (t . t)))
   :init
   (defun my/org-lang-icon (lang)
@@ -131,7 +131,7 @@ separate bullets package needed alongside it.
 ;; Source blocks and indentation structure
 (use-package org-modern-indent
   :ensure (org-modern-indent :host github :repo "jdtsmith/org-modern-indent")
-  :config
+  :init
   (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
 #+end_src
 
@@ -361,7 +361,7 @@ Operates directly on the Org AST."
   (add-to-list 'org-export-filter-parse-tree-functions #'org-typst-fix-src-backslashes))
 
 (use-package ox-ipynb
-  :ensure ox-ipynb (:host github :repo "jkitchin/ox-ipynb"))
+  :ensure (ox-ipynb :host github :repo "jkitchin/ox-ipynb"))
 
 (use-package ox-hugo
   :after org)
