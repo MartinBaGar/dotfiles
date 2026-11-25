@@ -93,6 +93,7 @@ separate bullets package needed alongside it.
   (org-modern-keyword
    `(("setupfile" . ,(concat (nerd-icons-codicon "nf-cod-gear") " "))
      ("options"   . ,(concat (nerd-icons-codicon "nf-cod-settings") " "))
+     ("property"   . ,(concat (nerd-icons-codicon "nf-cod-symbol_property") " "))
      ("filetags"  . ,(concat (nerd-icons-octicon "nf-oct-tag") " "))
      ("startup"   . ,(concat (nerd-icons-octicon "nf-oct-zap") " "))
      ("results"   . ,(concat (nerd-icons-mdicon "nf-md-hand_extended") " "))
