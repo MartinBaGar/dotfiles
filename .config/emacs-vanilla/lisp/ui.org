@@ -18,6 +18,19 @@
   :custom
   (nerd-icons-font-family "Symbols Nerd Font Mono"))
 
+(use-package nerd-icons-corfu
+  :ensure t
+  :after (corfu nerd-icons)
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+(use-package nerd-icons-completion
+  :ensure t
+  :after (marginalia nerd-icons)
+  :demand t
+  :config
+  (nerd-icons-completion-mode 1))
+
 (use-package olivetti
   :ensure t
   :hook (org-mode . olivetti-mode)
@@ -37,7 +50,7 @@ are hooked to =enable-theme-functions= and frame creation, scoped to
 graphical frames, and leave =:box= untouched so =spacious-padding= can
 manage tab-bar padding cleanly.
 #+begin_src emacs-lisp
-(add-to-list 'default-frame-alist '(font . "Iosevka-12:weight=medium"))
+(add-to-list 'default-frame-alist '(font . "JetBrainsMono Nerd Font-12:weight=light"))
 
 (defun my/apply-face-overrides (&optional frame)
   "(Re)apply font and minimal underline tab-bar faces after theme load or frame creation."
@@ -45,14 +58,14 @@ manage tab-bar padding cleanly.
     (when (display-graphic-p frame)
       (with-selected-frame frame
         (set-face-attribute 'fixed-pitch frame
-                            :family "Iosevka"
+                            :family "JetBrainsMono Nerd Font"
                             :height 1.0
-                            :weight 'medium)
+                            :weight 'light)
 
         (set-face-attribute 'variable-pitch frame
                             :family "Montserrat"
                             :height 1.08
-                            :weight 'semi-bold)
+                            :weight 'regular)
 
         (let ((bar-bg (or (face-background 'header-line frame t)
                           (face-background 'default frame t)))
@@ -93,7 +106,6 @@ definitions without fighting =my/apply-face-overrides=.
 #+begin_src emacs-lisp
 (use-package spacious-padding
   :ensure t
-  :after nerd-icons
   :custom
   (spacious-padding-widths
    '( :internal-border-width 15

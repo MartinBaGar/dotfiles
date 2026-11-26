@@ -7,26 +7,65 @@
 
 * Core settings
 #+begin_src emacs-lisp
-(with-eval-after-load 'org
-  (setq
-   ;; Edit settings
-   org-auto-align-tags nil
-   org-tags-column 0
-   org-fold-catch-invisible-edits 'show-and-error
-   org-special-ctrl-a/e t
-   org-insert-heading-respect-content t
+(use-package org
+  :ensure nil
+  :hook
+  ((org-mode . variable-pitch-mode)
+   (org-mode . my/org-disable-line-spacing))
+  :custom
+  ;; Editing & safety
+  (org-auto-align-tags nil)
+  (org-tags-column 0)
+  (org-fold-catch-invisible-edits 'show-and-error)
+  (org-special-ctrl-a/e t)
+  (org-insert-heading-respect-content t)
 
-   ;; Org styling, hide markup etc.
-   org-hide-emphasis-markers t
-   ;; org-pretty-entities t
-   ;; org-agenda-tags-column 0
-   org-ellipsis "…"
-   org-src-content-indentation 0
+  ;; Visual styling & folding
+  (org-startup-indented t)
+  (org-startup-folded 'content)
+  (org-hidden-keywords '(title author))
+  (org-hide-drawer-startup t)
+  (org-hide-emphasis-markers t)
+  (org-pretty-entities t)
+  (org-ellipsis "…")
+  (org-src-content-indentation 0)
+  (org-fontify-quote-and-verse-blocks t)
+  :init
+  (defface my/org-src-block
+    '((t (:inherit org-block)))
+    "Face for Org `#+begin_src' block bodies."
+    :group 'org-faces)
 
-   ;; CRITICAL: org-modern-indent requires org-indent to be enabled globally
-   org-startup-indented t)
+  (defface my/org-src-begin-line
+    '((t (:inherit org-block-begin-line)))
+    "Face for Org `#+begin_src' header lines."
+    :group 'org-faces)
 
-  ;; Initialize inline tasks
+  (defface my/org-src-end-line
+    '((t (:inherit org-block-end-line)))
+    "Face for Org `#+end_src' footer lines."
+    :group 'org-faces)
+
+  (defun my/org-disable-line-spacing ()
+    "Keep `line-spacing' nil so `org-modern-indent' vertical rails stay unbroken."
+    (setq-local line-spacing nil))
+
+  (defun my/org-setup-src-block-faces ()
+    "Apply dedicated header, body, and footer faces only to Org `src' blocks."
+    (font-lock-add-keywords
+     nil
+     '(("^[ \t]*#\\+begin_src.*\\(?:\n\\|\\'\\)"
+        (0 'my/org-src-begin-line prepend))
+       ("^[ \t]*#\\+begin_src.*\n\\(\\(?:.*\n\\)*?\\)[ \t]*#\\+end_src"
+        (1 'my/org-src-block append))
+       ("^[ \t]*#\\+end_src.*\\(?:\n\\|\\'\\)"
+        (0 'my/org-src-end-line prepend)))
+     'append)
+    (when (bound-and-true-p font-lock-mode)
+      (font-lock-flush)))
+
+  (add-hook 'org-mode-hook #'my/org-setup-src-block-faces 95)
+  :config
   (require 'org-inlinetask))
 #+end_src
 
@@ -35,41 +74,67 @@ org-modern owns stars, tags, lists and checkboxes on its own -- no
 separate bullets package needed alongside it.
 #+begin_src emacs-lisp
 (use-package org-modern
+  :ensure t
+  :after nerd-icons
+  :hook ((org-mode . org-modern-mode)
+         (org-agenda-finalize . org-modern-agenda))
   :custom
-  (org-modern-star '("◉" "○" "●" "○" "●"))
-  ;; Disable org-modern table styling if you prefer standard Org tables
+  (org-modern-star 'replace)
+  (org-modern-replace-stars "◉○●○●")
   (org-modern-table nil)
-  (org-modern-list
-   '(;; (?- . "-")
-     (?* . "•")
-     (?+ . "‣")))
-  :hook
-  (org-mode . org-modern-mode)
-  (org-agenda-finalize . org-modern-agenda))
+  (org-modern-list '((?* . "•") (?+ . "‣")))
+  (org-modern-block-fringe nil)
+  (org-modern-drawer nil)
+  (org-modern-block-name
+   `(("quote" ,(nerd-icons-mdicon "nf-md-format_quote_open")
+              ,(nerd-icons-mdicon "nf-md-format_quote_close"))
+     ("export"   ,(nerd-icons-mdicon "nf-md-export") ,(nerd-icons-mdicon "nf-md-export"))
+     ("src"   "" ,(nerd-icons-codicon "nf-cod-code"))))
+  (org-modern-keyword
+   `(("setupfile" . ,(concat (nerd-icons-codicon "nf-cod-gear") " "))
+     ("options"   . ,(concat (nerd-icons-codicon "nf-cod-settings") " "))
+     ("property"   . ,(concat (nerd-icons-codicon "nf-cod-symbol_property") " "))
+     ("filetags"  . ,(concat (nerd-icons-octicon "nf-oct-tag") " "))
+     ("startup"   . ,(concat (nerd-icons-octicon "nf-oct-zap") " "))
+     ("results"   . ,(concat (nerd-icons-mdicon "nf-md-hand_extended") " "))
+     (t . t)))
+  :init
+  (defun my/org-lang-icon (lang)
+    "Return a Nerd Font icon for Org src LANG."
+    (let* ((mode (org-src-get-lang-mode lang))
+           (spec (cdr (or (assq mode nerd-icons-mode-icon-alist)
+                          (assoc (downcase lang) nerd-icons-extension-icon-alist)))))
+      (if spec
+          (apply (car spec) (cdr spec))
+        (nerd-icons-codicon "nf-cod-code"))))
+
+  (defun my/org-setup-icons ()
+    "Replace src block markers and property drawer boundaries with icons."
+    (require 'org-src)
+    (require 'nerd-icons)
+    (add-hook 'font-lock-extra-managed-props 'display nil t)
+    (font-lock-add-keywords
+     nil
+     '(("^[ \t]*\\(#\\+begin_src[ \t]+\\([^ \t\n\r]+\\)\\)"
+        (1 `(face nil display ,(concat (my/org-lang-icon (match-string 2))
+                                       " "
+                                       (match-string 2)))
+           append))
+       ("^[ \t]*\\(:PROPERTIES:\\)[ \t]*$"
+        (1 `(face shadow display ,(concat (nerd-icons-codicon "nf-cod-symbol_property") " ")) t))
+       ("^[ \t]*\\(:END:\\)[ \t]*$"
+        (1 '(face shadow display "---") t)))
+     'append)
+    (when (bound-and-true-p font-lock-mode)
+      (font-lock-flush)))
+
+  (add-hook 'org-mode-hook #'my/org-setup-icons 95))
 
 ;; Source blocks and indentation structure
 (use-package org-modern-indent
   :ensure (org-modern-indent :host github :repo "jdtsmith/org-modern-indent")
-  :config
-  ;; The '90' ensures this hook runs very late, after org-modern and org-indent
+  :init
   (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
-#+end_src
-
-* Fonts: prose vs. code
-These faces are set globally, once -- not inside a per-buffer hook,
-since `set-face-attribute' without a frame argument changes the face
-everywhere, and re-running it on every org buffer you open is pure
-waste. Only the buffer-local minor mode (`variable-pitch-mode') needs
-to live in the hook.
-#+begin_src emacs-lisp
-(with-eval-after-load 'org
-  (dolist (face '(org-table org-code org-verbatim org-block
-                   org-meta-line org-drawer org-special-keyword
-                   org-property-value org-document-info-keyword
-                   org-date org-tag))
-    (set-face-attribute face nil :inherit 'fixed-pitch)))
-
-(add-hook 'org-mode-hook #'variable-pitch-mode)
 #+end_src
 
 * Sub-modes
@@ -77,15 +142,66 @@ to live in the hook.
 #+begin_src emacs-lisp
 (use-package org-roam
   :ensure t
+  :after nerd-icons
   :custom
-  ;; Replace this string with the exact path to your Syncthing directory
   (org-roam-directory (file-truename "~/org/roam"))
-  
-  ;; Enables completion for node insertion anywhere
-  (org-roam-completion-everywhere t)
+  (org-roam-file-exclude-regexp "\\(?:\\`\\|/\\)_setup\\.org\\'")
+  (org-roam-completion-everywhere nil)
   :config
-  ;; This is the magic line. It automatically parses all your existing files
-  ;; and builds the SQLite database so everything links up immediately.
+  (defun my/org-roam-compact-dir (dir)
+    "Shorten intermediate folders in DIR Fish-style, keeping the last two intact."
+    (let* ((parts (split-string dir "/" t))
+           (len (length parts)))
+      (if (<= len 2)
+          dir
+        (let ((head (butlast parts 2))
+              (tail (last parts 2)))
+          (concat (mapconcat (lambda (s) (substring s 0 1)) head "/")
+                  "/"
+                  (string-join tail "/"))))))
+
+  (cl-defmethod org-roam-node-my-dir ((node org-roam-node))
+    "Return the subdirectory of NODE with icon metadata for `nerd-icons-completion'."
+    (let* ((rel (file-relative-name (org-roam-node-file node) org-roam-directory))
+           (dir (file-name-directory rel))
+           (label (if dir (my/org-roam-compact-dir (directory-file-name dir)) ""))
+           (icon (if (zerop (org-roam-node-level node))
+                     (nerd-icons-sucicon "nf-custom-orgmode")
+                   (nerd-icons-octicon "nf-oct-bookmark"))))
+      (propertize label
+                  'face 'font-lock-keyword-face
+                  'my-roam-icon icon)))
+
+  (cl-defmethod org-roam-node-my-hierarchy ((node org-roam-node))
+    "Return dimmed File Title > Parent Headings > Node Title."
+    (let ((title (org-roam-node-title node))
+          (olp (org-roam-node-olp node))
+          (level (org-roam-node-level node))
+          (file-title (org-roam-node-file-title node)))
+      (concat
+       (when (and (> level 0) file-title)
+         (propertize (concat file-title " > ") 'face 'shadow))
+       (when (> level 1)
+         (propertize (concat (string-join olp " > ") " > ") 'face 'shadow))
+       title)))
+
+  (cl-defmethod org-roam-node-my-tags ((node org-roam-node))
+    "Return `#tag1 #tag2' styled with `org-tag'."
+    (let ((tags (org-roam-node-tags node)))
+      (if tags
+          (propertize (mapconcat (lambda (tag) (concat "#" tag)) tags " ")
+                      'face 'org-tag)
+        "")))
+
+  (with-eval-after-load 'nerd-icons-completion
+    (cl-defmethod nerd-icons-completion-get-icon (cand (_cat (eql org-roam-node)))
+      (concat (or (get-text-property 0 'my-roam-icon cand)
+                  (nerd-icons-sucicon "nf-custom-orgmode"))
+              " ")))
+
+  (setopt org-roam-node-display-template
+          "${my-dir:32} ${my-hierarchy:*} ${my-tags}")
+  
   (org-roam-db-autosync-mode 1))
 
 (with-eval-after-load 'meow
@@ -247,7 +363,7 @@ Operates directly on the Org AST."
   (add-to-list 'org-export-filter-parse-tree-functions #'org-typst-fix-src-backslashes))
 
 (use-package ox-ipynb
-  :ensure ox-ipynb (:host github :repo "jkitchin/ox-ipynb"))
+  :ensure (ox-ipynb :host github :repo "jkitchin/ox-ipynb"))
 
 (use-package ox-hugo
   :after org)
