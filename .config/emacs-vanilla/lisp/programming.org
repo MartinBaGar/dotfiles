@@ -35,6 +35,7 @@
   :bind (("C-x g" . magit-status)
          ("C-x M-g" . magit-dispatch))
   :custom
+  (magit-format-file-function #'magit-format-file-nerd-icons)
   ;; Keep window layout predictable and UI-safe
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
   (magit-bury-buffer-function #'magit-restore-window-configuration)
@@ -63,14 +64,17 @@
 ;; 4. Diff-HL: Live git gutter indicators synced with Magit
 (use-package diff-hl
   :ensure t
-  :hook ((prog-mode . diff-hl-mode)
-         (text-mode . diff-hl-mode)
-         (dired-mode . diff-hl-dired-mode)
+  :hook ((prog-mode . turn-on-diff-hl-mode)
+         (text-mode . turn-on-diff-hl-mode)
+         (dired-mode . (lambda ()
+                         (unless (file-remote-p default-directory)
+                           (diff-hl-dired-mode 1))))
          (magit-pre-refresh . diff-hl-magit-pre-refresh)
          (magit-post-refresh . diff-hl-magit-post-refresh))
   :custom
-  ;; Use margin instead of fringe so it plays nicely with spacious-padding
-  (diff-hl-side 'left))
+  (diff-hl-side 'left)
+  ;; (diff-hl-disable-on-remote t)
+  )
 #+end_src
 
 * envrc
@@ -88,7 +92,7 @@ executables).
 (with-eval-after-load 'org
   (require 'ob-python)
   
-  (defun +org-babel-edit-prep-python-session-a (info)
+  (defun my/org-babel-edit-prep-python-session-a (info)
     "Point this edit buffer's inferior Python process at the running
 Babel session named in INFO's :session header, so eldoc/completion
 talk to the live REPL. Self-contained: doesn't depend on
@@ -100,7 +104,7 @@ talk to the live REPL. Self-contained: doesn't depend on
                         (org-babel-python-without-earmuffs session)
                       (string-trim session "\\*" "\\*"))))))
 
-  (defun +org-babel-remote-dir (path host)
+  (defun my/org-babel-remote-dir (path host)
     "Return PATH as-is on HOST, or its
 /ssh:HOST: tramp form otherwise. Used in :dir header-args to make
 Babel blocks work identically whether running locally or over SSH."
@@ -125,7 +129,7 @@ Babel blocks work identically whether running locally or over SSH."
            (org-babel-expand-body:generic
             body params (org-babel-variable-assignments:python params)))
 	 (defalias ',prep-session-sym #'org-babel-prep-session:python)
-	 (defalias ',edit-prep-sym    #'+org-babel-edit-prep-python-session-a)
+	 (defalias ',edit-prep-sym    #'my/org-babel-edit-prep-python-session-a)
 	 (defvaralias ',header-args-sym 'org-babel-header-args:python)
 	 (add-to-list 'org-src-lang-modes (cons ,name-str 'python))
 	 (add-to-list 'org-babel-tangle-lang-exts (cons ,name-str "py"))
@@ -141,14 +145,12 @@ Babel blocks work identically whether running locally or over SSH."
   (def-python-babel-preset! pyops
 			    (:session . "pyops-session")
 			    (:results . "output")
-			    (:exports . "code")
-			    (:fold    . "yes"))
+			    (:exports . "code"))
 
   (def-python-babel-preset! pyviz
 			    (:session . "pyviz-session")
 			    (:results . "output")
-			    (:exports . "code")
-			    (:fold    . "yes")))
+			    (:exports . "code")))
 #+end_src
 * Typst
 #+begin_src emacs-lisp

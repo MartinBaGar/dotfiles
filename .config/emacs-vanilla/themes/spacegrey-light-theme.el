@@ -71,26 +71,115 @@
    `(font-lock-variable-name-face ((t (:foreground ,red))))
 
    ;; Outline (Headers)
-   `(outline-1 ((t (:foreground ,fg :weight ultra-bold))))
-   `(outline-2 ((t (:foreground ,out2 :weight bold))))
-   `(outline-3 ((t (:foreground ,out3 :weight bold))))
-   `(outline-4 ((t (:foreground ,blue :weight bold))))
-   `(outline-5 ((t (:foreground ,out5 :weight bold))))
-   `(outline-6 ((t (:foreground ,out6 :weight bold))))
-   `(outline-7 ((t (:foreground ,out7 :weight bold))))
-   `(outline-8 ((t (:foreground ,fg :weight bold))))
+   `(outline-1 ((t (:foreground ,fg :weight ultra-bold :height 1.25))))
+   `(outline-2 ((t (:foreground ,out2 :weight bold :height 1.25))))
+   `(outline-3 ((t (:foreground ,out3 :weight bold :height 1.0))))
+   `(outline-4 ((t (:foreground ,blue :weight bold :height 0.9))))
+   `(outline-5 ((t (:foreground ,out5 :weight bold :height 0.8))))
+   `(outline-6 ((t (:foreground ,out6 :weight bold :height 0.7))))
+   `(outline-7 ((t (:foreground ,out7 :weight bold :height 0.6))))
+   `(outline-8 ((t (:foreground ,fg :weight bold :height 0.5))))
 
-   ;; Org Mode
-   `(org-document-title ((t (:foreground ,blue :weight bold :height 1.2))))
-   `(org-block ((t (:inherit fixed-pitch :background ,org-block-bg :extend t))))
-   `(org-block-begin-line ((t (:inherit fixed-pitch :foreground ,base4 :slant italic :background ,org-meta-bg :extend t))))
-   `(org-block-end-line ((t (:inherit fixed-pitch :foreground ,base4 :slant italic :background ,org-meta-bg :extend t))))
-   `(org-quote ((t (:background ,base2 :extend t :slant italic))))
+   ;; Core UI
+   `(shadow ((t (:foreground ,base5))))
+
+   ;; Org Mode — Document & Metadata
+   `(org-document-title ((t (:inherit variable-pitch :foreground ,blue :weight bold :height 1.5))))
+   `(org-document-info ((t (:inherit variable-pitch :foreground ,base6 :slant italic :height 1.05))))
+   `(org-document-info-keyword ((t (:inherit (shadow fixed-pitch) :height 0.85))))
+   `(org-meta-line ((t (:inherit (shadow fixed-pitch) :height 0.85))))
+   `(org-drawer ((t (:inherit (shadow fixed-pitch) :height 0.85))))
+   `(org-special-keyword ((t (:inherit (shadow fixed-pitch) :height 0.85))))
+   `(org-property-value ((t (:inherit fixed-pitch :foreground ,base6 :height 0.85))))
+
+   ;; -------------------------------------------------------------------------
+   ;; 1. Neutral Base (Always Active — quotes, examples, export blocks, rail)
+   ;; -------------------------------------------------------------------------
+   `(org-block ((t (:inherit fixed-pitch :extend t))))
+   `(org-block-begin-line ((t (:inherit (shadow fixed-pitch) :height 1.0 :extend t))))
+   `(org-block-end-line ((t (:inherit (shadow fixed-pitch) :height 1.0 :extend t))))
+   `(org-quote ((t (:inherit variable-pitch :background ,org-block-bg :foreground ,fg-alt :extend t :weight normal :height 0.9))))
+   ;; `(org-modern-indent-bracket-line ((t (:inherit fixed-pitch
+   ;;                                                :family "JetBrainsMono Nerd Font"
+   ;;                                                :foreground ,base4
+   ;;                                                :height 0.9))))
+   `(org-verse ((t (:inherit org-quote))))
+
+   ;; -------------------------------------------------------------------------
+   ;; 2. Src Block Preset — Choose Option A OR Option B
+   ;; -------------------------------------------------------------------------
+
+   ;; --- Option A: Ultra-Minimal Hairlines (overline header, middle-line footer) ---
+   ;; `(my/org-src-block ((t (:inherit fixed-pitch
+   ;;                                  :background unspecified
+   ;;                                  :extend t))))
+   ;; `(my/org-src-begin-line ((t (:inherit fixed-pitch
+   ;;                                       :background unspecified
+   ;;                                       :foreground ,blue
+   ;;                                       :weight semi-bold
+   ;;                                       ;; :overline ,base3
+   ;;                                       :height 1.0
+   ;;                                       :extend t))))
+   ;; `(my/org-src-end-line ((t (:inherit fixed-pitch
+   ;;                                     :background unspecified
+   ;;                                     :strike-through ,base3
+   ;;                                     :weight bold
+   ;;                                     :height 1.0
+   ;;                                     :extend t))))
+
+   ;; --- Option B: Subtle Floating White Card (unified #ffffff surface) ---
+   `(my/org-src-block ((t (:inherit fixed-pitch
+                                    :background ,org-block-bg
+                                    :extend t))))
+   `(my/org-src-begin-line ((t (:inherit fixed-pitch
+                                         :background unspecified
+                                         :foreground ,blue
+                                         :weight semi-bold
+                                         :height 1.0
+                                         :extend t))))
+   `(my/org-src-end-line ((t (:inherit fixed-pitch
+                                       :background unspecified
+                                       :height 1.0
+                                       :foreground ,base5
+                                       ;; :overline ,base3
+                                       ;; :strike-through ,base3
+                                       :extend t))))
+   
+   ;; Org Mode — Inline Markup & Misc
    `(org-ellipsis ((t (:foreground ,red :underline nil))))
    `(org-hide ((t (:foreground ,bg))))
    `(org-code ((t (:inherit fixed-pitch :foreground ,green))))
    `(org-verbatim ((t (:inherit fixed-pitch :foreground ,green))))
    `(org-table ((t (:inherit fixed-pitch :foreground ,blue))))
+   `(org-modern-block-name ((t (:foreground ,blue :weight semi-bold))))
+   `(org-modern-label ((t (:inherit fixed-pitch :height 0.9 :weight semi-bold))))
+   `(org-modern-tag ((t (:inherit fixed-pitch :height 0.7 :weight semi-bold :background ,base2))))
+   
+   ;; Completion Stack (Vertico, Corfu, Orderless, Marginalia)
+   `(completions-common-part ((t (:foreground ,blue :weight semi-bold))))
+   `(completions-first-difference ((t (:foreground ,dark-cyan :weight semi-bold))))
+   `(completions-annotations ((t (:inherit shadow :slant italic :height 0.92))))
+
+   `(orderless-match-face-0 ((t (:foreground ,orange :weight semi-bold))))
+   `(orderless-match-face-1 ((t (:foreground ,teal :weight semi-bold))))
+   `(orderless-match-face-2 ((t (:foreground ,violet :weight semi-bold))))
+   `(orderless-match-face-3 ((t (:foreground ,blue :weight semi-bold))))
+
+   `(vertico-current ((t (:background ,base2 :foreground ,base8 :extend t))))
+   `(vertico-group-title ((t (:inherit variable-pitch :foreground ,base6 :weight semi-bold :height 0.92))))
+   `(vertico-group-separator ((t (:foreground ,base3 :strike-through t))))
+   `(vertico-multiline ((t (:inherit shadow))))
+
+   `(marginalia-documentation ((t (:inherit shadow :slant italic :height 0.92))))
+   `(marginalia-key ((t (:foreground ,violet))))
+   `(marginalia-file-name ((t (:foreground ,base6))))
+
+   `(corfu-default ((t (:inherit fixed-pitch :background ,base0 :foreground ,fg :height 0.95))))
+   `(corfu-current ((t (:background ,base2 :foreground ,base8))))
+   `(corfu-bar ((t (:background ,base4))))
+   `(corfu-border ((t (:background ,base3))))
+   `(corfu-annotations ((t (:inherit completions-annotations))))
+   `(corfu-deprecated ((t (:inherit shadow :strike-through t))))   
 
    ;; Markdown Mode
    `(markdown-markup-face ((t (:foreground ,base5))))

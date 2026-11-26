@@ -82,25 +82,27 @@
 * Snippets
 #+begin_src emacs-lisp
   (use-package tempel
+  :ensure t
     :bind (("M-+" . tempel-complete)
            ("M-*" . tempel-insert))
+  :custom
+  (tempel-path (expand-file-name "templates/*" user-emacs-directory))
     :init
     (defun tempel-setup-capf ()
-      ;; Add the Tempel Capf to `completion-at-point-functions'. `tempel-expand'
-      ;; only triggers on exact matches. We add it *before* the main
-      ;; programming mode Capf, so it's tried first.
-      (setq-local completion-at-point-functions
-    		(cons #'tempel-expand completion-at-point-functions))
-      (setopt tempel-path (concat (expand-file-name "templates" user-emacs-directory) "/*"))
-      )
+    "Add `tempel-expand' to buffer-local `completion-at-point-functions'."
+    (add-hook 'completion-at-point-functions #'tempel-expand nil t))
 
-    (add-hook 'conf-mode-hook 'tempel-setup-capf)
-    (add-hook 'prog-mode-hook 'tempel-setup-capf)
-    (add-hook 'text-mode-hook 'tempel-setup-capf))
+  (defun my/open-tempel-templates ()
+    "Open the Tempel templates directory."
+    (interactive)
+    (find-file (expand-file-name "templates/" user-emacs-directory)))
 
-  (use-package tempel-collection)
-
-  (defun tempel-case-match (elt fields)
+  (add-hook 'conf-mode-hook #'tempel-setup-capf)
+  (add-hook 'prog-mode-hook #'tempel-setup-capf)
+  (add-hook 'text-mode-hook #'tempel-setup-capf)
+  :config
+  (defun tempel-case-match (elt _fields)
+    "Support `(c \"text\")' elements that capitalize at sentence or bullet starts."
     (pcase elt
       (`(c ,text)
        (let ((at-start (save-excursion
@@ -108,14 +110,15 @@
                          (or (bobp)
                              (bolp)
                              (memq (char-before) '(?. ?? ?!))
-                             (looking-back "^\\s-*[*\\-]+" (line-beginning-position))))))
+                             (looking-back "^[ \t]*[*-]+[ \t]*"
+                                           (line-beginning-position))))))
          (if (and at-start (> (length text) 0))
              (concat (upcase (substring text 0 1)) (substring text 1))
            text)))))
 
-  (defun my/open-tempel-templates ()
-    (interactive)
-    (find-file (f-dirname tempel-path)))
+  (add-to-list 'tempel-user-elements #'tempel-case-match))
+
+(use-package tempel-collection)
 #+end_src
 
 * Windows (built-in support)
@@ -213,8 +216,47 @@
 (use-package gptel-commit
   :ensure t
   :after (gptel magit)
+
+  :bind
+  (:map git-commit-mode-map
+        ("C-c g" . gptel-commit)
+        ("C-c G" . gptel-commit-rationale))
+
+  :config
+  (setq
+   ;; Use gptel rather than the Claude Code CLI.
+   gptel-commit-use-claude-code nil
+
+   ;; Use gptel's streaming response path.
+   gptel-commit-stream t
+
+   ;; Use a separate lightweight backend for commit messages.
+   gptel-commit-backend
+   (gptel-make-openai "Mistral-Commits"
+     :host "api.mistral.ai"
+     :endpoint "/v1/chat/completions"
+     :protocol "https"
+     :stream t
+     :key #'gptel-api-key-from-auth-source
+     :models '(codestral-latest))
+
+   ;; Exclude generated or noisy files from the supplied diff.
+   gptel-commit-diff-excludes
+   '("package-lock.json"
+     "pnpm-lock.yaml"
+     "yarn.lock"
+     "*.lock"
+     "*.min.js"
+     "*.map"
+     "dist/*"
+     "build/*"
+     "coverage/*")))
+
+(use-package gptel-quick
+  :ensure (:host github :repo "karthink/gptel-quick")
+  :after (gptel)
   :custom
-  (gptel-commit-stream t))
+  (keymap-set embark-general-map "?" #'gptel-quick))
 
 (use-package gptel-agent
   :ensure t
