@@ -1,0 +1,27 @@
+#+TITLE: Bibliography
+#+PROPERTY: header-args:emacs-lisp :tangle bibliography.el :results none
+
+#+begin_src emacs-lisp
+;;; bibliography.el --- Bibliography -*- lexical-binding: t; -*-
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package citar
+  :no-require
+  :hook
+  (org-mode . citar-capf-setup)
+  :custom
+  (org-cite-global-bibliography '("~/zotero-lib/referenciator.bib"))
+  (org-cite-insert-processor 'citar)
+  (org-cite-follow-processor 'citar)
+  (org-cite-activate-processor 'citar)
+  (citar-bibliography org-cite-global-bibliography)
+  ;; optional: org-cite-insert is also bound to C-c C-x C-@
+  :bind
+  (:map org-mode-map :package org ("C-c b" . #'org-cite-insert)))
+
+(use-package citar-embark
+  :after (citar embark)
+  :no-require
+  :config (citar-embark-mode))
+#+end_src

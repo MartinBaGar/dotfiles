@@ -7,125 +7,132 @@
 
 * General
 #+begin_src emacs-lisp
-(add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
-(global-visual-line-mode 1)
+(add-to-list 'custom-theme-load-path
+             (expand-file-name "themes" user-emacs-directory))
 
-(use-package spacious-padding
-  :config
-  (setq spacious-padding-widths
-        '( :internal-border-width 15
-           :header-line-width 4
-           :mode-line-width 4
-           :tab-width 4
-           :right-divider-width 30
-           :scroll-bar-width 8))
-  (when (daemonp)
-    (setq spacious-padding-subtle-frame-lines nil))
-  (spacious-padding-mode 1))
+;; Avoid global-visual-line-mode; it breaks column-aligned UIs like Dired/Magit.
+(add-hook 'text-mode-hook #'visual-line-mode)
 
 (use-package nerd-icons
+  :ensure t
   :custom
   (nerd-icons-font-family "Symbols Nerd Font Mono"))
 
 (use-package olivetti
   :ensure t
   :hook (org-mode . olivetti-mode)
-  :config
-  (setq-default olivetti-body-width 100))
+  :custom
+  (olivetti-body-width 100))
 #+end_src
 
-* Fonts
+* Fonts & Faces
 Base faces only. The org-specific fixed-pitch overrides (tables, code
-blocks, etc) live in org-config.org, next to the rest of the org
+blocks, etc) live in =org-config.org=, next to the rest of the org
 appearance settings.
 
-These are wrapped in a function and hooked to =enable-theme-functions=
-rather than run as bare top-level code. Themes sit *above* plain
-=set-face-attribute= calls in Emacs's face-priority stack, so a theme
-that defines anything for =default=/=fixed-pitch=/=variable-pitch=
-(or the tab-bar faces) will silently reset these on every
-=load-theme= call after the first -- switching themes mid-session,
-not just startup. Re-applying via a function on the hook makes it
-reapply automatically every time, including the very first load,
-since =load-theme= internally calls =enable-theme=, which is what
-this hook actually fires on.
+The default font is set via =default-frame-alist= so new GUI frames get
+their exact geometry /before/ mapping (preventing daemon resize flicker
+and =olivetti-mode= margin miscalculations). The remaining face overrides
+are hooked to =enable-theme-functions= and frame creation, scoped to
+graphical frames, and leave =:box= untouched so =spacious-padding= can
+manage tab-bar padding cleanly.
 #+begin_src emacs-lisp
-(defun my/apply-face-overrides (&rest _)
-  "(Re)apply font and tab-bar face overrides after a theme is enabled."
+(add-to-list 'default-frame-alist '(font . "Iosevka-12:weight=medium"))
 
-  (set-face-attribute 'default nil
-                      :family "Iosevka"
-                      :height 120
-                      :weight 'medium)
+(defun my/apply-face-overrides (&optional frame)
+  "(Re)apply font and minimal underline tab-bar faces after theme load or frame creation."
+  (let ((frame (or (and (framep frame) frame) (selected-frame))))
+    (when (display-graphic-p frame)
+      (with-selected-frame frame
+        (set-face-attribute 'fixed-pitch frame
+                            :family "Iosevka"
+                            :height 1.0
+                            :weight 'medium)
 
-  (set-face-attribute 'fixed-pitch nil
-                      :family "Iosevka"
-                      :height 1.0
-                      :weight 'medium)
+        (set-face-attribute 'variable-pitch frame
+                            :family "Montserrat"
+                            :height 1.08
+                            :weight 'semi-bold)
 
-  (set-face-attribute 'variable-pitch nil
-                      :family "Montserrat"
-                      :height 1.08
-                      :weight 'semi-bold)
+        (let ((bar-bg (or (face-background 'header-line frame t)
+                          (face-background 'default frame t)))
+              (accent (face-foreground 'font-lock-keyword-face frame t)))
+          (set-face-attribute 'tab-bar frame
+                              :background (or bar-bg 'unspecified)
+                              :height 0.95)
 
-  (set-face-attribute 'tab-bar nil
-                      :background 'unspecified
-                      :inherit 'mode-line-inactive
-                      :box nil)
+          (set-face-attribute 'tab-bar-tab frame
+                              :background (or bar-bg 'unspecified)
+                              :foreground (if (stringp accent) accent 'unspecified)
+                              :weight 'demibold
+                              :underline (list :color (if (stringp accent)
+                                                          accent
+                                                        'foreground-color)
+                                               :style 'line
+                                               :position t))
 
-  ;; During daemon startup, `link' may not have a resolved foreground.
-  ;; The underline's :color must be a color string or `foreground-color',
-  ;; never `unspecified'.
-  (let ((link-color (face-attribute 'link :foreground nil t)))
-    (set-face-attribute 'tab-bar-tab nil
-                        :inherit 'mode-line
-                        :weight 'bold
-                        :box nil
-                        :underline (list :color (if (stringp link-color)
-                                                    link-color
-                                                  'foreground-color)
-                                         :style 'line
-                                         :position t)))
-
-  (set-face-attribute 'tab-bar-tab-inactive nil
-                      :background 'unspecified
-                      :inherit 'shadow
-                      :weight 'normal
-                      :box nil))
+          (set-face-attribute 'tab-bar-tab-inactive frame
+                              :background (or bar-bg 'unspecified)
+                              :foreground (face-foreground 'shadow frame t)
+                              :weight 'demibold
+                              :underline nil))))))
 
 ;; Register before the initial theme load.
 (add-hook 'enable-theme-functions #'my/apply-face-overrides)
-(load-theme 'spacegrey-light t)
-
-;; Once a graphical frame exists, reapply to pick up `link' color if
-;; it was unavailable during daemon startup. Also applies on later frames.
 (if (daemonp)
     (add-hook 'server-after-make-frame-hook #'my/apply-face-overrides)
   (add-hook 'window-setup-hook #'my/apply-face-overrides))
+
+;; Load theme BEFORE spacious-padding so spacious-padding wraps the final faces.
+(load-theme 'spacegrey t)
+#+end_src
+
+* Padding
+Loaded after the theme and =nerd-icons= so it wraps the final face
+definitions without fighting =my/apply-face-overrides=.
+#+begin_src emacs-lisp
+(use-package spacious-padding
+  :ensure t
+  :after nerd-icons
+  :custom
+  (spacious-padding-widths
+   '( :internal-border-width 15
+      :header-line-width 4
+      :mode-line-width 4
+      :tab-width 4
+      :right-divider-width 30
+      :scroll-bar-width 8))
+  (spacious-padding-subtle-frame-lines (not (daemonp)))
+  :config
+  (spacious-padding-mode 1))
 #+end_src
 
 * Modeline
 #+begin_src emacs-lisp
-  (use-package doom-modeline
-    :ensure t
-    :init (doom-modeline-mode 1)
-    :custom
-    ;; Play nicely with spacious-padding
-    (doom-modeline-height 25)
-    (doom-modeline-bar-width 4)
+(use-package doom-modeline
+  :ensure t
+  :after nerd-icons
+  :custom
+  ;; Play nicely with spacious-padding
+  (doom-modeline-height 25)
+  (doom-modeline-bar-width 4)
 
-    ;; Icon integration
-    (doom-modeline-icon t)
-    (doom-modeline-major-mode-icon t)
-    (doom-modeline-major-mode-color-icon t)
-    (doom-modeline-buffer-encoding nil)
-    (doom-modeline-check-icon nil)
+  ;; Icon integration
+  (doom-modeline-icon t)
+  (doom-modeline-major-mode-icon t)
+  (doom-modeline-major-mode-color-icon t)
+  (doom-modeline-buffer-encoding nil)
+  (doom-modeline-check 'simple)
 
-    ;; Clean path display (e.g., project/src/main.py instead of full path)
-    (doom-modeline-buffer-file-name-style 'truncate-upto-project))
+  ;; Clean path display (e.g., project/src/main.py instead of full path)
+  (doom-modeline-buffer-file-name-style 'truncate-upto-project)
+  :config
+  (doom-modeline-mode 1))
 #+end_src
 
-* Tabs
+* Tabs & Workspaces
+=tab-bar= and =project= are configured first so =tabspaces= can take
+ownership of =tab-bar-mode= activation cleanly on startup.
 #+begin_src emacs-lisp
 ;; 1. Configure the native Tab Bar
 (use-package tab-bar
@@ -135,30 +142,34 @@ this hook actually fires on.
   (tab-bar-close-button-show nil)         ; Hide the [X] for a cleaner UI
   (tab-bar-new-tab-choice "*scratch*")    ; New tabs start clean
   (tab-bar-tab-hints t)
+  (tab-bar-separator "  ")                ; Subtle spacing between minimal tabs
   (tab-bar-format '(tab-bar-format-tabs
                     tab-bar-format-align-right
-                    tab-bar-format-global))
-  :config
-  (tab-bar-mode 1))
+                    tab-bar-format-global)))
 
-;; 2. Tabspaces: Isolate buffers per tab (The "Workspace" magic)
+;; 2. Configure project.el commands before tabspaces aliases them
+(use-package project
+  :ensure nil
+  :custom
+  (project-switch-commands '((project-find-file "Find file")
+                             (project-dired "Dired")
+                             (project-vc-dir "VC-Dir")
+                             (project-eshell "Eshell"))))
+
+;; 3. Tabspaces: Isolate buffers per tab (The "Workspace" magic)
 (use-package tabspaces
   :ensure t
-  ;; Filter consult-buffer to only show buffers in the current tab's workspace
+  :after (tab-bar project)
   :hook (after-init . tabspaces-mode)
   :custom
-  (tabspaces-session t)  ; Save sessions automatically
-  (tabspaces-session-auto-save-delay 300)  ; Save after 5 idle minutes
+  (tabspaces-session t)                   ; Save sessions automatically
+  (tabspaces-session-auto-save-delay 300) ; Save after 5 idle minutes
   (tabspaces-session-auto-restore nil)
   (tabspaces-use-filtered-buffers-as-default t)
   (tabspaces-default-tab "Default")
   (tabspaces-remove-to-default t)
   (tabspaces-include-buffers '("*scratch*"))
-  ;; Tell project.el to open new projects in a brand new tab automatically
-  (project-switch-commands '((project-find-file "Find file")
-                             (project-dired "Dired")
-                             (project-vc-dir "VC-Dir")
-                             (project-eshell "Eshell")))
   :config
-  (defalias 'project-other-tab-command 'tabspaces-open-or-create-project-and-workspace))
+  (tab-bar-mode 1)
+  (defalias 'project-other-tab-command #'tabspaces-open-or-create-project-and-workspace))
 #+end_src

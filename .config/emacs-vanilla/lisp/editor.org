@@ -755,6 +755,7 @@ With a prefix argument (e.g., C-u), forces a prompt to change the engine."
 	  :name "UI / Global Zoom"
 	  "b" #'text-scale-adjust
 	  "t" #'consult-theme
+	  "l" #'display-line-numbers-mode
 	  "g" #'global-text-scale-adjust))
 
   (setq my/lookup-map

@@ -53,12 +53,6 @@
 (add-to-list 'safe-local-eval-forms
              '(add-hook 'after-save-hook #'org-babel-tangle nil t))
 
-;; Redirect the Emacs auto-generated Custom block to a hidden file
-;; This prevents Emacs from constantly injecting garbage at the bottom of this init.el
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-(when (file-exists-p custom-file)
-  (load custom-file 'noerror 'nomessage))
-
 (defvar my/config-dir (expand-file-name "lisp" user-emacs-directory))
 
 ;; Load literate config directly.
@@ -71,7 +65,8 @@
                 "ui.org"
                 "org-config.org"
                 "file-management.org"
-                "programming.org"))
+                "programming.org"
+                "bibliography.org"))
   (org-babel-load-file (expand-file-name file my/config-dir)))
 
 ;;; init.el ends here
